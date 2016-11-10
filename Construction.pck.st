@@ -1,6 +1,7 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 3:35:52 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 3:39:39 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 0!
+!provides: 'Construction' 1 1!
+!requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
 	instanceVariableNames: 'doubled'
