@@ -3,16 +3,15 @@ A simulation of the Construction board game, a Euro-style game for 2 to 6 player
 
 http://farmgame.com/product/the-construction-game/
 
-As the game progresses the outcome is often increasingly unpredictable, ending in come-from-behind victories possible.
+As the game progresses the outcome is often increasingly unpredictable, with come-from-behind victories at the very end.
 
 ## Differences ##
 The differences from the actual board game include:
 
 - Automatic and interactive board tours
 - Extensive statistics
-- Computer is the banker
+- Computer is banker, auctioneer, and auditor
 - Rules enforced consistently
 - No limits on equipment quantities
-- Auctioneer
 - History of player's progress
-- Must be on a franchise in order to purchase
+- Optional views to assist decision making
