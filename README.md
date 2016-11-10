@@ -1,5 +1,5 @@
 # Cuis-Smalltalk-contractor
-A simulation of the Construction board game, a Euro-style game for 2 to 6 players, which is similar to Monopoly. Players start with earth-moving equipment: two backhoes and one bulldozer. Each player also has a $100,000 line of credit. Moving tokens around the board, players try to succeed at jobs and be the first to acquire $1,500,000 in net assets (default).
+A simulation of the Construction board game, a Euro-style game for 2 to 6 players, which is similar to Monopoly. Players operate an earth-moving business with two backhoes, one bulldozer, and a $100,000 line of credit. As they move around the board, players try to succeed at jobs and be the first to acquire $1,500,000 in net assets (default).
 
 http://farmgame.com/product/the-construction-game/
 
