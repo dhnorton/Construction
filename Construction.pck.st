@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 12:42:17 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 2:40:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 4!
+!provides: 'Construction' 1 5!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1597,12 +1597,14 @@ buyerButtons
 			setBalloonText: 'bidder')].
 	buyers addAllMorphs: col reversed! !
 
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 9/20/2016 15:31:48'!
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 11/11/2016 14:25:19'!
 closeBoxHit
 
 	model 
 		assetAuctionItem: nil;
 		enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model enableAll: {'End Turn'}]].
 	super closeBoxHit! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/26/2016 20:07:10'!
@@ -1619,13 +1621,14 @@ details
 				self showChant.
 				beginButton disableButton]]! !
 
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/2/2016 16:10:11'!
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 11/11/2016 14:36:12'!
 endIt
 	
 	model 
 		assetAuctionItem: nil;
 		enableAll: {'Auction'}.
-	begun ifFalse: [model enableAll: {'End Turn'}].
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model enableAll: {'End Turn'}]].
 	self delete! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:53:27'!
