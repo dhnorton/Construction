@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 2:40:19 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 4:01:54 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 5!
+!provides: 'Construction' 1 6!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1804,12 +1804,12 @@ chant
 	chant ifNil: [chant _ OrderedCollection new].
 	^ chant! !
 
-!AuctionJob methodsFor: 'termination' stamp: 'dhn 9/20/2016 15:30:52'!
+!AuctionJob methodsFor: 'termination' stamp: 'dhn 11/11/2016 15:39:33'!
 closeBoxHit
 
 	model 
 		jobAuctionItem: nil;
-		enableAll: {'Auction'}.
+		enableAll: {'Auction'. 'End Turn'}.
 	super closeBoxHit! !
 
 !AuctionJob methodsFor: 'operation' stamp: 'dhn 9/26/2016 21:33:07'!
@@ -1817,12 +1817,12 @@ details
 	"Not required for job auctions"
 ! !
 
-!AuctionJob methodsFor: 'termination' stamp: 'dhn 9/20/2016 15:30:45'!
+!AuctionJob methodsFor: 'termination' stamp: 'dhn 11/11/2016 15:39:12'!
 endIt
 	
 	model 
 		jobAuctionItem: nil;
-		enableAll: {'Auction'}.
+		enableAll: {'Auction'. 'End Turn'}.
 	self delete! !
 
 !AuctionJob methodsFor: 'operation' stamp: 'dhn 11/8/2016 21:45:55'!
