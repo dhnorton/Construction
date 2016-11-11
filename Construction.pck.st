@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 3:39:39 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 9:25:38 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 1!
+!provides: 'Construction' 1 2!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1528,12 +1528,11 @@ degree: anIndex
 	
 	^ #(nil 'once' 'twice' 'three times') at: anIndex! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/1/2016 11:11:23'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 11/10/2016 21:24:23'!
 assetSold
 	"Record the sale; enable End button"
 	| seller purchase recipient |
 	
-	soldButton disableButton.
 	cancelButton disableButton.
 	endButton enableButton.
 	buyers removeAllMorphs.
