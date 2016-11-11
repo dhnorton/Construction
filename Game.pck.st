@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 9:02:24 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 12:41:44 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 1!
+!provides: 'Game' 1 2!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -53,7 +53,7 @@ BidderButton class
 
 !classDefinition: #GameCell category: #'Game-Graphics'!
 TextModelMorph subclass: #GameCell
-	instanceVariableNames: 'position'
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
@@ -619,18 +619,6 @@ describe
 
 	model actualContents ifNil: [model actualContents: ''].
 	^ model actualContents! !
-
-!GameCell methodsFor: 'accessing' stamp: 'dhn 8/2/2016 16:38:13'!
-position
-	"Answer the value of position"
-
-	^ position! !
-
-!GameCell methodsFor: 'accessing' stamp: 'dhn 8/2/2016 16:38:13'!
-position: anObject
-	"Set the value of position"
-
-	position _ anObject! !
 
 !GameBoard methodsFor: 'initialization' stamp: 'dhn 7/12/2016 19:58'!
 buttonAreaHeight

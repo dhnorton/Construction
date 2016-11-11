@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 9:32:12 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 12:42:17 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 3!
+!provides: 'Construction' 1 4!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -702,7 +702,7 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 9/22/2016 21:04:20'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 11/11/2016 11:55:13'!
 makeCellsArea
 	"Lay out the area which shows some spaces of the board"
 	| mm cellArea |
@@ -721,7 +721,6 @@ makeCellsArea
 				textProvider: self
 				textGetter: #describe)
 					layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
-					position: ix;
 					color: self class cellColor;
 					borderWidth: 1;
 					name: #cell.
