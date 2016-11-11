@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 3:35:15 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 9:02:24 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 0!
+!provides: 'Game' 1 1!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -143,7 +143,7 @@ Game class
 
 !classDefinition: #Gamer category: #'Game-Model'!
 Object subclass: #Gamer
-	instanceVariableNames: 'identity cash debt inFlow outFlow interestPd paidInterest avoidedDebt assets history passedGo years mgr position oldPosition token die marker roll totalRoll turns expenseCount status'
+	instanceVariableNames: 'identity cash debt inFlow outFlow interestPd paidInterest avoidedDebt assets history passedGo years mgr position oldPosition token die marker roll totalRoll turns expenseCount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -2151,14 +2151,6 @@ rollStats: aRoll
 !Gamer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:30'!
 sendBid
 	mgr takeBidOf: self! !
-
-!Gamer methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2014 15:15'!
-status
-	^ status! !
-
-!Gamer methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2014 15:15'!
-status: anObject
-	status := anObject! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/26/2012 17:52'!
 tally: anAmount
