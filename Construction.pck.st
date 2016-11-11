@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 9:25:38 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 10 November 2016 at 9:32:12 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 2!
+!provides: 'Construction' 1 3!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -34,7 +34,7 @@ ConstructionView class
 
 !classDefinition: #AuctionView category: #'Construction-Graphics'!
 ConstructionView subclass: #AuctionView
-	instanceVariableNames: 'textPane heading chant buyers cancelButton soldButton endButton beginButton buttonsArea currentBid currentBidder begun going'
+	instanceVariableNames: 'textPane heading chant buyers cancelButton endButton beginButton buttonsArea currentBid currentBidder begun going'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Construction-Graphics'!
@@ -1506,12 +1506,6 @@ showChant
 	chant do: [:ea | record nextPutAll: ea].
 	textPane model actualContents: record contents! !
 
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/21/2016 19:43:18'!
-soldButton
-	"Answer the value of soldButton"
-	
-	^ soldButton! !
-
 !AuctionView methodsFor: 'buttons' stamp: 'dhn 11/8/2016 21:39:48'!
 soldEndButtons
 	"Replace buttons with the Sold and End buttons"
@@ -1634,16 +1628,6 @@ endIt
 		enableAll: {'Auction'}.
 	begun ifFalse: [model enableAll: {'End Turn'}].
 	self delete! !
-
-!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 9/19/2016 15:39:52'!
-makeSoldButton
-	"Answer the 'Sold' button"
-	
-	soldButton _ GameButtonMorph label: 'Sold' action: #assetSold state: true model: self.
-	soldButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Hammer Down'.
-	^ soldButton! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:53:27'!
 offer: aName
@@ -1855,17 +1839,7 @@ jobSold
 	self showChant.
 	model triggerEvent: #winningBidder withArguments: {currentBidder. currentBid}! !
 
-!AuctionJob methodsFor: 'buttons' stamp: 'dhn 9/19/2016 18:46:19'!
-makeSoldButton
-	"Answer the 'Sold' button"
-	
-	soldButton _ GameButtonMorph label: 'Sold' action: #jobSold state: true model: self.
-	soldButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Hammer Down'.
-	^ soldButton! !
-
-!AuctionJob methodsFor: 'operation' stamp: 'dhn 10/28/2016 12:27:28'!
+!AuctionJob methodsFor: 'operation' stamp: 'dhn 11/10/2016 21:30:35'!
 offer: aName
 	"Record a bid by aName"
 	
@@ -1881,8 +1855,7 @@ offer: aName
 			self showChant.
 			self going: 0.
 			buyers submorphsDo: [:ea | ea enableButton].
-			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton.
-			soldButton ifNotNil: [soldButton enableButton]]
+			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
 		ifFalse: [
 			buyers submorphsDo: [:ea | ea enableButton].
 			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton].
