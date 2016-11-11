@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 4:01:54 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 4:38:11 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 6!
+!provides: 'Construction' 1 7!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -961,7 +961,7 @@ showHistory
 	graphs openInWorld: path
 ! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/8/2016 21:45:18'!
+!Construction methodsFor: 'windows' stamp: 'dhn 11/11/2016 16:31:33'!
 showJobAuctionAt: aPosition
 	"Open a job auction window on the job at aPosition"
 	| win seas |
@@ -971,6 +971,7 @@ showJobAuctionAt: aPosition
 	win _ AuctionJob openOn: model.			
 	win buyers color: seas color.
 	win 
+		setWindowColor: Color lightBrown;
 		setLabel: seas desc, ' job auction'.
 	win 
 		soldEndButtons;
