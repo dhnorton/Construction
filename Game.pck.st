@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 12:41:44 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 4:50:31 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 2!
+!provides: 'Game' 1 3!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -9,16 +9,6 @@ TextProvider subclass: #MyEditor
 	category: 'Game-Model'!
 !classDefinition: 'MyEditor class' category: #'Game-Model'!
 MyEditor class
-	instanceVariableNames: ''!
-
-!classDefinition: #OverlayMorph category: #'Game-Graphics'!
-PasteUpMorph subclass: #OverlayMorph
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Game-Graphics'!
-!classDefinition: 'OverlayMorph class' category: #'Game-Graphics'!
-OverlayMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #Token category: #'Game-Graphics'!
@@ -79,6 +69,16 @@ SystemWindow subclass: #ListView
 	category: 'Game-Graphics'!
 !classDefinition: 'ListView class' category: #'Game-Graphics'!
 ListView class
+	instanceVariableNames: ''!
+
+!classDefinition: #OverlayMorph category: #'Game-Graphics'!
+PasteUpMorph subclass: #OverlayMorph
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Game-Graphics'!
+!classDefinition: 'OverlayMorph class' category: #'Game-Graphics'!
+OverlayMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #DieMorph category: #'Game-Graphics'!
@@ -196,9 +196,6 @@ MarkerArea class
 Edit text files.
 Capable of replacing all occurrences of a character, such as the carriage return, in a file.!
 
-!OverlayMorph commentStamp: '<historical>' prior: 0!
-A place to drag and drop morphs!
-
 !Token commentStamp: 'dhn 7/10/2016 11:44' prior: 0!
 A player's piece on the game board.!
 
@@ -216,6 +213,9 @@ Abstract class for views of a board game.!
 
 !ListView commentStamp: 'dhn 7/10/2016 17:20' prior: 0!
 An abstract class for game windows.!
+
+!OverlayMorph commentStamp: '<historical>' prior: 0!
+A place to drag and drop morphs!
 
 !DieMorph commentStamp: 'dhn 8/20/2016 11:10:40' prior: 0!
 One half of a pair of dice: a die.!
@@ -348,40 +348,27 @@ example
 	"
 ! !
 
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
-allowsMorphDrop
-	"Answer whether we accept dropping morphs. Redefined to answer true."
-
-	^ true! !
-
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
-allowsSubmorphDrag
-	"Answer whether our morphs can just be grabbed with the hand, instead of requiring the use of the halo. Redefined to answer true."
-
-	^ true! !
-
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
-wantsDroppedMorph: aMorph event: evt
-	"Return true if the receiver wishes to accept the given morph, which is being dropped by a hand in response to the given event. Note that for a successful drop operation both parties need to agree. The symmetric check is done automatically via aMorph wantsToBeDroppedInto: self.
-	This method just answers super. It is included here to say it is relevant to D&D behavior."
-
-	^super wantsDroppedMorph: aMorph event: evt! !
-
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
 	"Answer the value of arrow"
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 9/25/2016 13:11:14'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 16:48:55'!
 arrowLeft
 
-	arrow contents: '<---'! !
+	arrow contents: '<---'.
+	self halt.
+	(Form fromFileNamed: 'leftArrow.bmp') 
+		displayAt: self morphPosition + (50@-100)! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 9/25/2016 13:11:26'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 16:49:06'!
 arrowRight
 
-	arrow contents: '--->'! !
+	arrow contents: '--->'.
+	self halt.
+	(Form fromFileNamed: 'rightArrow.bmp') 
+		displayAt: self morphPosition + (50@-100)! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/9/2011 20:04'!
 count
@@ -798,6 +785,25 @@ text1
 text1: aString 
 	text1 := aString.
 ! !
+
+!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
+allowsMorphDrop
+	"Answer whether we accept dropping morphs. Redefined to answer true."
+
+	^ true! !
+
+!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
+allowsSubmorphDrag
+	"Answer whether our morphs can just be grabbed with the hand, instead of requiring the use of the halo. Redefined to answer true."
+
+	^ true! !
+
+!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
+wantsDroppedMorph: aMorph event: evt
+	"Return true if the receiver wishes to accept the given morph, which is being dropped by a hand in response to the given event. Note that for a successful drop operation both parties need to agree. The symmetric check is done automatically via aMorph wantsToBeDroppedInto: self.
+	This method just answers super. It is included here to say it is relevant to D&D behavior."
+
+	^super wantsDroppedMorph: aMorph event: evt! !
 
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 8/20/2016 10:31:22'!
 combo
