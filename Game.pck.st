@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 4:50:31 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 5:46:43 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 3!
+!provides: 'Game' 1 4!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -354,21 +354,21 @@ arrow
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 16:48:55'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 17:42:21'!
 arrowLeft
 
 	arrow contents: '<---'.
 	self halt.
 	(Form fromFileNamed: 'leftArrow.bmp') 
-		displayAt: self morphPosition + (50@-100)! !
+		displayAt: self morphPosition + (80@250)! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 16:49:06'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 17:42:09'!
 arrowRight
 
 	arrow contents: '--->'.
 	self halt.
 	(Form fromFileNamed: 'rightArrow.bmp') 
-		displayAt: self morphPosition + (50@-100)! !
+		displayAt: self morphPosition + (80@250)! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/9/2011 20:04'!
 count
