@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 4:38:11 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 2:11:08 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 7!
+!provides: 'Construction' 1 9!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1114,7 +1114,7 @@ tourAt: anInterval
 	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"
 ! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 10/30/2016 18:30:14'!
+!Construction methodsFor: 'operation' stamp: 'dhn 11/13/2016 10:45:27'!
 winningBidder: aPlayer bid: aBid
 	"Change players to aPlayer and move to job, if necessary"
 	| space |
@@ -1124,8 +1124,6 @@ winningBidder: aPlayer bid: aBid
 			space _ model currentPlayer position.
 			model currentPlayer token delete.
 			model currentPlayer: (model players detect: [:pl | pl identity = aPlayer] ifNone: []).
-			GamePopUp inform: aPlayer , ' will be moved to this space.'.
-			model triggerEvent: #deleteOpenWindows.
 			gameTitle contents: aPlayer, '''s turn.'.
 			gameTitle color: model currentPlayer token color.
 			self setupToken: model currentPlayer.
@@ -1506,14 +1504,13 @@ showChant
 	chant do: [:ea | record nextPutAll: ea].
 	textPane model actualContents: record contents! !
 
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 11/8/2016 21:39:48'!
+!AuctionView methodsFor: 'buttons' stamp: 'dhn 11/13/2016 13:55:05'!
 soldEndButtons
-	"Replace buttons with the Sold and End buttons"
+	"Replace buttons with the End button"
 	
 	buttonsArea
 		removeAllMorphs;
 		addMorph: self makeEndButton;
-		addMorph: self makeCancelButton;
 		padding: #center! !
 
 !AuctionView class methodsFor: 'data base' stamp: 'dhn 10/29/2016 19:47:56'!
@@ -1818,19 +1815,20 @@ details
 	"Not required for job auctions"
 ! !
 
-!AuctionJob methodsFor: 'termination' stamp: 'dhn 11/11/2016 15:39:12'!
+!AuctionJob methodsFor: 'termination' stamp: 'dhn 11/13/2016 11:00:03'!
 endIt
 	
 	model 
 		jobAuctionItem: nil;
+		triggerEvent: #winningBidder withArguments: {currentBidder. currentBid};
 		enableAll: {'Auction'. 'End Turn'}.
-	self delete! !
+	self delete
+! !
 
-!AuctionJob methodsFor: 'operation' stamp: 'dhn 11/8/2016 21:45:55'!
+!AuctionJob methodsFor: 'operation' stamp: 'dhn 11/13/2016 14:04:57'!
 jobSold
 	"SOLD!! the job"
 	
-	cancelButton disableButton.
 	endButton enableButton.
 	buyers removeAllMorphs.
 	chant addFirst: (String streamContents: [:str |
@@ -1839,8 +1837,8 @@ jobSold
 			nextPutAll: currentBidder;
 			nextPutAll: ' for $';
 			nextPutAll: currentBid printStringWithCommas; newLine]).
-	self showChant.
-	model triggerEvent: #winningBidder withArguments: {currentBidder. currentBid}! !
+	self showChant
+! !
 
 !AuctionJob methodsFor: 'operation' stamp: 'dhn 11/10/2016 21:30:35'!
 offer: aName
@@ -3136,7 +3134,7 @@ endTurn
 						ifFalse: [self enableAll: {'Move'. 'Stats'}.
 							self disableAll: {'End Turn'}]]]! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/29/2016 17:44:08'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 11/13/2016 11:36:25'!
 franchiseEffect: anObject
 	"Show the effect of landing on an owned franchise"
 	| fran z invoice amt owner user |
@@ -3167,7 +3165,7 @@ franchiseEffect: anObject
 							nextPutAll: payee;
 							nextPutAll: ' $';
 							nextPutAll: z printStringWithCommas;
-							nextPutAll: ' for your order from ';
+							nextPutAll: ' for your bill from ';
 							nextPutAll: (leases at: fran) description]).
 					user triggerEvent: #displayInvoice withArguments: {invoice. 'Franchise Expense'}.
 					user paid: z for: fran.
