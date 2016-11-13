@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 8:08:50 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 8:56:04 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 5!
+!provides: 'Game' 1 6!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -386,19 +386,21 @@ arrow
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:05:02'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:52:33'!
 arrowLeft
 
 	arrow _ ArrowMorph leftOn: owner.
-	self addMorph: arrow.
-	arrow morphPosition: self morphPosition + (80@-60)! !
+	arrow morphPosition: self morphPosition + (100@-60).
+	self addMorph: arrow
+! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:05:25'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:52:22'!
 arrowRight
 
 	arrow _ ArrowMorph rightOn: owner.
-	self addMorph: arrow.
-	arrow morphPosition: self morphPosition + (80@-60)! !
+	arrow morphPosition: self morphPosition + (100@-60).
+	self addMorph: arrow
+! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/9/2011 20:04'!
 count
