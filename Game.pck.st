@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 5:46:43 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 8:08:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 4!
+!provides: 'Game' 1 5!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -9,6 +9,16 @@ TextProvider subclass: #MyEditor
 	category: 'Game-Model'!
 !classDefinition: 'MyEditor class' category: #'Game-Model'!
 MyEditor class
+	instanceVariableNames: ''!
+
+!classDefinition: #OverlayMorph category: #'Game-Graphics'!
+PasteUpMorph subclass: #OverlayMorph
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Game-Graphics'!
+!classDefinition: 'OverlayMorph class' category: #'Game-Graphics'!
+OverlayMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #Token category: #'Game-Graphics'!
@@ -71,14 +81,14 @@ SystemWindow subclass: #ListView
 ListView class
 	instanceVariableNames: ''!
 
-!classDefinition: #OverlayMorph category: #'Game-Graphics'!
-PasteUpMorph subclass: #OverlayMorph
-	instanceVariableNames: ''
+!classDefinition: #ArrowMorph category: #'Game-Graphics'!
+BorderedRectMorph subclass: #ArrowMorph
+	instanceVariableNames: 'form'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
-!classDefinition: 'OverlayMorph class' category: #'Game-Graphics'!
-OverlayMorph class
+!classDefinition: 'ArrowMorph class' category: #'Game-Graphics'!
+ArrowMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #DieMorph category: #'Game-Graphics'!
@@ -196,6 +206,9 @@ MarkerArea class
 Edit text files.
 Capable of replacing all occurrences of a character, such as the carriage return, in a file.!
 
+!OverlayMorph commentStamp: '<historical>' prior: 0!
+A place to drag and drop morphs!
+
 !Token commentStamp: 'dhn 7/10/2016 11:44' prior: 0!
 A player's piece on the game board.!
 
@@ -214,8 +227,8 @@ Abstract class for views of a board game.!
 !ListView commentStamp: 'dhn 7/10/2016 17:20' prior: 0!
 An abstract class for game windows.!
 
-!OverlayMorph commentStamp: '<historical>' prior: 0!
-A place to drag and drop morphs!
+!ArrowMorph commentStamp: '<historical>' prior: 0!
+Enable a form to be opened on a world.!
 
 !DieMorph commentStamp: 'dhn 8/20/2016 11:10:40' prior: 0!
 One half of a pair of dice: a die.!
@@ -348,27 +361,44 @@ example
 	"
 ! !
 
+!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
+allowsMorphDrop
+	"Answer whether we accept dropping morphs. Redefined to answer true."
+
+	^ true! !
+
+!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
+allowsSubmorphDrag
+	"Answer whether our morphs can just be grabbed with the hand, instead of requiring the use of the halo. Redefined to answer true."
+
+	^ true! !
+
+!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
+wantsDroppedMorph: aMorph event: evt
+	"Return true if the receiver wishes to accept the given morph, which is being dropped by a hand in response to the given event. Note that for a successful drop operation both parties need to agree. The symmetric check is done automatically via aMorph wantsToBeDroppedInto: self.
+	This method just answers super. It is included here to say it is relevant to D&D behavior."
+
+	^super wantsDroppedMorph: aMorph event: evt! !
+
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
 	"Answer the value of arrow"
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 17:42:21'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:05:02'!
 arrowLeft
 
-	arrow contents: '<---'.
-	self halt.
-	(Form fromFileNamed: 'leftArrow.bmp') 
-		displayAt: self morphPosition + (80@250)! !
+	arrow _ ArrowMorph leftOn: owner.
+	self addMorph: arrow.
+	arrow morphPosition: self morphPosition + (80@-60)! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 17:42:09'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:05:25'!
 arrowRight
 
-	arrow contents: '--->'.
-	self halt.
-	(Form fromFileNamed: 'rightArrow.bmp') 
-		displayAt: self morphPosition + (80@250)! !
+	arrow _ ArrowMorph rightOn: owner.
+	self addMorph: arrow.
+	arrow morphPosition: self morphPosition + (80@-60)! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/9/2011 20:04'!
 count
@@ -383,11 +413,11 @@ count: anObject
 
 	count := anObject! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 9/25/2016 13:29:30'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:05:47'!
 deleteArrow
 	"Delete the arrow"
 	
-	arrow contents: ''! !
+	arrow delete! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 die
@@ -786,24 +816,38 @@ text1: aString
 	text1 := aString.
 ! !
 
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
-allowsMorphDrop
-	"Answer whether we accept dropping morphs. Redefined to answer true."
+!ArrowMorph methodsFor: 'drawing' stamp: 'dhn 11/12/2016 19:13:00'!
+drawOn: aCanvas
 
-	^ true! !
+	aCanvas image: form at: 0@0! !
 
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
-allowsSubmorphDrag
-	"Answer whether our morphs can just be grabbed with the hand, instead of requiring the use of the halo. Redefined to answer true."
+!ArrowMorph methodsFor: 'accessing' stamp: 'dhn 11/12/2016 19:23:27'!
+form
+	"Answer the value of form"
 
-	^ true! !
+	^ form! !
 
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
-wantsDroppedMorph: aMorph event: evt
-	"Return true if the receiver wishes to accept the given morph, which is being dropped by a hand in response to the given event. Note that for a successful drop operation both parties need to agree. The symmetric check is done automatically via aMorph wantsToBeDroppedInto: self.
-	This method just answers super. It is included here to say it is relevant to D&D behavior."
+!ArrowMorph methodsFor: 'accessing' stamp: 'dhn 11/12/2016 19:23:27'!
+form: anObject
+	"Set the value of form"
 
-	^super wantsDroppedMorph: aMorph event: evt! !
+	form _ anObject! !
+
+!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/12/2016 19:56:44'!
+leftOn: aWorld
+	"Open a right-pointing arrow in aWorld"
+	
+	^ self new
+		form: (Form fromFileNamed: 'leftArrow.bmp');
+		openInWorld: aWorld! !
+
+!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/12/2016 19:52:58'!
+rightOn: aWorld
+	"Open a right-pointing arrow in aWorld"
+	
+	^ self new
+		form: (Form fromFileNamed: 'rightArrow.bmp');
+		openInWorld: aWorld! !
 
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 8/20/2016 10:31:22'!
 combo
