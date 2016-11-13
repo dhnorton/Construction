@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 12:42:17 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 11 November 2016 at 4:38:11 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 4!
+!provides: 'Construction' 1 7!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -961,7 +961,7 @@ showHistory
 	graphs openInWorld: path
 ! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/8/2016 21:45:18'!
+!Construction methodsFor: 'windows' stamp: 'dhn 11/11/2016 16:31:33'!
 showJobAuctionAt: aPosition
 	"Open a job auction window on the job at aPosition"
 	| win seas |
@@ -971,6 +971,7 @@ showJobAuctionAt: aPosition
 	win _ AuctionJob openOn: model.			
 	win buyers color: seas color.
 	win 
+		setWindowColor: Color lightBrown;
 		setLabel: seas desc, ' job auction'.
 	win 
 		soldEndButtons;
@@ -1597,12 +1598,14 @@ buyerButtons
 			setBalloonText: 'bidder')].
 	buyers addAllMorphs: col reversed! !
 
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 9/20/2016 15:31:48'!
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 11/11/2016 14:25:19'!
 closeBoxHit
 
 	model 
 		assetAuctionItem: nil;
 		enableAll: {'Auction'}.
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model enableAll: {'End Turn'}]].
 	super closeBoxHit! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/26/2016 20:07:10'!
@@ -1619,13 +1622,14 @@ details
 				self showChant.
 				beginButton disableButton]]! !
 
-!AuctionAsset methodsFor: 'termination' stamp: 'dhn 10/2/2016 16:10:11'!
+!AuctionAsset methodsFor: 'termination' stamp: 'dhn 11/11/2016 14:36:12'!
 endIt
 	
 	model 
 		assetAuctionItem: nil;
 		enableAll: {'Auction'}.
-	begun ifFalse: [model enableAll: {'End Turn'}].
+	model moveButton enabled
+		ifFalse: [begun ifFalse: [model enableAll: {'End Turn'}]].
 	self delete! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:53:27'!
@@ -1801,12 +1805,12 @@ chant
 	chant ifNil: [chant _ OrderedCollection new].
 	^ chant! !
 
-!AuctionJob methodsFor: 'termination' stamp: 'dhn 9/20/2016 15:30:52'!
+!AuctionJob methodsFor: 'termination' stamp: 'dhn 11/11/2016 15:39:33'!
 closeBoxHit
 
 	model 
 		jobAuctionItem: nil;
-		enableAll: {'Auction'}.
+		enableAll: {'Auction'. 'End Turn'}.
 	super closeBoxHit! !
 
 !AuctionJob methodsFor: 'operation' stamp: 'dhn 9/26/2016 21:33:07'!
@@ -1814,12 +1818,12 @@ details
 	"Not required for job auctions"
 ! !
 
-!AuctionJob methodsFor: 'termination' stamp: 'dhn 9/20/2016 15:30:45'!
+!AuctionJob methodsFor: 'termination' stamp: 'dhn 11/11/2016 15:39:12'!
 endIt
 	
 	model 
 		jobAuctionItem: nil;
-		enableAll: {'Auction'}.
+		enableAll: {'Auction'. 'End Turn'}.
 	self delete! !
 
 !AuctionJob methodsFor: 'operation' stamp: 'dhn 11/8/2016 21:45:55'!
