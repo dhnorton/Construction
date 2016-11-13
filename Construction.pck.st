@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 11:40:53 am'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 2:11:08 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 8!
+!provides: 'Construction' 1 9!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1504,14 +1504,13 @@ showChant
 	chant do: [:ea | record nextPutAll: ea].
 	textPane model actualContents: record contents! !
 
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 11/8/2016 21:39:48'!
+!AuctionView methodsFor: 'buttons' stamp: 'dhn 11/13/2016 13:55:05'!
 soldEndButtons
-	"Replace buttons with the Sold and End buttons"
+	"Replace buttons with the End button"
 	
 	buttonsArea
 		removeAllMorphs;
 		addMorph: self makeEndButton;
-		addMorph: self makeCancelButton;
 		padding: #center! !
 
 !AuctionView class methodsFor: 'data base' stamp: 'dhn 10/29/2016 19:47:56'!
@@ -1826,11 +1825,10 @@ endIt
 	self delete
 ! !
 
-!AuctionJob methodsFor: 'operation' stamp: 'dhn 11/13/2016 10:52:52'!
+!AuctionJob methodsFor: 'operation' stamp: 'dhn 11/13/2016 14:04:57'!
 jobSold
 	"SOLD!! the job"
 	
-	cancelButton disableButton.
 	endButton enableButton.
 	buyers removeAllMorphs.
 	chant addFirst: (String streamContents: [:str |
