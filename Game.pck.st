@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 8:56:04 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 10:38:30 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 6!
+!provides: 'Game' 1 7!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -2266,12 +2266,13 @@ distribution: anObject
 
 	distribution := anObject! !
 
-!Histogram methodsFor: 'accessing' stamp: 'dhn 10/7/2014 17:26'!
+!Histogram methodsFor: 'accessing' stamp: 'dhn 11/12/2016 22:08:56'!
 incrementAt: anIndex
 	"Add 1 to the amount in the distribution at anIndex"
 	| x |
-	x := distribution at: anIndex.
-	distribution at: anIndex put: x + 1.! !
+	
+	x _ distribution atWrap: anIndex.
+	distribution atWrap: anIndex put: x + 1! !
 
 !Histogram methodsFor: 'accessing' stamp: 'dhn 10/7/2014 17:15'!
 maximum
