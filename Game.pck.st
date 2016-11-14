@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 7:41:00 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 8:10:47 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 8!
+!provides: 'Game' 1 9!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -1650,14 +1650,14 @@ marks: anObject
 
 	marks := anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 9/22/2016 21:06:12'!
+!Game methodsFor: 'operating' stamp: 'dhn 11/13/2016 20:08:21'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
 	cells first addMorph: (bone _ currentPlayer die openInWorld).
-	bone morphPosition: 110 @ (cells first morphHeight * 0.5).
+	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
 	bone show: bone combo shuffled! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 13:09:26'!
