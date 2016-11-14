@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 2:11:08 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 7:42:15 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 9!
+!provides: 'Construction' 1 10!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -418,41 +418,27 @@ doubled
 
 	^ doubled! !
 
-!ContractToken methodsFor: 'initialization' stamp: 'dhn 10/29/2016 20:42:46'!
+!ContractToken methodsFor: 'initialization' stamp: 'dhn 11/13/2016 17:01:27'!
 initialize
 
 	super initialize.
 	
 	labelArea _ LayoutMorph newColumn 
+		layoutSpec: LayoutSpec useAll;
 		color: Color transparent;
 		name: 'label area';
 		separation: 1;
 		padding: #center.
 	labelArea
-		morphExtent: 100@50;
-		addMorph: self makeArrowArea;
 		addMorph: self makeIdArea;
 		addMorph: self makeDoubledArea.
 
-	self addMorph: labelArea! !
+	self addMorphFront: labelArea! !
 
-!ContractToken methodsFor: 'initialization' stamp: 'dhn 9/25/2016 16:29:36'!
-makeArrowArea
-	"Lay out the area for the arrow"
-	| area |
-	
-	area _ LayoutMorph newRow
-		color: Color transparent;
-		name: #arrow;
-		padding: #center.
-	
-	arrow _ (StringMorph contents: '') 
-		emphasis: AbstractFont boldCode;
-		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 10).
-		
-	area addMorph: arrow.
-	^ area layoutSpec: (LayoutSpec  
-		proportionalWidth: 1.0)	! !
+!ContractToken methodsFor: 'initialization' stamp: 'dhn 11/13/2016 16:29:42'!
+layoutSubmorphs
+
+	labelArea morphExtent: self morphExtent! !
 
 !ContractToken methodsFor: 'initialization' stamp: 'dhn 11/8/2016 18:18:47'!
 makeDoubledArea
@@ -518,11 +504,14 @@ setPosition
 	
 	self morphPosition: owner morphExtent * (0.006@0.72)! !
 
-!ContractToken methodsFor: 'initialization' stamp: 'dhn 10/30/2016 17:11:06'!
+!ContractToken methodsFor: 'initialization' stamp: 'dhn 11/13/2016 16:18:15'!
 setSize
 	"Set the extent of the receiver"
+	| w h |
 	
-	self morphExtent: owner morphExtent * (0.13@0.25)! !
+	w _ owner morphExtent x * 0.13.
+	h _ w * 0.3.
+	self morphExtent: w@h! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 11/7/2016 20:55:25'!
 buildMorphicWindow
@@ -862,7 +851,7 @@ model
 
 	^ model! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 10/30/2016 16:54:02'!
+!Construction methodsFor: 'operation' stamp: 'dhn 11/13/2016 16:08:12'!
 nextPlayer: aPlayer
 	"Begin the next player's turn"
 
@@ -874,6 +863,7 @@ nextPlayer: aPlayer
 		positionBoardTo: aPlayer position.
 	aPlayer token 
 		openInWorld: path;
+		setSize;
 		setPosition.
 	model testMode
 		ifTrue: [model hardRoll: (6 min: (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6') asNumber)]! !
@@ -925,7 +915,7 @@ setupToken: aPlayer
 	path addMorph: aPlayer token.
 	^ aPlayer token who: aPlayer! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/8/2016 16:15:41'!
+!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:39:53'!
 showAssetAuction
 	"Open an asset auction window"
 	| pl win purpose |
@@ -942,7 +932,7 @@ showAssetAuction
 		startButtons;
 		color: (Color r: 0.986 g: 0.986 b: 0.986);
 		setWindowColor: pl token color;
-		morphPosition: self morphPosition + (model windowPosition: ConstructionView viewPosition);
+		morphPosition: self windowPosition;
 		morphExtent: 450@300! !
 
 !Construction methodsFor: 'windows' stamp: 'dhn 10/19/2016 20:41:32'!
@@ -979,7 +969,7 @@ showJobAuctionAt: aPosition
 		morphExtent: 450@300;
 		openInHand! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/7/2016 21:23:38'!
+!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:39:26'!
 showLoan
 	"Show window for reducing debt"
 	| pl win |
@@ -991,12 +981,12 @@ showLoan
 		setLabel: pl identity, '''s Debt';
 		setWindowColor: pl token color;
 		startButtons;
-		morphPosition: self morphPosition + (model windowPosition: ConstructionView viewPosition);
+		morphPosition: self windowPosition;
 		morphExtent: 300 @ 220.
 				
 	model disableAll: {'Pay Loan'}! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/7/2016 21:27:37'!
+!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:38:32'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
@@ -1010,7 +1000,7 @@ showOpts
 				setLabel: pl identity, '''s Shopping';
 				setWindowColor: pl token color;
 				startButtons;
-				morphPosition: self morphPosition + (model windowPosition: ConstructionView viewPosition);
+				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220.
 				model disableAll: {'Purchase'}]! !
 
@@ -1047,7 +1037,7 @@ showSeasons: associations
 			set add: txt].
 	^ set! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/7/2016 21:23:19'!
+!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:32:27'!
 showStats
 	"Open a window on a player's statistics"
 	| pl win |
@@ -1058,7 +1048,7 @@ showStats
 	win
 		setLabel: pl identity, '''s Statistics';
 		setWindowColor: pl token color;
-		morphPosition: self morphPosition + (model windowPosition: ConstructionView viewPosition);
+		morphPosition: self windowPosition;
 		morphExtent: 300 @ 260.
 	model disableAll: {'Stats'}! !
 
@@ -1113,6 +1103,12 @@ tourAt: anInterval
 				self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"
 ! !
+
+!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:35:44'!
+windowPosition
+	"Answer the position for a window"
+	
+	^ model cells second morphPosition + (model windowPosition: 0@-40)! !
 
 !Construction methodsFor: 'operation' stamp: 'dhn 11/13/2016 10:45:27'!
 winningBidder: aPlayer bid: aBid
@@ -3587,7 +3583,7 @@ setUpLeases
 	^ leases
 ! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/30/2016 17:12:07'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 11/13/2016 16:58:33'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName with a die and with token and marker colored aColor"
 	| pl  tok |
@@ -3605,7 +3601,6 @@ setupPlayer: aName color: aColor
 		openInWorld: arena path;
 		setSize;
 		setPosition.
-	tok labelArea morphPosition: tok morphExtent / (4.26222222222222@8.116).
 	tok id contents: aName.
 	tok when: #jumped send: #moved to: tok.
 	self when: #deleteOpenWindows send: #delete to: tok.

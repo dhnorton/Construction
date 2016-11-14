@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 12 November 2016 at 10:38:30 pm'!
+'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 7:41:00 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 7!
+!provides: 'Game' 1 8!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -456,23 +456,25 @@ initialize
 	self setBalloonText: 'A token representing the player. When the Move button is clicked, 
 a die is "rolled" and the token moves that number of spaces.'! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 10/2/2016 17:41:42'!
+!Token methodsFor: 'stepping' stamp: 'dhn 11/13/2016 19:08:03'!
 jump: aCount
 	"Move the receiver in aCount hops"
-	| limit i hop |
+	| step limit i hop horiz |
 	
+	step _ 4.	"time of each increment of the hop"
 	hop _ self class hopVComponent.
 	limit _ hop size * (aCount min: 6).
+	horiz _ who mgr cells first morphWidth / hop size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :delta |
 		i _ i + 1.
 		i < limit 
-			ifTrue: [self morphPosition: (self morphPosition translatedBy: 2.978@(hop atWrap: i))]
+			ifTrue: [self morphPosition: (self morphPosition translatedBy: horiz@(hop atWrap: i))]
 			ifFalse: [
 				self stopStepping.
 				self triggerEvent: #jumped.
 				self removeActionsForEvent: #morphicStep]].
-	self startSteppingStepTime: 4. 	"time of each increment of the hop"
+	self startSteppingStepTime: step. 	
 ! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 8/25/2016 17:23:29'!
