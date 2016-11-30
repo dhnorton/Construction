@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 8:10:47 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 30 November 2016 at 3:26:41 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 9!
+!provides: 'Game' 1 10!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -386,19 +386,19 @@ arrow
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:52:33'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/30/2016 14:27:50'!
 arrowLeft
 
 	arrow _ ArrowMorph leftOn: owner.
-	arrow morphPosition: self morphPosition + (100@-60).
+	arrow morphPosition: self morphPosition + (50@-60).
 	self addMorph: arrow
 ! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:52:22'!
+!Token methodsFor: 'initialization' stamp: 'dhn 11/30/2016 14:28:15'!
 arrowRight
 
 	arrow _ ArrowMorph rightOn: owner.
-	arrow morphPosition: self morphPosition + (100@-60).
+	arrow morphPosition: self morphPosition + (50@-60).
 	self addMorph: arrow
 ! !
 
@@ -837,20 +837,20 @@ form: anObject
 
 	form _ anObject! !
 
-!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/12/2016 19:56:44'!
+!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/30/2016 15:26:32'!
 leftOn: aWorld
 	"Open a right-pointing arrow in aWorld"
 	
 	^ self new
-		form: (Form fromFileNamed: 'leftArrow.bmp');
+		form: (BitBltCanvas arrowOfDirection: #left size: 40) as8BitColorForm;
 		openInWorld: aWorld! !
 
-!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/12/2016 19:52:58'!
+!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/30/2016 15:26:20'!
 rightOn: aWorld
 	"Open a right-pointing arrow in aWorld"
-	
+
 	^ self new
-		form: (Form fromFileNamed: 'rightArrow.bmp');
+		form: (BitBltCanvas arrowOfDirection: #right size: 40) as8BitColorForm;
 		openInWorld: aWorld! !
 
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 8/20/2016 10:31:22'!
