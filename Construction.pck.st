@@ -1,6 +1,6 @@
-'From Cuis 4.2 of 25 July 2013 [latest update: #2972] on 13 November 2016 at 8:23:15 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 29 November 2016 at 7:39:14 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 11!
+!provides: 'Construction' 1 12!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -935,21 +935,26 @@ showAssetAuction
 		morphPosition: self windowPosition;
 		morphExtent: 450@300! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 10/19/2016 20:41:32'!
+!Construction methodsFor: 'windows' stamp: 'dhn 11/29/2016 19:03:33'!
 showHistory
 	"Open a graph of players' history"
 	| graphs |
 	
-	(graphs _ HistoryView openOn: model title: 'Progress Toward Goal')
-		morphExtent: 360 @ 300.
-	graphs legend 
+	graphs _ HistoryView openOn: model title: 'Progress Toward Goal'.
+ 	graphs legend 
 		morphExtent: 100@80;
 		morphPosition: owner morphExtent * (0.025@0.030).
 	graphs plotter 
 		players: model players;
 		plotData.
-	graphs openInWorld: path
-! !
+	graphs 
+		openInHand;
+ 		morphExtent: 360 @ 300;
+		borderColor: Color lightBrown.
+	graphs layoutMorph color: Color white.
+	graphs legend color: Color white.
+ 	graphs legend submorphs do: [:ea | ea color: Color white]
+ ! !
 
 !Construction methodsFor: 'windows' stamp: 'dhn 11/11/2016 16:31:33'!
 showJobAuctionAt: aPosition
@@ -1936,14 +1941,15 @@ openOn: aModel
 	^ win
 ! !
 
-!HistoryView methodsFor: 'initialization' stamp: 'dhn 10/16/2016 12:25:09'!
+!HistoryView methodsFor: 'initialization' stamp: 'dhn 11/29/2016 19:00:13'!
 buildMorphicWindow
 	"Lay out the window for the plots"
 	| goal ix |
 	
 	goal _ (LayoutMorph newRow name: #goal)
 		padding: #center;
-		addMorph: (MinimalStringMorph contents: '100%').
+		color: Color white;
+ 		addMorph: (MinimalStringMorph contents: '100%').
 	self layoutMorph
 		addMorph: goal layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 0.1 minorDirectionPadding: #bottom);
 		addMorph: (plotter _ PlotGraphMorph new
