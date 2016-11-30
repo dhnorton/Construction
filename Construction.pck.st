@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 29 November 2016 at 7:39:14 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 30 November 2016 at 5:55:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 12!
+!provides: 'Construction' 1 13!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1312,14 +1312,16 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 10/20/2016 18:55:58'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 11/30/2016 17:51:11'!
 start
 	"Start the Construction Game"
 	| win |
 	
 	win _ self open: Contract new label: 'A Board Game'.
 	win startButtonSet.
+	win morphExtent: (win owner morphExtent * (1.0@0.8)).
 	win showSeasons: (win model parseSeasonsAt: 1).
+	win morphPosition: 0@60.
 	win model when: #nextPlayer: send: #nextPlayer: to: win with: #player.
 	win model when: #winningBidder send: #winningBidder:bid: to: win withArguments: #(#buyer #bid)
 ! !
