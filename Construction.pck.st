@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 30 November 2016 at 8:08:29 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 1 December 2016 at 2:39:41 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 14!
+!provides: 'Construction' 1 15!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -549,7 +549,7 @@ describe
 
 	^ ''! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 10/29/2016 11:34:58'!
+!Construction methodsFor: 'windows' stamp: 'dhn 12/1/2016 12:29:51'!
 displayInvoice: details title: aTitle
 	"Display the results of doing the job"
 	| inv |
@@ -559,7 +559,7 @@ displayInvoice: details title: aTitle
 		setLabel: aTitle;
 		setWindowColor: model currentPlayer token color;
 		openInWorld: path;
-		"morphPosition: path morphPosition + (80@-220);"
+		morphPosition: self windowPosition;
 		morphExtent: 310@180;						
 		details: details! !
 
