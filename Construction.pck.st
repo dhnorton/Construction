@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 30 November 2016 at 5:55:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 30 November 2016 at 8:08:29 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 13!
+!provides: 'Construction' 1 14!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -504,13 +504,13 @@ setPosition
 	
 	self morphPosition: owner morphExtent * (0.006@0.72)! !
 
-!ContractToken methodsFor: 'initialization' stamp: 'dhn 11/13/2016 16:18:15'!
+!ContractToken methodsFor: 'initialization' stamp: 'dhn 11/30/2016 19:02:57'!
 setSize
 	"Set the extent of the receiver"
 	| w h |
 	
 	w _ owner morphExtent x * 0.13.
-	h _ w * 0.3.
+	h _ w * 0.5.
 	self morphExtent: w@h! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 11/7/2016 20:55:25'!
