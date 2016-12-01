@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 1 December 2016 at 2:39:41 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 1 December 2016 at 4:11:15 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 15!
+!provides: 'Construction' 1 16!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -3138,7 +3138,7 @@ endTurn
 						ifFalse: [self enableAll: {'Move'. 'Stats'}.
 							self disableAll: {'End Turn'}]]]! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 11/13/2016 11:36:25'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 12/1/2016 15:45:52'!
 franchiseEffect: anObject
 	"Show the effect of landing on an owned franchise"
 	| fran z invoice amt owner user |
@@ -3163,6 +3163,7 @@ franchiseEffect: anObject
 					payee _ owner identity.
 					owner earned: z for: fran.
 					owner tally: z.
+					owner appendHistory.
 					invoice _ (String streamContents: [:str |
 						str
 							nextPutAll: 'You paid ';
