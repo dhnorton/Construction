@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 1 December 2016 at 4:11:15 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 1 December 2016 at 5:00:16 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 16!
+!provides: 'Construction' 1 17!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -3542,14 +3542,14 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 9/23/2016 19:25:19'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 12/1/2016 16:18:58'!
 rollForFranchise
 	"Show the die rolling; set result with #triggerEvent:"
 	| bone posn |
 
 	posn _ 1 + currentPlayer roll.
 	(cells at: posn) addMorph: (bone _ currentPlayer die openInWorld).
-	bone morphPosition: 110 @ (cells first morphHeight * 0.5).
+	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
 	bone franchiseRoll: bone combo shuffled
 ! !
 
