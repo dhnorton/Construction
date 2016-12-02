@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 30 November 2016 at 5:37:34 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 2 December 2016 at 9:13:04 am'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 11!
+!provides: 'Game' 1 12!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -93,7 +93,7 @@ ArrowMorph class
 
 !classDefinition: #DieMorph category: #'Game-Graphics'!
 BorderedRectMorph subclass: #DieMorph
-	instanceVariableNames: 'dt wo'
+	instanceVariableNames: 'dt wo layoutMorph'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
@@ -1021,7 +1021,7 @@ franchiseRoll: aCollection
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
 
-!DieMorph methodsFor: 'initialization' stamp: 'dhn 8/22/2016 11:29:51'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 12/2/2016 08:38:09'!
 initialize
 
 	super initialize.
@@ -1656,13 +1656,13 @@ marks: anObject
 
 	marks := anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 11/13/2016 20:08:21'!
+!Game methodsFor: 'operating' stamp: 'dhn 12/2/2016 09:11:48'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
-	cells first addMorph: (bone _ currentPlayer die openInWorld).
+	bone _ currentPlayer die openInWorld: arena path.
 	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
 	bone show: bone combo shuffled! !
 
@@ -2195,10 +2195,6 @@ rollStats: aRoll
 	self totalRoll: aRoll + self totalRoll. 
 	self turns: 1 + self turns. 
 	self mgr triggerEvent: #itemChange! !
-
-!Gamer methodsFor: 'as yet unclassified' stamp: 'dhn 12/21/2013 11:30'!
-sendBid
-	mgr takeBidOf: self! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/26/2012 17:52'!
 tally: anAmount
