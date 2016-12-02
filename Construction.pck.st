@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 1 December 2016 at 5:00:16 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 2 December 2016 at 9:58:22 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 17!
+!provides: 'Construction' 1 18!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -3542,23 +3542,22 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 12/1/2016 16:18:58'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 12/2/2016 09:58:00'!
 rollForFranchise
-	"Show the die rolling; set result with #triggerEvent:"
-	| bone posn |
+	"Show the die rolling"
+	| bone |
 
-	posn _ 1 + currentPlayer roll.
-	(cells at: posn) addMorph: (bone _ currentPlayer die openInWorld).
+	bone _ currentPlayer die openInWorld: arena path.
 	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
 	bone franchiseRoll: bone combo shuffled
 ! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 11/13/2016 20:21:37'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 12/2/2016 09:58:12'!
 rollTheDie
-	"Show the die rolling; set result with #triggerEvent:"
+	"Show the die rolling"
 	| bone |
 
-	(cells at: currentPlayer harvestPosition) addMorph: (bone _ currentPlayer die openInWorld).
+	bone _ currentPlayer die openInWorld: arena path.
 	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
 	bone jobShow: bone combo shuffled
 ! !
