@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 2 December 2016 at 9:13:04 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 2 December 2016 at 6:59:47 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 12!
+!provides: 'Game' 1 13!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -859,6 +859,20 @@ rightOn: aWorld
 		form: (BitBltCanvas arrowOfDirection: #right size: 40) as8BitColorForm;
 		openInWorld: aWorld! !
 
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 12/2/2016 18:11:14'!
+adjustTo: aMorph
+	"Set position and dot size based on anObject"
+	| s |
+	
+	s _ aMorph morphExtent x * 50 / 132.
+	self morphExtent: s@s.
+	self referencePosition: aMorph referencePosition - (0@2 * aMorph morphHeight).
+	
+	dt _ (Form dotOfSize: aMorph morphExtent x * 10 / 132).	"a black dot"
+	wo _ dt copy.
+	wo bits atAllPut: 0.	"a white dot"
+! !
+
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 8/20/2016 10:31:22'!
 combo
 	"Answer an array of all faces at both orientations (two sets)"
@@ -877,6 +891,18 @@ combo
 		#face5 #face5
 		#face6 #face6b
 	)! !
+
+!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:37:01'!
+dt
+	"Answer the value of dt"
+	
+	^ dt! !
+
+!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:39:03'!
+dt: anObject
+	"Set the value of dt"
+	
+	dt _ anObject! !
 
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:10:58'!
 face1
@@ -1113,6 +1139,18 @@ whiteOut
 	wo displayAt: posn + (25@38).
 	wo displayAt: posn + (38@38).
 	! !
+
+!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:37:44'!
+wo
+	"Answer the value of wo"
+	
+	^ wo! !
+
+!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:38:34'!
+wo: anObject
+	"Set the value of wo"
+	
+	wo _ anObject! !
 
 !PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 9/28/2016 20:14:51'!
 asNormalizedPoints: aCollection
@@ -1656,14 +1694,14 @@ marks: anObject
 
 	marks := anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 12/2/2016 09:11:48'!
+!Game methodsFor: 'operating' stamp: 'dhn 12/2/2016 18:13:32'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
 	bone _ currentPlayer die openInWorld: arena path.
-	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
+	bone adjustTo: currentPlayer token.
 	bone show: bone combo shuffled! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 13:09:26'!
