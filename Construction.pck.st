@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 9:20:38 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 9:59:04 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 21!
+!provides: 'Construction' 1 22!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -935,12 +935,12 @@ showAssetAuction
 		morphPosition: self windowPosition;
 		morphExtent: 450@300! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 12/2/2016 11:01:54'!
+!Construction methodsFor: 'windows' stamp: 'dhn 12/8/2016 21:57:50'!
 showHistory
 	"Open a graph of players' history"
 	| graphs |
 	
-	graphs _ HistoryView openOn: model title: 'Progress Toward Goal'.
+	graphs _ HistoryView openOn: model title: 'History'.
  	graphs legend 
 		morphExtent: 100@80;
 		morphPosition: owner morphExtent * (0.04@0.030).
