@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 2 December 2016 at 11:19:48 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 7:47:12 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 19!
+!provides: 'Construction' 1 20!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -3542,24 +3542,24 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 12/2/2016 09:58:00'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 12/8/2016 19:29:42'!
 rollForFranchise
 	"Show the die rolling"
 	| bone |
 
 	bone _ currentPlayer die openInWorld: arena path.
 	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
-	bone franchiseRoll: bone combo shuffled
+	bone show: bone combo shuffled event: #franchiseEffect:
 ! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 12/2/2016 09:58:12'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 12/8/2016 19:28:04'!
 rollTheDie
 	"Show the die rolling"
 	| bone |
 
 	bone _ currentPlayer die openInWorld: arena path.
 	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
-	bone jobShow: bone combo shuffled
+	bone show: bone combo shuffled event: #jobDone
 ! !
 
 !Contract methodsFor: 'accessing' stamp: 'dhn 10/2/2016 16:01:41'!

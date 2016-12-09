@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 2 December 2016 at 6:59:47 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 7:46:40 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 13!
+!provides: 'Game' 1 14!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -1024,29 +1024,6 @@ face6b
 	^ 6
 ! !
 
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 9/23/2016 19:26:07'!
-franchiseRoll: aCollection
-	"Display the succession of faces in aCollection"
-	| limit linger t i x |
-	
-	limit _ 1600 + (500 atRandom).
-	linger _ limit + 700. 	"to pause before vanishing"
-	t _ 0.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :delta |
-		i _ i + 1.
-		t _ t + delta.
-		t < limit 	"limit on the total time of activity"
-			ifTrue: [x _ self perform: (aCollection atWrap: i)]
-			ifFalse: [
-				t > linger ifTrue: [
-					self stopStepping.
-					self triggerEvent: #franchiseEffect: with: x.
-					self removeActionsForEvent: #morphicStep.
-					owner removeMorph: self]]].
-	self startSteppingStepTime: 85. 	"time of each step in the activity"
-! !
-
 !DieMorph methodsFor: 'initialization' stamp: 'dhn 12/2/2016 08:38:09'!
 initialize
 
@@ -1060,9 +1037,9 @@ initialize
 
 	! !
 
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 9/23/2016 17:02:22'!
-jobShow: aCollection
-	"Display the succession of faces in aCollection"
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 12/8/2016 19:23:41'!
+show: aCollection event: aSymbol
+	"Display the succession of faces in aCollection, triggering aSymbol at the end"
 	| limit linger t i x |
 	
 	limit _ 1600 + (500 atRandom).
@@ -1077,30 +1054,7 @@ jobShow: aCollection
 			ifFalse: [
 				t > linger ifTrue: [
 					self stopStepping.
-					self triggerEvent: #jobDone with: x.
-					self removeActionsForEvent: #morphicStep.
-					owner removeMorph: self]]].
-	self startSteppingStepTime: 85. 	"time of each step in the activity"
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/23/2016 21:16:23'!
-show: aCollection
-	"Display the succession of faces in aCollection"
-	| limit linger t i x |
-	
-	limit _ 1600 + (500 atRandom).
-	linger _ limit + 700. 	"to pause before vanishing"
-	t _ 0.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :delta |
-		i _ i + 1.
-		t _ t + delta.
-		t < limit 	"limit on the total time of activity"
-			ifTrue: [x _ self perform: (aCollection atWrap: i)]
-			ifFalse: [
-				t > linger ifTrue: [
-					self stopStepping.
-					self triggerEvent: #rolled with: x.
+					self triggerEvent: aSymbol with: x.
 					self removeActionsForEvent: #morphicStep.
 					owner removeMorph: self]]].
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
@@ -1694,7 +1648,7 @@ marks: anObject
 
 	marks := anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 12/2/2016 18:13:32'!
+!Game methodsFor: 'operating' stamp: 'dhn 12/8/2016 19:25:16'!
 move
 	"Roll the die"
 	| bone |
@@ -1702,7 +1656,7 @@ move
 	self disableAll: {'Move'}.
 	bone _ currentPlayer die openInWorld: arena path.
 	bone adjustTo: currentPlayer token.
-	bone show: bone combo shuffled! !
+	bone show: bone combo shuffled event: #rolled! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 13:09:26'!
 moveFrom: positionA to: positionB
