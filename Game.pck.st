@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 7:46:40 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 9:19:51 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 14!
+!provides: 'Game' 1 15!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -873,17 +873,11 @@ adjustTo: aMorph
 	wo bits atAllPut: 0.	"a white dot"
 ! !
 
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/20/2016 10:31:22'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 12/8/2016 19:50:48'!
 combo
-	"Answer an array of all faces at both orientations (two sets)"
+	"Answer an array of all faces at both orientations"
 	
 	^ #(
-		#face1 #face1
-		#face2 #face2b
-		#face3 #face3b
-		#face4 #face4
-		#face5 #face5
-		#face6 #face6b
 		#face1 #face1
 		#face2 #face2b
 		#face3 #face3b

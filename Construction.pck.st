@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 7:47:12 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 9:20:38 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 20!
+!provides: 'Construction' 1 21!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -2251,7 +2251,7 @@ buildMorphicWindow
 		addAdjusterAndMorph: rightPane layoutSpec: (LayoutSpec useAll)	
 ! !
 
-!OptionsView methodsFor: 'accessing' stamp: 'dhn 10/2/2016 16:00:22'!
+!OptionsView methodsFor: 'accessing' stamp: 'dhn 12/8/2016 20:19:00'!
 buy
 	"Purchase an asset"
 	| key option cost down balance |
@@ -2266,7 +2266,8 @@ buy
 		borrow: balance
 		for: option listName asSymbol
 		amount: 1;
-		updateHistory.
+		updateHistory;
+		enableAll: {'doJob'}.
 	self details! !
 
 !OptionsView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 11:33:35'!
