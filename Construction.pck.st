@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 9:59:04 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3000] on 16 December 2016 at 7:18:42 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 22!
+!provides: 'Construction' 1 23!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1115,7 +1115,7 @@ windowPosition
 	
 	^ model cells second morphPosition + (model windowPosition: 0@-40)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 11/13/2016 10:45:27'!
+!Construction methodsFor: 'operation' stamp: 'dhn 12/16/2016 17:44:16'!
 winningBidder: aPlayer bid: aBid
 	"Change players to aPlayer and move to job, if necessary"
 	| space |
@@ -1136,6 +1136,7 @@ winningBidder: aPlayer bid: aBid
 			model currentPlayer token setPosition.
 			model moveFrom: model currentPlayer position to: space.
 			model currentPlayer position: space.
+			model currentPlayer token doubled contents: model currentPlayer doubledString.
 			model currentPlayer canDoJob].
 	model updateHistory.
 	model enableAll: {'End Turn'. 'Do Job'}.
