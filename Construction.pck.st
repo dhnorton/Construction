@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3000] on 16 December 2016 at 7:18:42 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3020] on 5 January 2017 at 3:45:42 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 23!
+!provides: 'Construction' 1 24!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1944,7 +1944,7 @@ openOn: aModel
 	^ win
 ! !
 
-!HistoryView methodsFor: 'initialization' stamp: 'dhn 11/29/2016 19:00:13'!
+!HistoryView methodsFor: 'initialization' stamp: 'dhn 1/5/2017 15:40:22'!
 buildMorphicWindow
 	"Lay out the window for the plots"
 	| goal ix |
@@ -1959,6 +1959,7 @@ buildMorphicWindow
 			layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 0.9);
 			yScaleFactor: model goal;
 			domain: (-0.8 to: 11);
+			yRange: (0 to: 10);
 			setXYFactors).
 	legend _ LayoutMorph newColumn name: #legend.
 	ix _ 0.
