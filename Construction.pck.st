@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3020] on 5 January 2017 at 3:45:42 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3020] on 6 January 2017 at 11:49:11 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 24!
+!provides: 'Construction' 1 25!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -935,7 +935,7 @@ showAssetAuction
 		morphPosition: self windowPosition;
 		morphExtent: 450@300! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 12/8/2016 21:57:50'!
+!Construction methodsFor: 'windows' stamp: 'dhn 1/6/2017 11:36:37'!
 showHistory
 	"Open a graph of players' history"
 	| graphs |
@@ -943,7 +943,7 @@ showHistory
 	graphs _ HistoryView openOn: model title: 'History'.
  	graphs legend 
 		morphExtent: 100@80;
-		morphPosition: owner morphExtent * (0.04@0.030).
+		morphPosition: owner morphExtent * (0.05@0.030).
 	graphs plotter 
 		players: model players;
 		plotData.
@@ -1944,7 +1944,7 @@ openOn: aModel
 	^ win
 ! !
 
-!HistoryView methodsFor: 'initialization' stamp: 'dhn 1/5/2017 15:40:22'!
+!HistoryView methodsFor: 'initialization' stamp: 'dhn 1/6/2017 11:18:19'!
 buildMorphicWindow
 	"Lay out the window for the plots"
 	| goal ix |
@@ -1958,7 +1958,7 @@ buildMorphicWindow
 		addMorph: (plotter _ PlotGraphMorph new
 			layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 0.9);
 			yScaleFactor: model goal;
-			domain: (-0.8 to: 11);
+			domain: (0 to: 11);
 			yRange: (0 to: 10);
 			setXYFactors).
 	legend _ LayoutMorph newColumn name: #legend.
