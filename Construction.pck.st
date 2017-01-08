@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3020] on 6 January 2017 at 11:49:11 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 8 January 2017 at 12:50:21 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 25!
+!provides: 'Construction' 1 26!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -5027,10 +5027,10 @@ updateHistory
 	
 	history at: history size put: self netAssets! !
 
-!Contractor methodsFor: 'job-related' stamp: 'dhn 11/4/2016 17:25:27'!
+!Contractor methodsFor: 'job-related' stamp: 'dhn 1/8/2017 12:48:11'!
 updateIron: anAsset with: aRoll 
 	"Compute the results of a move"
-	| what amt yield total mkt reduced |
+	| what amt yield total mkt reduced title |
 
 	yield _ 0.
 	reduced _ false.
@@ -5070,7 +5070,13 @@ updateIron: anAsset with: aRoll
 					str lf.
 					str nextPutAll: '$' , total asInteger printStringWithCommas , ' Net'.
 					reduced ifTrue: [str nextPutAll: ' reduced by ', contingency factor printString].
-					self triggerEvent: #displayInvoice withArguments: {str contents. anAsset, ' quantity ', amt asString}]].
+					title _ String streamContents: [:cnts |
+						cnts 
+							nextPutAll: amt asString;
+							nextPut: $ ;
+							nextPutAll: anAsset.
+						amt > 1 ifTrue: [cnts nextPut: $s]].
+					self triggerEvent: #displayInvoice withArguments: {str contents. title}]].
 	self demo: 0.
 	expenseFactor _ 1.
 	^ total! !
