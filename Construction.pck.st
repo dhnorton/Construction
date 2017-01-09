@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 8 January 2017 at 12:50:21 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 9 January 2017 at 10:02:23 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 26!
+!provides: 'Construction' 1 27!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1944,7 +1944,7 @@ openOn: aModel
 	^ win
 ! !
 
-!HistoryView methodsFor: 'initialization' stamp: 'dhn 1/6/2017 11:18:19'!
+!HistoryView methodsFor: 'initialization' stamp: 'dhn 1/9/2017 09:56:37'!
 buildMorphicWindow
 	"Lay out the window for the plots"
 	| goal ix |
@@ -1952,7 +1952,7 @@ buildMorphicWindow
 	goal _ (LayoutMorph newRow name: #goal)
 		padding: #center;
 		color: Color white;
- 		addMorph: (MinimalStringMorph contents: '100%').
+ 		addMorph: (MinimalStringMorph contents: '$', model goal printStringWithCommas).
 	self layoutMorph
 		addMorph: goal layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 0.1 minorDirectionPadding: #bottom);
 		addMorph: (plotter _ PlotGraphMorph new
