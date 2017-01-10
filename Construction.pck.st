@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 9 January 2017 at 10:02:23 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 9 January 2017 at 8:30:51 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 27!
+!provides: 'Construction' 1 28!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -274,7 +274,7 @@ You class
 
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions fates drawnFates paymentList payLoanWindow leases statsItem optionsItem optionsReport loanItem loanReport assetAuctionItem auctionList jobAuctionItem windowCount moveButton latestPlayer'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions fates drawnFates paymentList leases statsItem optionsItem optionsReport loanItem loanReport assetAuctionItem auctionList jobAuctionItem windowCount moveButton latestPlayer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Construction-Model'!
@@ -3422,18 +3422,6 @@ pay: down borrow: balance for: aSymbol amount: qty
 				ifTrue: [currentPlayer jobDone
 					ifFalse: [self enableAll: {'Do Job'}]]].
 	self updatePlayer! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
-payLoanWindow
-	"Answer the value of payLoanWindow"
-
-	^ payLoanWindow! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
-payLoanWindow: anObject
-	"Set the value of payLoanWindow"
-
-	payLoanWindow := anObject! !
 
 !Contract methodsFor: 'operating' stamp: 'dhn 9/25/2016 20:53:33'!
 payRent: anAmount for: aSymbol 
