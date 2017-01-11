@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 9 January 2017 at 8:30:51 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 4:05:54 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 28!
+!provides: 'Construction' 1 29!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1069,13 +1069,13 @@ startButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 10/28/2016 21:05:00'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/11/2017 15:45:45'!
 startGame
 	"Change the buttons and start the game"
 	
 	self playButtonSet.
 	model
-		marks: (model setupMarksFor: model class spaces size).
+		marks: (model setupMarksFor: model spaces size).
 	model players do: [:ea | 
 		ea die when: #rolled send: #hopFor: to: ea with: #value.
 		ea die when: #franchiseEffect: send: #franchiseEffect: to: model with: #value.
@@ -1092,12 +1092,12 @@ startGame
 	self setupToken: model currentPlayer.
 	model initialButtonState! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 10/23/2016 14:58:12'!
+!Construction methodsFor: 'operation' stamp: 'dhn 1/11/2017 15:45:58'!
 tourAt: anInterval 
 	"Take a tour of the board."
 	| limit i |
 	
-	limit _ model class spaces size + 2.
+	limit _ model spaces size + 2.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :delta |
 		i _ i + 1.
@@ -3222,10 +3222,12 @@ initialButtonState
 	self enableAll: {'Purchase'}.
 	self disableAll: {'End Turn'. 'Do Job'}! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 12:48:17'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 15:50:46'!
 initialize
 
 	super initialize.
+	spaces _ self class describeSpaces. 	"a temporary measure"
+	spaceFreq _ Histogram ofSize: spaces size.
 	cellCount _ self class cellsForGame.
 	won _ false.
 	windowCount _ 0.
@@ -3975,6 +3977,18 @@ spaceTruck: aRent
 	self enableAll: {'End Turn'}.
 	^ z! !
 
+!Contract methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:44:39'!
+spaces
+	"Answer the value of spaces"
+	
+	^ spaces! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:45:06'!
+spaces: anObject
+	"Set the value of spaces"
+	
+	^ spaces _ anObject! !
+
 !Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 12:46:45'!
 statsItem
 	"Answer the value of statsItem"
@@ -4068,10 +4082,10 @@ updatePlayer
 
 	self triggerEvent: #itemChange! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:03'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 1/11/2017 15:47:03'!
 whatSpaceSays
 	| assoc |
-	assoc := self class spaces at: self currentPlayer position.
+	assoc := self class spacesX at: self currentPlayer position.
 	^ self perform: assoc key! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:12'!
@@ -4171,6 +4185,286 @@ defaultGoal
 	^ 1500000.
 ! !
 
+!Contract class methodsFor: 'operation' stamp: 'dhn 1/11/2017 15:34:01'!
+describeSpaces
+	"Descriptions for the spaces on the board."
+	| col |
+	
+	col _ OrderedCollection new.
+	col
+		add: 'DECEMBER
+Week 4
+
+PAY $1,000 for Christmas gifts to hard-working employees.
+
+Receive $10,000 from outstanding receivables as you pass.';
+
+	add: 'JANUARY
+Week 1
+
+Boomville approves thousands of new home permits. Double all residential construction gross profits this year.';
+
+	add: 'JANUARY
+Week 2
+
+Boomville is selected as the site for a new MegaMall. Double all commercial construction gross profits this year.';
+
+	add: 'JANUARY
+Week 3
+
+Boomville''s explosive growth requires new schools. Double all institutional construction gross profits this year.';
+
+add: 'JANUARY
+Week 4
+
+Boomville levies a big tax increase to pay for roads and utilities. Double all municipal construction gross profits this year.';
+
+	add: 'JANUARY
+Week 5
+
+Boomville approves a new airport. Double all heavy/highway construction gross profits this year.';
+
+	add: 'FEBRUARY
+Week 1
+
+Early warm weather allows you to start construction ahead of schedule. Collect $5,000.';
+
+	add: 'FEBRUARY
+Week 2
+
+
+Sudden blast of winter weather shuts down construction. Pay $5,000.';
+
+	add: 'FEBRUARY
+Week 3
+
+Bout of pneumonia puts you flat on your back for three months. Move to the 4th week in May';
+
+	add: 'MARCH
+Week 1
+
+Extra grading required in new single-family subdivision. Pay fuel bill of $1,000 per backhoe';
+
+	add: 'MARCH
+Week 2
+
+Big job requires you to pay $4,000 to rent a truck.';
+
+	add: 'MARCH
+Week 3
+
+Gravel is needed for house foundations. Pay LOST MINER $3,000.';
+
+	add: 'MARCH
+Week 4
+
+Hire surveyor to lay out tricky steep multi-family site for excavation. Pay $2,000.';
+
+	add: 'APRIL
+Week 1
+
+Federal funding of sewer line requires you to pay prevailing wage. Pay labor costs of $5,000 per grader.
+Contractor Contingency.';
+
+	add: 'APRIL
+Week 2
+
+Street improvements including curbs, sidewalks, and ADA ramps require concrete. Pay BIG PHIL''S CONCRETE $15,000.
+
+Pay Federal Income Taxes $5,000.';
+
+	add: 'APRIL
+Week 3
+
+COMPETITIVE BID
+(Good Luck)';
+
+	add: 'APRIL
+Week 4
+
+Worker accidentally runs over a stack of sewer pipe while excavating a MiniMall. Pay $5,000.';
+
+	add: 'MAY
+Week 1
+
+Mall parking lot requires paving. Pay WESTWOOD ASPHALT $8,000.';
+
+	add: 'MAY
+Week 2
+
+Huge boulders found during excavation require you to rent a truck for $7,000.';
+
+	add: 'MAY
+Week 3
+
+Design of new public library requires retaining walls, sidewalks, curbs, and ramps. Pay BIG PHIL''S CONCRETE $12,000.
+Contractor Contingency.';
+
+	add: 'MAY
+Week 4
+
+Layer of extra-hard rock hampers excavation of new school foundation. Replace bucket on every excavator you own. Pay $3,000.';
+
+	add: 'JUNE
+Week 1
+
+New school requires parking lot. Pay WESTWOOD PAVING $10,000.
+Contractor Contingency.';
+
+	add: 'JUNE
+Week 2
+
+Pay equipment operators $10,000 to excavate foundations for courthouse.
+Contractor Contingency.';
+
+	add: 'JUNE
+Week 3
+
+Extra material and labor costs for finish grading on shopping mall parking lot add up. Pay $7,000.';
+
+	add: 'JUNE
+Week 4
+
+Dozers need service. Pay $2,000 each for oil, filter, grease and hydraulic hoses.';
+
+	add: 'JULY
+Week 1
+
+Windstorm trashes your subdivision site. Pay STINKY''S GARBAGE & LANDFILL $3,000 to pick up the debris.
+
+Pay 10% interest on all outstanding notes.';
+
+	add: 'JULY
+Week 2
+
+Digging through hardpan at new housing site requires extra service to all backhoes. Pay $1,000 each.';
+
+	add: 'JULY
+Week 3
+
+While installing septic system backhoe punches through tank. Pay $4,000 to fix the mess.';
+
+	add: 'JULY
+Week 4
+
+Around-the-clock construction of the new airport wears out self-loading scraper parts. Pay $10,000 per machine to overhaul.
+Contractor Contingency.';
+
+	add: 'AUGUST
+Week 1
+
+Pay WESTWOOD PAVING $25,000 to asphalt a new section of four-lane highway.
+Contractor Contingency.';
+
+	add: 'AUGUST
+Week 2
+
+Pay BIG PHIL''S $30,000 for concrete to build an overpass for a new freeway to the airport.';
+
+	add: 'AUGUST
+Week 3
+
+COMPETETIVE BID
+(Don''t get burned like last time!!!!)';
+
+	add: 'AUGUST
+Week 4
+
+Pay equipment operators $15,000 per scraper for labor and overtime racked up building the new reservoir.
+Contractor Contingency.';
+
+	add: 'SEPTEMBER
+Week 1
+
+Illegal dumping requires you to remove trash. Pay $15,000 to rent a truck.
+Contractor Contingency.';
+
+	add: 'SEPTEMBER
+Week 2
+
+Pay $10,000 for traffic signals, signage and pavement striping to finish new 4-way intersection.
+Contractor Contingency.';
+
+	add: 'SEPTEMBER
+Week 3
+
+Install sanitary sewer system for single-family residence. Pay labor and materials costs of $3,000.';
+
+	add: 'SEPTEMBER
+Week 4
+
+Purchase crushed rock for pipe building. Pay LOST MINER $2,000.
+
+Pay 10% interest on all outstanding notes';
+
+	add: 'SEPTEMBER
+Week 5
+
+Excavation and removal job requires you to pay $10,000 to rent a truck.
+Contractor Contingency.';
+
+	add: 'OCTOBER
+Week 1
+
+COMPETETIVE BID
+(Who needs this job the most??)';
+
+	add: 'OCTOBER
+Week 2
+
+Purchase pipe, valves and fittings for potable water system servicing the new Buttercup Elementary School. Pay $5,000 per excavator.
+Contractor Contingency.';
+
+	add: 'OCTOBER
+Week 3
+
+Unstable soil at new warehouse site requires you to import sand and gravel. Pay LOST MINER $5,000.';
+
+	add: 'OCTOBER
+Week 4
+
+Megabucks Shopping Mall refinishes its sidewalks, ramps and gutters. Pay BIG PHIL''S CONCRETE $7,000.';
+
+	add: 'NOVEMBER
+Week 1
+
+Haul contaminated material from gas station project. Pay STINKY''S GARBAGE & LANDFILL $5,000.';
+
+	add: 'NOVEMBER
+Week 2
+
+Install new fire protection main, hydrants and replace the paving. Pay BIG PHIL''S CONCRETE $15,000.
+Contractor Contingency.';
+
+	add: 'NOVEMBER
+Week 3
+
+Flaggers and concrete barricades are needed for traffic control during road improvement job. Pay $7,000 per grader.
+Contractor Contingency.';
+
+	add: 'NOVEMBER
+Week 4
+
+If owned, pay owner for annual disposal usage $4,000 to $24,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $100,000.';
+
+	add: 'DECEMBER
+Week 1
+
+If owned, pay owner for annual material purchases $6,000 to $36,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $200,000.';
+
+	add: 'DECEMBER
+Week 2
+
+If owned, pay owner for annual material purchases $10,000 to $60,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $300,000.';
+
+	add: 'DECEMBER
+Week 3
+
+If owned, pay owner for annual material purchases $15,000 to $90,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $500,000.';
+
+	yourself.
+	^ col! !
+
 !Contract class methodsFor: 'lists' stamp: 'dhn 8/18/2013 06:54'!
 equipmentList
 	"Answer a list in the order needed for purchases and status"
@@ -4253,8 +4547,8 @@ requiredEquipment
 		add: #'BIG PHIL' -> #BigPhil;
 		yourself! !
 
-!Contract class methodsFor: 'operation' stamp: 'dhn 8/27/2016 15:39:18'!
-spaces
+!Contract class methodsFor: 'operation' stamp: 'dhn 1/11/2017 15:39:02'!
+spacesX
 	"Descriptions for the spaces on the board."
 	^ {#space1 -> 'DECEMBER
 Week 4

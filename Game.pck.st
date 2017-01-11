@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #2981] on 8 December 2016 at 9:19:51 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 4:03:45 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 15!
+!provides: 'Game' 1 16!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -143,7 +143,7 @@ Direction class
 
 !classDefinition: #Game category: #'Game-Model'!
 Object subclass: #Game
-	instanceVariableNames: 'arena cells goal response players currentPlayer playerIndex buttons token marks tags outs cellCount hardRoll won spaceFreq chantBeat'
+	instanceVariableNames: 'arena cells spaces goal response players currentPlayer playerIndex buttons token marks tags outs cellCount hardRoll won spaceFreq chantBeat'
 	classVariableNames: 'TestGoal TestMode'
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -1518,17 +1518,17 @@ cells: anObject
 
 	cells _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 10/16/2016 12:40:33'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:48:12'!
 cellsAt: anIndex 
-	"Show the board starting with self class spaces at: anIndex."
+	"Show the board starting with self spaces at: anIndex."
 	| str |
 	
 	tags _ self players collect: [:ea | ea marker].
 	1 to: cellCount do: [:m | 
 		str _ String new writeStream.
-		str nextPutAll: (self class spaces atWrap: anIndex + m - 1) value; newLine.
+		str nextPutAll: (self spaces atWrap: anIndex + m - 1) value; newLine.
 		self testMode
-			ifTrue: [str nextPutAll: (self class spaces atWrap: anIndex + m - 1) key asString; newLine].
+			ifTrue: [str nextPutAll: (self spaces atWrap: anIndex + m - 1) key asString; newLine].
 		(cells at: m)
 			model actualContents: str contents.
 		"self
@@ -1561,10 +1561,10 @@ disableAll: aCollection
 		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
 		btn ifNotNil: [btn disableButton]]! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 4/26/2012 11:02'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:48:24'!
 doSpace
 	|assoc|
-	assoc := self class spaces at: self currentPlayer position.
+	assoc := self class spacesX at: self currentPlayer position.
 	self perform: assoc key.
 ! !
 
@@ -1618,13 +1618,12 @@ initialButtonState
 	"Establish the button state at the start of the game"
 	self subclassResponsibility! !
 
-!Game methodsFor: 'initialize' stamp: 'dhn 9/22/2016 21:03:42'!
+!Game methodsFor: 'initialize' stamp: 'dhn 1/11/2017 15:54:23'!
 initialize
 
 	players _ OrderedCollection new.
 	cells _ OrderedCollection new.
 	tags _ OrderedCollection new.
-	spaceFreq _ Histogram ofSize: self class spaces size.
 	self when: #slidTo: send: #slidTo: to: self with: #position.! !
 
 !Game methodsFor: 'initialize' stamp: 'dhn 7/11/2013 14:53'!
@@ -1652,7 +1651,7 @@ move
 	bone adjustTo: currentPlayer token.
 	bone show: bone combo shuffled event: #rolled! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 13:09:26'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:51:33'!
 moveFrom: positionA to: positionB
 	"Determine best direction and move token"
 	| dir |
@@ -1660,7 +1659,7 @@ moveFrom: positionA to: positionB
 	dir _ Direction
 		shortest: positionA
 		to: positionB
-		in: self class spaces size.
+		in: spaces size.
 	dir < 0
 		ifTrue: [currentPlayer token arrowLeft]
 		ifFalse: [currentPlayer token arrowRight].
@@ -1671,7 +1670,7 @@ moveFrom: positionA to: positionB
 	currentPlayer token deleteArrow
 ! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 9/22/2016 19:48:15'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:58:10'!
 moveFrom: start to: end by: direction 
 	"Animate moves forward or backward."
 	| a b |
@@ -1679,14 +1678,14 @@ moveFrom: start to: end by: direction
 	a _ start.
 	b _ end.
 	direction < 0
-		ifTrue: [start < end ifTrue: [	a _ start + self class spaces size]]
-		ifFalse: [start > end ifTrue: [b _ end + self class spaces size]].
+		ifTrue: [start < end ifTrue: [	a _ start + spaces size]]
+		ifFalse: [start > end ifTrue: [b _ end + spaces size]].
 	a to: b by: direction do: [:n | 
-		self positionBoardTo: (self wrapIndex: n around: self class spaces size).
+		self positionBoardTo: (self wrapIndex: n around: spaces size).
 		self arena world doOneCycleNow.
 		(Delay forSeconds: self currentPlayer class moveInterval) wait.
 		n = b ifTrue: [
-			self triggerEvent: #slidTo: with: (self wrapIndex: n around: self class spaces size)]]! !
+			self triggerEvent: #slidTo: with: (self wrapIndex: n around: spaces size)]]! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 17:55:22'!
 nextPlayer
@@ -1713,13 +1712,13 @@ outs: anObject
 
 	outs := anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 8/4/2016 18:43:55'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:52:14'!
 parseSeasonsAt: anIndex 
 	"Answer associations of point->season, where point defines the range of cells for the season"
 	| col max start sea |
 	
 	col := OrderedCollection new.
-	max _ self class spaces size.
+	max _ spaces size.
 	sea _ self seasonAt: anIndex.
 	start _ 0.
 	0 to: cellCount - 1 do: [:n | 	| next |
@@ -1906,7 +1905,7 @@ wrapIndex: anIndex around: aLimit
 				ifTrue: [^ aLimit].
 			^ anIndex]! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 9/25/2016 13:10:27'!
+!Gamer methodsFor: 'movement' stamp: 'dhn 1/11/2017 15:52:30'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	| pos |
@@ -1914,7 +1913,7 @@ advanceTo: aPosition
 	token arrowRight.
 	pos _ self position - self roll.
 	self mgr moveFrom: pos to: aPosition - self roll by: 1.
-	self position: (self mgr wrapIndex: aPosition around: self mgr class spaces size).
+	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size).
 ! !
 
 !Gamer methodsFor: 'accessing' stamp: 'dhn 9/3/2013 21:29'!
@@ -1994,12 +1993,12 @@ forwardTo: anIndex around: aLimit
 			^self forwardTo: anIndex - aLimit around: aLimit
 			].! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 4/26/2012 17:47'!
+!Gamer methodsFor: 'movement' stamp: 'dhn 1/11/2017 15:52:40'!
 goTo: aPosition
 	|pos|
 	self position: aPosition.
 	pos := aPosition - self roll.
-	(pos < 1) ifTrue: [pos := pos + self mgr class spaces size].
+	(pos < 1) ifTrue: [pos := pos + self mgr spaces size].
 	self mgr positionBoardTo: pos.
 ! !
 
@@ -2015,7 +2014,7 @@ history: anObject
 
 	history := anObject! !
 
-!Gamer methodsFor: 'accessing' stamp: 'dhn 10/16/2016 14:46:53'!
+!Gamer methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:52:50'!
 hopFor: anObject
 	"Hop token anObject number of spaces"
 	| r |
@@ -2027,7 +2026,7 @@ hopFor: anObject
 	token jump: roll.
 	self 
 		position: (self forwardTo: (roll + self position) 
-		around: mgr class spaces size).
+		around: mgr spaces size).
 	self rollStats: roll! !
 
 !Gamer methodsFor: 'accessing' stamp: 'dhn 7/24/2016 12:46'!
