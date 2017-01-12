@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 4:03:45 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 9:42:41 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 16!
+!provides: 'Game' 1 17!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -131,6 +131,16 @@ Object subclass: #Asset
 Asset class
 	instanceVariableNames: ''!
 
+!classDefinition: #BoardSpace category: #'Game-Model'!
+Object subclass: #BoardSpace
+	instanceVariableNames: 'label routine marks'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Game-Model'!
+!classDefinition: 'BoardSpace class' category: #'Game-Model'!
+BoardSpace class
+	instanceVariableNames: ''!
+
 !classDefinition: #Direction category: #'Game-Model'!
 Object subclass: #Direction
 	instanceVariableNames: ''
@@ -244,6 +254,13 @@ UserDialogBoxMorph inform: 'An informative string.'.!
 
 !Asset commentStamp: 'dhn 7/10/2016 11:58' prior: 0!
 Abstract class for an asset model.!
+
+!BoardSpace commentStamp: 'dhn 1/11/2017 19:04:14' prior: 0!
+A model for a space on a board game. Instance variables include:
+
+label - describes the space
+routine - a symbol for the method to run when landing on the space
+marks - morphs indicating player's presence!
 
 !Direction commentStamp: 'dhn 7/10/2016 12:00' prior: 0!
 A model for finding the shortest distance around a game board.!
@@ -1435,6 +1452,59 @@ quantity: anObject
 optionCost
 	^ self price * self auctionQuantity! !
 
+!BoardSpace methodsFor: 'accessing' stamp: 'dhn 1/11/2017 19:04:31'!
+label
+	"Answer the value of label"
+
+	^ label! !
+
+!BoardSpace methodsFor: 'accessing' stamp: 'dhn 1/11/2017 19:04:31'!
+label: anObject
+	"Set the value of label"
+
+	label _ anObject! !
+
+!BoardSpace methodsFor: 'operating' stamp: 'dhn 1/11/2017 20:08:57'!
+markAddFor: aPlayer
+	"Set the marker for aPlayer in marks"
+	| ix |
+	
+	ix _ aPlayer mgr players findFirst: [:a | a == aPlayer].
+	marks at: ix put: aPlayer marker! !
+
+!BoardSpace methodsFor: 'operating' stamp: 'dhn 1/11/2017 20:08:38'!
+markRemFor: aPlayer
+	"Remove the marker for aPlayer in marks"
+	| ix |
+	
+	ix _ marks findFirst: [:a | a == aPlayer marker].
+	marks at: ix put: ' '! !
+
+!BoardSpace methodsFor: 'accessing' stamp: 'dhn 1/11/2017 20:30:33'!
+marks
+	"Answer the value of marks"
+
+	marks ifNil: [marks _ #(' '  ' '  ' '  ' '  ' '  ' ') asOrderedCollection].
+	^ marks! !
+
+!BoardSpace methodsFor: 'accessing' stamp: 'dhn 1/11/2017 19:04:31'!
+marks: anObject
+	"Set the value of marks"
+
+	marks _ anObject! !
+
+!BoardSpace methodsFor: 'accessing' stamp: 'dhn 1/11/2017 19:04:31'!
+routine
+	"Answer the value of routine"
+
+	^ routine! !
+
+!BoardSpace methodsFor: 'accessing' stamp: 'dhn 1/11/2017 19:04:31'!
+routine: anObject
+	"Set the value of routine"
+
+	routine _ anObject! !
+
 !Direction methodsFor: 'as yet unclassified' stamp: 'dhn 7/15/2016 21:20'!
 testLong
 	| ans |
@@ -1518,7 +1588,7 @@ cells: anObject
 
 	cells _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:48:12'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 21:00:51'!
 cellsAt: anIndex 
 	"Show the board starting with self spaces at: anIndex."
 	| str |
@@ -1526,9 +1596,9 @@ cellsAt: anIndex
 	tags _ self players collect: [:ea | ea marker].
 	1 to: cellCount do: [:m | 
 		str _ String new writeStream.
-		str nextPutAll: (self spaces atWrap: anIndex + m - 1) value; newLine.
+		str nextPutAll: (self spaces atWrap: anIndex + m - 1) label; newLine.
 		self testMode
-			ifTrue: [str nextPutAll: (self spaces atWrap: anIndex + m - 1) key asString; newLine].
+			ifTrue: [str nextPutAll: (self spaces atWrap: anIndex + m - 1) routine asString; newLine].
 		(cells at: m)
 			model actualContents: str contents.
 		"self
@@ -1561,12 +1631,11 @@ disableAll: aCollection
 		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
 		btn ifNotNil: [btn disableButton]]! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:48:24'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 21:35:01'!
 doSpace
-	|assoc|
-	assoc := self class spacesX at: self currentPlayer position.
-	self perform: assoc key.
-! !
+	"Perform the method associated with the space where the player is"
+
+	^ self perform: ((spaces at: self currentPlayer position) routine)! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 10/9/2011 11:04'!
 drawCard: aDeck discard: aDiscard

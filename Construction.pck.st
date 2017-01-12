@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 4:05:54 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 9:48:12 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 29!
+!provides: 'Construction' 1 31!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -3222,11 +3222,11 @@ initialButtonState
 	self enableAll: {'Purchase'}.
 	self disableAll: {'End Turn'. 'Do Job'}! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 15:50:46'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 20:57:21'!
 initialize
 
 	super initialize.
-	spaces _ self class describeSpaces. 	"a temporary measure"
+	spaces _ self setUpSpaces.
 	spaceFreq _ Histogram ofSize: spaces size.
 	cellCount _ self class cellsForGame.
 	won _ false.
@@ -3583,6 +3583,18 @@ setUpLeases
 	leases at: #BigPhil put: (BigPhil new description: 'BIG PHIL''S Concrete Plant').
 	^ leases
 ! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 20:56:37'!
+setUpSpaces
+	"Initialize the board spaces"
+	| col |
+	
+	col _ OrderedCollection new.
+	1 to: self class describeSpaces size do: [:ix |
+		col add: (BoardSpace new
+			label: (self class describeSpaces at: ix);
+			routine: ('space', ix asString) asSymbol)].
+	^ col! !
 
 !Contract methodsFor: 'initialize-release' stamp: 'dhn 11/13/2016 16:58:33'!
 setupPlayer: aName color: aColor
@@ -4082,11 +4094,11 @@ updatePlayer
 
 	self triggerEvent: #itemChange! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 1/11/2017 15:47:03'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 1/11/2017 21:08:33'!
 whatSpaceSays
-	| assoc |
-	assoc := self class spacesX at: self currentPlayer position.
-	^ self perform: assoc key! !
+	"Perform the method associated with the space where the player is"
+
+	^ self perform: ((spaces at: self currentPlayer position) routine)! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:12'!
 whom: aSymbol
@@ -4546,183 +4558,6 @@ requiredEquipment
 		add: #WESTWOOD -> #Westwood;
 		add: #'BIG PHIL' -> #BigPhil;
 		yourself! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 1/11/2017 15:39:02'!
-spacesX
-	"Descriptions for the spaces on the board."
-	^ {#space1 -> 'DECEMBER
-Week 4
-
-PAY $1,000 for Christmas gifts to hard-working employees.
-
-Receive $10,000 from outstanding receivables as you pass.'. #space2 -> 'JANUARY
-Week 1
-
-Boomville approves thousands of new home permits. Double all residential construction gross profits this year.'. #space3 -> 'JANUARY
-Week 2
-
-Boomville is selected as the site for a new MegaMall. Double all commercial construction gross profits this year.'. #space4 -> 'JANUARY
-Week 3
-
-Boomville''s explosive growth requires new schools. Double all institutional construction gross profits this year.'. #space5 -> 'JANUARY
-Week 4
-
-Boomville levies a big tax increase to pay for roads and utilities. Double all municipal construction gross profits this year.'. #space6 -> 'JANUARY
-Week 5
-
-Boomville approves a new airport. Double all heavy/highway construction gross profits this year.'. #space7 -> 'FEBRUARY
-Week 1
-
-Early warm weather allows you to start construction ahead of schedule. Collect $5,000.'. #space8 -> 'FEBRUARY
-Week 2
-
-
-Sudden blast of winter weather shuts down construction. Pay $5,000.'. #space9 -> 'FEBRUARY
-Week 3
-
-Bout of pneumonia puts you flat on your back for three months. Move to the 4th week in May'. #space10 -> 'MARCH
-Week 1
-
-Extra grading required in new single-family subdivision. Pay fuel bill of $1,000 per backhoe'. #space11 -> 'MARCH
-Week 2
-
-Big job requires you to pay $4,000 to rent a truck.'. #space12 -> 'MARCH
-Week 3
-
-Gravel is needed for house foundations. Pay LOST MINER $3,000.'. #space13 -> 'MARCH
-Week 4
-
-Hire surveyor to lay out tricky steep multi-family site for excavation. Pay $2,000.'. #space14 -> 'APRIL
-Week 1
-
-Federal funding of sewer line requires you to pay prevailing wage. Pay labor costs of $5,000 per grader.
-Contractor Contingency.'. #space15 -> 'APRIL
-Week 2
-
-Street improvements including curbs, sidewalks, and ADA ramps require concrete. Pay BIG PHIL''S CONCRETE $15,000.
-
-Pay Federal Income Taxes $5,000.'. #space16 -> 'APRIL
-Week 3
-
-COMPETITIVE BID
-(Good Luck)'. #space17 -> 'APRIL
-Week 4
-
-Worker accidentally runs over a stack of sewer pipe while excavating a MiniMall. Pay $5,000.'. #space18 -> 'MAY
-Week 1
-
-Mall parking lot requires paving. Pay WESTWOOD ASPHALT $8,000.'. #space19 -> 'MAY
-Week 2
-
-Huge boulders found during excavation require you to rent a truck for $7,000.'. #space20 -> 'MAY
-Week 3
-
-Design of new public library requires retaining walls, sidewalks, curbs, and ramps. Pay BIG PHIL''S CONCRETE $12,000.
-Contractor Contingency.'. #space21 -> 'MAY
-Week 4
-
-Layer of extra-hard rock hampers excavation of new school foundation. Replace bucket on every excavator you own. Pay $3,000.'. #space22 -> 'JUNE
-Week 1
-
-New school requires parking lot. Pay WESTWOOD PAVING $10,000.
-Contractor Contingency.'. #space23 -> 'JUNE
-Week 2
-
-Pay equipment operators $10,000 to excavate foundations for courthouse.
-Contractor Contingency.'. #space24 -> 'JUNE
-Week 3
-
-Extra material and labor costs for finish grading on shopping mall parking lot add up. Pay $7,000.'. #space25 -> 'JUNE
-Week 4
-
-Dozers need service. Pay $2,000 each for oil, filter, grease and hydraulic hoses.'. #space26 -> 'JULY
-Week 1
-
-Windstorm trashes your subdivision site. Pay STINKY''S GARBAGE & LANDFILL $3,000 to pick up the debris.
-
-Pay 10% interest on all outstanding notes.'. #space27 -> 'JULY
-Week 2
-
-Digging through hardpan at new housing site requires extra service to all backhoes. Pay $1,000 each.'. #space28 -> 'JULY
-Week 3
-
-While installing septic system backhoe punches through tank. Pay $4,000 to fix the mess.'. #space29 -> 'JULY
-Week 4
-
-Around-the-clock construction of the new airport wears out self-loading scraper parts. Pay $10,000 per machine to overhaul.
-Contractor Contingency.'. #space30 -> 'AUGUST
-Week 1
-
-Pay WESTWOOD PAVING $25,000 to asphalt a new section of four-lane highway.
-Contractor Contingency.'. #space31 -> 'AUGUST
-Week 2
-
-Pay BIG PHIL''S $30,000 for concrete to build an overpass for a new freeway to the airport.'. #space32 -> 'AUGUST
-Week 3
-
-COMPETETIVE BID
-(Don''t get burned like last time!!!!)'. #space33 -> 'AUGUST
-Week 4
-
-Pay equipment operators $15,000 per scraper for labor and overtime racked up building the new reservoir.
-Contractor Contingency.'. #space34 -> 'SEPTEMBER
-Week 1
-
-Illegal dumping requires you to remove trash. Pay $15,000 to rent a truck.
-Contractor Contingency.'. #space35 -> 'SEPTEMBER
-Week 2
-
-Pay $10,000 for traffic signals, signage and pavement striping to finish new 4-way intersection.
-Contractor Contingency.'. #space36 -> 'SEPTEMBER
-Week 3
-
-Install sanitary sewer system for single-family residence. Pay labor and materials costs of $3,000.'. #space37 -> 'SEPTEMBER
-Week 4
-
-Purchase crushed rock for pipe building. Pay LOST MINER $2,000.
-
-Pay 10% interest on all outstanding notes'. #space38 -> 'SEPTEMBER
-Week 5
-
-Excavation and removal job requires you to pay $10,000 to rent a truck.
-Contractor Contingency.'. #space39 -> 'OCTOBER
-Week 1
-
-COMPETETIVE BID
-(Who needs this job the most??)'. #space40 -> 'OCTOBER
-Week 2
-
-Purchase pipe, valves and fittings for potable water system servicing the new Buttercup Elementary School. Pay $5,000 per excavator.
-Contractor Contingency.'. #space41 -> 'OCTOBER
-Week 3
-
-Unstable soil at new warehouse site requires you to import sand and gravel. Pay LOST MINER $5,000.'. #space42 -> 'OCTOBER
-Week 4
-
-Megabucks Shopping Mall refinishes its sidewalks, ramps and gutters. Pay BIG PHIL''S CONCRETE $7,000.'. #space43 -> 'NOVEMBER
-Week 1
-
-Haul contaminated material from gas station project. Pay STINKY''S GARBAGE & LANDFILL $5,000.'. #space44 -> 'NOVEMBER
-Week 2
-
-Install new fire protection main, hydrants and replace the paving. Pay BIG PHIL''S CONCRETE $15,000.
-Contractor Contingency.'. #space45 -> 'NOVEMBER
-Week 3
-
-Flaggers and concrete barricades are needed for traffic control during road improvement job. Pay $7,000 per grader.
-Contractor Contingency.'. #space46 -> 'NOVEMBER
-Week 4
-
-If owned, pay owner for annual disposal usage $4,000 to $24,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $100,000.'. #space47 -> 'DECEMBER
-Week 1
-
-If owned, pay owner for annual material purchases $6,000 to $36,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $200,000.'. #space48 -> 'DECEMBER
-Week 2
-
-If owned, pay owner for annual material purchases $10,000 to $60,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $300,000.'. #space49 -> 'DECEMBER
-Week 3
-
-If owned, pay owner for annual material purchases $15,000 to $90,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $500,000.'}! !
 
 !Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 20:58'!
 taxDue: aPosition 
