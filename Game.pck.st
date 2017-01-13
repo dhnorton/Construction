@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 9:42:41 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 12 January 2017 at 9:21:22 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 17!
+!provides: 'Game' 1 20!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -1464,21 +1464,21 @@ label: anObject
 
 	label _ anObject! !
 
-!BoardSpace methodsFor: 'operating' stamp: 'dhn 1/11/2017 20:08:57'!
+!BoardSpace methodsFor: 'operating' stamp: 'dhn 1/12/2017 12:02:29'!
 markAddFor: aPlayer
 	"Set the marker for aPlayer in marks"
 	| ix |
 	
 	ix _ aPlayer mgr players findFirst: [:a | a == aPlayer].
-	marks at: ix put: aPlayer marker! !
+	self marks at: ix put: aPlayer marker! !
 
-!BoardSpace methodsFor: 'operating' stamp: 'dhn 1/11/2017 20:08:38'!
+!BoardSpace methodsFor: 'operating' stamp: 'dhn 1/12/2017 11:12:25'!
 markRemFor: aPlayer
 	"Remove the marker for aPlayer in marks"
 	| ix |
 	
 	ix _ marks findFirst: [:a | a == aPlayer marker].
-	marks at: ix put: ' '! !
+	ix = 0 ifFalse: [marks at: ix put: ' ']! !
 
 !BoardSpace methodsFor: 'accessing' stamp: 'dhn 1/11/2017 20:30:33'!
 marks
@@ -1588,22 +1588,21 @@ cells: anObject
 
 	cells _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 21:00:51'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/12/2017 10:21:46'!
 cellsAt: anIndex 
-	"Show the board starting with self spaces at: anIndex."
+	"Show the board starting with spaces at: anIndex."
 	| str |
 	
 	tags _ self players collect: [:ea | ea marker].
 	1 to: cellCount do: [:m | 
 		str _ String new writeStream.
-		str nextPutAll: (self spaces atWrap: anIndex + m - 1) label; newLine.
+		str nextPutAll: (spaces atWrap: anIndex + m - 1) label; newLine.
 		self testMode
-			ifTrue: [str nextPutAll: (self spaces atWrap: anIndex + m - 1) routine asString; newLine].
+			ifTrue: [str nextPutAll: (spaces atWrap: anIndex + m - 1) routine asString; newLine].
 		(cells at: m)
 			model actualContents: str contents.
-		"self
-			showMarksFor: ix
-			at: (cells at: m)"]! !
+		(spaces at: anIndex) marks do: [:ea | str nextPutAll: ea]]
+! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 10/28/2016 14:54:47'!
 chantBeat

@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 11 January 2017 at 9:48:12 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 12 January 2017 at 9:22:05 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 31!
+!provides: 'Construction' 1 33!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -851,7 +851,7 @@ model
 
 	^ model! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 11/13/2016 16:08:12'!
+!Construction methodsFor: 'operation' stamp: 'dhn 1/12/2017 10:34:16'!
 nextPlayer: aPlayer
 	"Begin the next player's turn"
 
@@ -859,8 +859,8 @@ nextPlayer: aPlayer
 	gameTitle color: aPlayer token color.
 	model 
 		updatePlayer; 
-		removeMarkerIDInMarks; 
 		positionBoardTo: aPlayer position.
+	(model spaces at: aPlayer position) markRemFor: aPlayer.
 	aPlayer token 
 		openInWorld: path;
 		setSize;
@@ -1115,15 +1115,16 @@ windowPosition
 	
 	^ model cells second morphPosition + (model windowPosition: 0@-40)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 12/16/2016 17:44:16'!
+!Construction methodsFor: 'operation' stamp: 'dhn 1/12/2017 11:37:14'!
 winningBidder: aPlayer bid: aBid
-	"Change players to aPlayer and move to job, if necessary"
+	"Change current player to aPlayer and move to job, if necessary"
 	| space |
 
 	aPlayer = model currentPlayer identity
 		ifFalse: [
 			space _ model currentPlayer position.
 			model currentPlayer token delete.
+			(model spaces at: model currentPlayer position) markAddFor: model currentPlayer.
 			model currentPlayer: (model players detect: [:pl | pl identity = aPlayer] ifNone: []).
 			gameTitle contents: aPlayer, '''s turn.'.
 			gameTitle color: model currentPlayer token color.
@@ -1131,8 +1132,8 @@ winningBidder: aPlayer bid: aBid
 			model currentPlayer rollForHarvest.
 			model 
 				updatePlayer; 
-				removeMarkerIDInMarks; 
 				positionBoardTo: model currentPlayer position.
+			(model spaces at: model currentPlayer position) markRemFor: model currentPlayer.
 			model currentPlayer token setPosition.
 			model moveFrom: model currentPlayer position to: space.
 			model currentPlayer position: space.
@@ -1141,6 +1142,7 @@ winningBidder: aPlayer bid: aBid
 	model updateHistory.
 	model enableAll: {'End Turn'. 'Do Job'}.
 	model currentPlayer tally: aBid negated.
+	(model spaces at: model currentPlayer position) markAddFor: model currentPlayer.
 	model updatePlayer! !
 
 !Construction class methodsFor: 'instance creation' stamp: 'dhn 7/19/2016 15:54'!
@@ -3103,11 +3105,12 @@ drawContingency
 		ifTrue: [GamePopUp inform: con description title: 'Contractor Contingency:'].
 	^ con! !
 
-!Contract methodsFor: 'operating' stamp: 'dhn 10/2/2016 12:27:04'!
+!Contract methodsFor: 'operating' stamp: 'dhn 1/12/2017 12:00:52'!
 endTurn
 	"End a player's turn"
 	
-	self addMarkerIDInMarks; removeAllMarkersInCells.
+	(spaces at: currentPlayer position) markAddFor: currentPlayer.
+"	self addMarkerIDInMarks; removeAllMarkersInCells."
 	self enableAll: {'Auction'}.
 	currentPlayer cash < 0
 		ifTrue: [self disableAll: {'Move'}.
