@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 12 January 2017 at 9:22:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 13 January 2017 at 6:26:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 33!
+!provides: 'Construction' 1 34!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -691,10 +691,10 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 11/11/2016 11:55:13'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/13/2017 17:31:38'!
 makeCellsArea
 	"Lay out the area which shows some spaces of the board"
-	| mm cellArea |
+	| mm mn cellArea cell |
 	
 	cellArea _ (LayoutMorph newRow separation: 0)
 		layoutSpec: (LayoutSpec 
@@ -709,12 +709,26 @@ makeCellsArea
 			mm _ (GameCell 
 				textProvider: self
 				textGetter: #describe)
-					layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
+					layoutSpec: (LayoutSpec proportionalWidth: 1.0);
 					color: self class cellColor;
 					borderWidth: 1;
+					name: 'cell text'.
+			mn _ (LayoutMorph newRow separation: 4)
+					layoutSpec: (LayoutSpec 
+						proportionalWidth: 1.0
+						fixedHeight: 40
+						minorDirectionPadding: #center);
+					color: self class cellColor;
+					padding: #center;
+					name: #marks.
+			cell _ 	LayoutMorph newColumn
+					layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
 					name: #cell.
+			cell
+				addMorph: mm;
+				addMorph: mn.					
 
-			model cells add: mm].
+			model cells add: cell].
 		
 	^ cellArea addAllMorphs: model cells reversed
 		
@@ -1069,13 +1083,11 @@ startButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 1/11/2017 15:45:45'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/13/2017 17:35:19'!
 startGame
 	"Change the buttons and start the game"
 	
 	self playButtonSet.
-	model
-		marks: (model setupMarksFor: model spaces size).
 	model players do: [:ea | 
 		ea die when: #rolled send: #hopFor: to: ea with: #value.
 		ea die when: #franchiseEffect: send: #franchiseEffect: to: model with: #value.
