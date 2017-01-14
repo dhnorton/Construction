@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 13 January 2017 at 8:04:43 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 13 January 2017 at 8:46:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 22!
+!provides: 'Game' 1 23!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -1588,18 +1588,25 @@ cells: anObject
 
 	cells _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/13/2017 20:01:53'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/13/2017 20:43:53'!
 cellsAt: anIndex 
 	"Show the board starting with spaces at: anIndex."
 	| str |
 	
-	1 to: cellCount do: [:m | 
+	1 to: cellCount do: [:k | 
+		(cells at: k) submorphs first removeAllMorphs].
+	
+	1 to: cellCount do: [:m | | sp |
+		sp _ spaces atWrap: anIndex + m - 1.
 		str _ String new writeStream.
-		str nextPutAll: (spaces atWrap: anIndex + m - 1) label; newLine.
+		str nextPutAll: sp label; newLine.
 		self testMode
-			ifTrue: [str nextPutAll: (spaces atWrap: anIndex + m - 1) routine asString; newLine].
+			ifTrue: [str nextPutAll: sp routine asString; newLine].
 		(cells at: m) submorphs last
-			model actualContents: str contents]
+			model actualContents: str contents.
+		sp marks ifNotEmpty: [
+			(cells at: m) submorphs first
+				addAllMorphs: sp marks]]
 ! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 10/28/2016 14:54:47'!
@@ -1826,18 +1833,6 @@ quitGame
 
 	self triggerEvent: #deleteOpenWindows.
 	self triggerEvent: #quitGame! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 8/23/2016 17:44:50'!
-removeAllMarkersInCells
-"
-	| col |
-	boardMgr cells
-		do: [:eachCell | 
-			col := eachCell owner submorphs at: 1.
-			col submorphs
-				ifNotNil: [col submorphs
-						do: [:y | y delete]]]
-"! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 8/24/2016 12:40:16'!
 removeMarkerIDInMarks
