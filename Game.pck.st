@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 13 January 2017 at 6:25:34 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 13 January 2017 at 8:04:43 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 21!
+!provides: 'Game' 1 22!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -153,7 +153,7 @@ Direction class
 
 !classDefinition: #Game category: #'Game-Model'!
 Object subclass: #Game
-	instanceVariableNames: 'arena cells spaces goal response players currentPlayer playerIndex buttons token marks tags outs cellCount hardRoll won spaceFreq chantBeat'
+	instanceVariableNames: 'arena cells spaces goal response players currentPlayer playerIndex buttons token outs cellCount hardRoll won spaceFreq chantBeat'
 	classVariableNames: 'TestGoal TestMode'
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -1588,12 +1588,11 @@ cells: anObject
 
 	cells _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/13/2017 17:44:13'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/13/2017 20:01:53'!
 cellsAt: anIndex 
 	"Show the board starting with spaces at: anIndex."
 	| str |
 	
-	tags _ self players collect: [:ea | ea marker].
 	1 to: cellCount do: [:m | 
 		str _ String new writeStream.
 		str nextPutAll: (spaces atWrap: anIndex + m - 1) label; newLine.
@@ -1685,28 +1684,17 @@ initialButtonState
 	"Establish the button state at the start of the game"
 	self subclassResponsibility! !
 
-!Game methodsFor: 'initialize' stamp: 'dhn 1/11/2017 15:54:23'!
+!Game methodsFor: 'initialize' stamp: 'dhn 1/13/2017 20:02:02'!
 initialize
 
 	players _ OrderedCollection new.
 	cells _ OrderedCollection new.
-	tags _ OrderedCollection new.
 	self when: #slidTo: send: #slidTo: to: self with: #position.! !
 
 !Game methodsFor: 'initialize' stamp: 'dhn 7/11/2013 14:53'!
 markerSize
 	"Answer the size for markers"
 	^ 28! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 7/6/2013 11:47'!
-marks
-
-	^ marks! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 7/6/2013 11:47'!
-marks: anObject
-
-	marks := anObject! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 12/8/2016 19:25:16'!
 move
@@ -1920,20 +1908,6 @@ setupMarksFor: aNumber
 		to: aNumber
 		do: [:each | set at: each put: array copy].
 	^ set! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 8/4/2016 18:56:57'!
-showMarksFor: anIndex at: aCell 
-	"Reflect the presence of players at a board space in the marker area
-	of aCell. The position of the space is specified by anIndex."
-	| area spots adds |
-	
-	tags ifNotNil: [
-		tags ifNotEmpty: [
-			area _ aCell owner submorphs detect: [:a | a name = 'marks'].
-			spots _ self marks at: anIndex.
-			adds _ spots select: [:each | each ~= ''].
-			adds do: [:each | 
-				area addMorph: (tags detect: [:a | a name = each])]]]! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/28/2016 12:40:49'!
 slidTo: aPosition
