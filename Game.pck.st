@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 15 January 2017 at 9:21:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 15 January 2017 at 10:04:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 26!
+!provides: 'Game' 1 27!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -1862,6 +1862,14 @@ removeMarkerIDInMarks
 	ix := col indexOf: currentPlayer identity ifAbsent: [nil].
 	ix ifNotNil: [col at: ix put: ''.]
 "! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 1/15/2017 21:59:40'!
+removeMarkers
+	"Remove a player's marker from space and cell"
+	
+	(spaces at: currentPlayer position) markRemFor: currentPlayer.
+	cells first marksPane removeMorph: currentPlayer marker
+! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 7/23/2016 22:14'!
 response

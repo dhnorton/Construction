@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 15 January 2017 at 9:21:06 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 15 January 2017 at 10:05:12 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 38!
+!provides: 'Construction' 1 40!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -862,7 +862,7 @@ model
 
 	^ model! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 1/12/2017 10:34:16'!
+!Construction methodsFor: 'operation' stamp: 'dhn 1/15/2017 22:00:52'!
 nextPlayer: aPlayer
 	"Begin the next player's turn"
 
@@ -870,8 +870,8 @@ nextPlayer: aPlayer
 	gameTitle color: aPlayer token color.
 	model 
 		updatePlayer; 
-		positionBoardTo: aPlayer position.
-	(model spaces at: aPlayer position) markRemFor: aPlayer.
+		positionBoardTo: aPlayer position;
+		removeMarkers.
 	aPlayer token 
 		openInWorld: path;
 		setSize;
