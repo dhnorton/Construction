@@ -1,16 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 15 January 2017 at 10:04:50 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 16 January 2017 at 11:36:19 am'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 27!
-!classDefinition: #MyEditor category: #'Game-Model'!
-TextProvider subclass: #MyEditor
-	instanceVariableNames: 'directory fileName txt'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Game-Model'!
-!classDefinition: 'MyEditor class' category: #'Game-Model'!
-MyEditor class
-	instanceVariableNames: ''!
-
+!provides: 'Game' 1 28!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
 	instanceVariableNames: ''
@@ -201,20 +191,6 @@ Object subclass: #Season
 Season class
 	instanceVariableNames: ''!
 
-!classDefinition: #Speed category: #'Game-Model'!
-Object subclass: #Speed
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Game-Model'!
-!classDefinition: 'Speed class' category: #'Game-Model'!
-Speed class
-	instanceVariableNames: ''!
-
-
-!MyEditor commentStamp: 'dhn 7/21/2016 11:50' prior: 0!
-Edit text files.
-Capable of replacing all occurrences of a character, such as the carriage return, in a file.!
 
 !OverlayMorph commentStamp: '<historical>' prior: 0!
 A place to drag and drop morphs!
@@ -281,97 +257,6 @@ A Season is the collection of attributes associated with, for example:
 	a season (Farming Game, Construction Game)
 	a property set (Monopoly)
 !
-
-!Speed commentStamp: 'dhn 3/31/2014 13:35' prior: 0!
-A Speed computes the speed in MPH from time and distance
-	'Speed new'
-
-Instance Variables
-!
-
-!MyEditor methodsFor: 'accessing' stamp: 'dhn 7/21/2016 09:11'!
-directory
-	"Answer the value of directory"
-
-	directory ifNil: [directory _ FillInTheBlankMorph request: 'Enter the directory string' initialAnswer: 'c:\'].
-	^ directory! !
-
-!MyEditor methodsFor: 'accessing' stamp: 'dhn 7/21/2016 09:09'!
-directory: anObject
-	"Set the value of directory"
-
-	directory _ anObject! !
-
-!MyEditor methodsFor: 'accessing' stamp: 'dhn 7/21/2016 11:57'!
-fileName
-	"Answer the value of fileName"
-
-	fileName ifNil: [
-		fileName _ FillInTheBlankMorph 
-			request: 'Enter the file name string' 
-			initialAnswer: 'flummox.txt'].
-	txt _ (directory, fileName) asFileEntry fileContents.
-	^ fileName! !
-
-!MyEditor methodsFor: 'accessing' stamp: 'dhn 7/21/2016 09:09'!
-fileName: anObject
-	"Set the value of fileName"
-
-	fileName _ anObject! !
-
-!MyEditor methodsFor: 'initialization' stamp: 'dhn 7/21/2016 11:14'!
-initialize
-
-	self
-		directory;
-		fileName! !
-
-!MyEditor methodsFor: 'editing' stamp: 'dhn 7/21/2016 10:32'!
-replaceAll: char1 with: char2
-	"Replace all occurrences of char1 with char2 in txt"
-	| work done |
-	
-	work _ txt copy.
-	done _ false.
-	[done not] whileTrue: [ | ix |
-		ix _ work indexOf: char1 ifAbsent: [done _ true].
-		done ifFalse: [work at: ix put: char2]].
-	^ work
-	! !
-
-!MyEditor methodsFor: 'saving' stamp: 'dhn 7/21/2016 10:45'!
-save
-	"Write txt to the file named fileName in the directory"
-	
-	(directory, fileName) asFileEntry forceWriteStreamDo: [:str | str nextPutAll: txt]! !
-
-!MyEditor methodsFor: 'saving' stamp: 'dhn 7/21/2016 10:44'!
-saveAs: aString
-	"Write txt to the file named aString in the directory"
-	
-	(directory, aString) asFileEntry forceWriteStreamDo: [:str | str nextPutAll: txt]! !
-
-!MyEditor methodsFor: 'accessing' stamp: 'dhn 7/21/2016 09:15'!
-txt
-	"Answer the value of txt"
-
-	^ txt! !
-
-!MyEditor methodsFor: 'accessing' stamp: 'dhn 7/21/2016 09:15'!
-txt: anObject
-	"Set the value of txt"
-
-	txt _ anObject! !
-
-!MyEditor class methodsFor: 'as yet unclassified' stamp: 'dhn 7/21/2016 11:45'!
-example
-	"In a Workspace do:
-	
-	e := MyEditor new.
-	e txt: (e replaceAll: Character cr with: Character lf). 
-	e save.
-	"
-! !
 
 !OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
 allowsMorphDrop
@@ -2407,33 +2292,3 @@ textColor: aBool
 	"Set the value of textColor"
 
 	textColor := aBool! !
-
-!Speed methodsFor: 'as yet unclassified' stamp: 'dhn 7/10/2016 15:24'!
-compute
-	| hms time secs distance speed str |
-	hms := FillInTheBlankMorph request: 'Enter the Elapsed Time' initialAnswer: 'hh:mm:ss'.
-	secs _ (hms findTokens: ':' keep: ($0 to: $9)) asArray evalStrings asOrderedCollection.
-	[secs size < 3] whileTrue: [secs addFirst: 0].
-	time _ (3600 * secs first) + (60 * secs second) + secs third.
-	distance := (FillInTheBlankMorph request: 'Enter the Distance Travelled' initialAnswer: 'miles').
-	speed := distance asNumber / (time / 3600.0).
-	str _ String new writeStream
-		nextPutAll: distance;
-		nextPutAll: ' miles in ';
-		nextPutAll: hms ;
-		nextPutAll: ' = '.
-		speed printOn: str fractionDigits: 2.
-		str	nextPutAll: ' MPH'.
-	nil inform: str contents! !
-
-!Speed methodsFor: 'as yet unclassified' stamp: 'dhn 7/10/2016 13:07'!
-howTo
-	"
-	Speed new
-	"! !
-
-!Speed methodsFor: 'as yet unclassified' stamp: 'dhn 3/31/2014 13:34'!
-initialize
-	super initialize.
-	^ self compute
-! !
