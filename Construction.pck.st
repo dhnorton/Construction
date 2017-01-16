@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 13 January 2017 at 8:47:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 15 January 2017 at 9:21:06 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 35!
+!provides: 'Construction' 1 38!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -691,44 +691,41 @@ makeButtonArea
 	^ buttonArea
 		! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 1/13/2017 17:31:38'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/15/2017 15:54:52'!
 makeCellsArea
 	"Lay out the area which shows some spaces of the board"
-	| mm mn cellArea cell |
+	| cellArea view mm mt |
 	
 	cellArea _ (LayoutMorph newRow separation: 0)
 		layoutSpec: (LayoutSpec 
 			proportionalWidth: 1.0
 			proportionalHeight: 1.0
-			minorDirectionPadding: #center).
-	cellArea
-		color: Color tan;
+			minorDirectionPadding: #center);
 		name: #'cell area'.
 	
 	1 to: self class cellsForGame do: [:ix |
-			mm _ (GameCell 
-				textProvider: self
-				textGetter: #describe)
-					layoutSpec: (LayoutSpec proportionalWidth: 1.0);
-					color: self class cellColor;
-					borderWidth: 1;
-					name: 'cell text'.
-			mn _ (LayoutMorph newRow separation: 4)
-					layoutSpec: (LayoutSpec 
-						proportionalWidth: 1.0
-						fixedHeight: 40
-						minorDirectionPadding: #center);
-					color: self class cellColor;
-					padding: #center;
-					name: #marks.
-			cell _ 	LayoutMorph newColumn
-					layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
-					name: #cell.
-			cell
-				addMorph: mm;
-				addMorph: mn.					
-
-			model cells add: cell].
+		view _ (CellView newColumn
+			layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
+			name: #cell).
+		view addMorph: (mt _ (GameCell 
+			textProvider: self
+			textGetter: #describe)
+				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
+				color: self class cellColor;
+				borderWidth: 1;
+				name: 'cell text').
+		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				fixedHeight: 40
+				minorDirectionPadding: #center);
+			color: self class cellColor;
+			padding: #center;
+			name: #marks).
+		view 
+			marksPane: mm;
+			textPane: mt.
+		model cells add: view].
 		
 	^ cellArea addAllMorphs: model cells reversed
 		

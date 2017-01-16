@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 13 January 2017 at 8:46:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 15 January 2017 at 9:21:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 23!
+!provides: 'Game' 1 26!
 !classDefinition: #MyEditor category: #'Game-Model'!
 TextProvider subclass: #MyEditor
 	instanceVariableNames: 'directory fileName txt'
@@ -99,6 +99,16 @@ BorderedRectMorph subclass: #DieMorph
 	category: 'Game-Graphics'!
 !classDefinition: 'DieMorph class' category: #'Game-Graphics'!
 DieMorph class
+	instanceVariableNames: ''!
+
+!classDefinition: #CellView category: #'Game-Graphics'!
+LayoutMorph subclass: #CellView
+	instanceVariableNames: 'textPane marksPane'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Game-Graphics'!
+!classDefinition: 'CellView class' category: #'Game-Graphics'!
+CellView class
 	instanceVariableNames: ''!
 
 !classDefinition: #PlotGraphMorph category: #'Game-Graphics'!
@@ -201,16 +211,6 @@ Object subclass: #Speed
 Speed class
 	instanceVariableNames: ''!
 
-!classDefinition: #MarkerArea category: #'Game-Graphics'!
-ProtoObject subclass: #MarkerArea
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Game-Graphics'!
-!classDefinition: 'MarkerArea class' category: #'Game-Graphics'!
-MarkerArea class
-	instanceVariableNames: ''!
-
 
 !MyEditor commentStamp: 'dhn 7/21/2016 11:50' prior: 0!
 Edit text files.
@@ -287,11 +287,6 @@ A Speed computes the speed in MPH from time and distance
 	'Speed new'
 
 Instance Variables
-!
-
-!MarkerArea commentStamp: 'dhn 6/30/2013 21:09' prior: 0!
-A MarkerArea is a region in a board space where markers appear. 
-The markers indicate which players have moved to the space during their turn.
 !
 
 !MyEditor methodsFor: 'accessing' stamp: 'dhn 7/21/2016 09:11'!
@@ -658,9 +653,10 @@ performAction
 	actionSelector ifNotNil: [
 		model perform: actionSelector with: label]! !
 
-!GameCell methodsFor: 'accessing' stamp: 'dhn 8/2/2016 16:44:52'!
+!GameCell methodsFor: 'accessing' stamp: 'dhn 1/14/2017 20:05:49'!
 describe
 
+	{owner. model} print.
 	model actualContents ifNil: [model actualContents: ''].
 	^ model actualContents! !
 
@@ -1116,6 +1112,30 @@ wo: anObject
 	"Set the value of wo"
 	
 	wo _ anObject! !
+
+!CellView methodsFor: 'accessing' stamp: 'dhn 1/14/2017 13:17:39'!
+marksPane
+	"Answer the value of marksPane"
+
+	^ marksPane! !
+
+!CellView methodsFor: 'accessing' stamp: 'dhn 1/14/2017 13:17:39'!
+marksPane: anObject
+	"Set the value of marksPane"
+
+	marksPane _ anObject! !
+
+!CellView methodsFor: 'accessing' stamp: 'dhn 1/14/2017 13:17:39'!
+textPane
+	"Answer the value of textPane"
+
+	^ textPane! !
+
+!CellView methodsFor: 'accessing' stamp: 'dhn 1/14/2017 13:17:39'!
+textPane: anObject
+	"Set the value of textPane"
+
+	textPane _ anObject! !
 
 !PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 9/28/2016 20:14:51'!
 asNormalizedPoints: aCollection
@@ -1588,13 +1608,13 @@ cells: anObject
 
 	cells _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/13/2017 20:43:53'!
+!Game methodsFor: 'operating' stamp: 'dhn 1/14/2017 14:43:58'!
 cellsAt: anIndex 
 	"Show the board starting with spaces at: anIndex."
 	| str |
 	
 	1 to: cellCount do: [:k | 
-		(cells at: k) submorphs first removeAllMorphs].
+		(cells at: k) marksPane removeAllMorphs].
 	
 	1 to: cellCount do: [:m | | sp |
 		sp _ spaces atWrap: anIndex + m - 1.
@@ -1602,10 +1622,10 @@ cellsAt: anIndex
 		str nextPutAll: sp label; newLine.
 		self testMode
 			ifTrue: [str nextPutAll: sp routine asString; newLine].
-		(cells at: m) submorphs last
+		(cells at: m) textPane
 			model actualContents: str contents.
 		sp marks ifNotEmpty: [
-			(cells at: m) submorphs first
+			(cells at: m) marksPane
 				addAllMorphs: sp marks]]
 ! !
 
@@ -2408,44 +2428,4 @@ howTo
 initialize
 	super initialize.
 	^ self compute
-! !
-
-!MarkerArea methodsFor: 'as yet unclassified' stamp: 'dhn 7/6/2013 12:56'!
-drawOn: aCanvas
-	| area |
-	area := self bounds insetBy: 10 @ 16.
-	aCanvas fillRectangle: area color: Color transparent.
-	self width: self owner width.
-	self bottom: self owner bottom - 80
-! !
-
-!MarkerArea methodsFor: 'as yet unclassified' stamp: 'dhn 7/4/2013 13:37'!
-setup
-	self position: self owner position.
-	self width: self owner width.
-	"self color: Color transparent."
-	self dropEnabled: true.
-	self bottom: self owner bottom - 80! !
-
-!MarkerArea methodsFor: 'as yet unclassified' stamp: 'dhn 7/4/2013 13:19'!
-setupIn: aMorph 
-	self position: self owner position.
-	self width: self owner width.
-	self color: Color transparent.
-	self dropEnabled: true.
-	self bottom: self owner bottom - 80! !
-
-!MarkerArea methodsFor: 'as yet unclassified' stamp: 'dhn 7/17/2016 15:00'!
-winitialize
-	"Answer a marker for a player"
-	
-	^ LayoutMorph newRow
-		name: 'marks';
-		borderWidth: 1
-		
-	"self listDirection: #leftToRight.
-	self listCentering: #center.
-	self cellInset: 10 @ 0.
-	self name: 'marks'.
-	self borderWidth: 1."
 ! !
