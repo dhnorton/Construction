@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 16 January 2017 at 10:39:31 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 16 January 2017 at 11:23:24 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 41!
+!provides: 'Construction' 1 42!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -563,7 +563,7 @@ displayInvoice: details title: aTitle
 		morphExtent: 310@180;						
 		details: details! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 9/30/2016 18:07:22'!
+!Construction methodsFor: 'operation' stamp: 'dhn 1/16/2017 11:09:46'!
 displayNumbers
 	"Display cash, debt, and goal progress"
 	| c d net otherLead pluralForm others |
@@ -585,7 +585,7 @@ displayNumbers
 	otherLead
 		emphasis: AbstractFont boldCode;
 		color: Color lightBrown;
-		font: (AbstractFont familyName: 'DejaVu' pointSize: 22).
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
 	othersArea 
 		removeAllMorphs;
 		addMorph: otherLead.
@@ -596,7 +596,7 @@ displayNumbers
 			emphasis: AbstractFont boldCode;
 			color: ea token color;
 			setBalloonText: 'cash held by ', ea identity;
-			font: (AbstractFont familyName: 'DejaVu' pointSize: 22))]! !
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
 
 !Construction methodsFor: 'operation' stamp: 'dhn 10/23/2016 14:53:10'!
 doTour
