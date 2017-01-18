@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 16 January 2017 at 11:23:24 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 18 January 2017 at 5:38:39 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 42!
+!provides: 'Construction' 1 43!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -180,6 +180,16 @@ Franchise subclass: #Westwood
 	category: 'Construction-Model'!
 !classDefinition: 'Westwood class' category: #'Construction-Model'!
 Westwood class
+	instanceVariableNames: ''!
+
+!classDefinition: #Hints category: #'Construction-Model'!
+ConAsset subclass: #Hints
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Construction-Model'!
+!classDefinition: 'Hints class' category: #'Construction-Model'!
+Hints class
 	instanceVariableNames: ''!
 
 !classDefinition: #Iron category: #'Construction-Model'!
@@ -368,6 +378,9 @@ The land fill monopoly.!
 
 !Westwood commentStamp: 'dhn 8/22/2016 15:54:20' prior: 0!
 The asphalt paving monopoly.!
+
+!Hints commentStamp: '<historical>' prior: 0!
+A description for a contingency which has been drawn in the Construction Game.!
 
 !Iron commentStamp: 'dhn 8/22/2016 15:45:14' prior: 0!
 The abstract class for machines, as opposed to franchises.!
@@ -655,12 +668,12 @@ initialize
 
 	super initialize! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:41:01'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:03:14'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
 
 	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.11 proportionalHeight: 0.8);
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
 
@@ -832,12 +845,12 @@ makeSeasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:41:40'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:03:34'!
 makeSettingsButton
 	"Answer the 'Settings' button"
 	
 	^ (GameButtonMorph label: 'Settings' action: #doSettings state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.12 proportionalHeight: 0.8);
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Change some of the game parameters'! !
 
 !Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:52:04'!
@@ -848,12 +861,12 @@ makeShowStatsButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
 		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:41:51'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:05:41'!
 makeTourButton
 	"Answer the 'Tour' button"
 	
 	^ (GameButtonMorph label: 'Tour' action: #doTour state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.1 proportionalHeight: 0.8);
+		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
 		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
 
 !Construction methodsFor: 'accessing' stamp: 'dhn 9/10/2016 19:45:38'!
@@ -1242,6 +1255,18 @@ debtLimit
 defaultGoal
 	"Answer the default winning net asset goal"
 	^ 1500000.
+! !
+
+!Construction class methodsFor: 'database' stamp: 'dhn 1/18/2017 17:31:36'!
+hintsDesc
+	"Answer the game hints"
+	
+	^ OrderedCollection new
+	add: '
+Enter two to six names of players, then use the "Move" and "End Turn" buttons alternately to take turns. During your turn, any button which is not gray is enabled for your use. To see what buttons and other parts of the board do, let the cursor linger over them.';
+	add: 'If you have the required equipment at a space on the board, the "Do Job" button will be enabled. Whether this is advantageous for you depends on your amount of that particular equipment and the "roll" of the die when you optionally click the "Do Job" button. Clicking the "End Turn" button instead will skip the job.';
+	add: 'Some jobs involve competetive bidding. The auction will be held even if only one player has the equipment. When there are no more bids, the auctioneer will declare "SOLD" after a few seconds.';
+	yourself
 ! !
 
 !Construction class methodsFor: 'documentation' stamp: 'dhn 10/16/2016 11:55:53'!
@@ -2629,6 +2654,33 @@ price
 	"Per each"
 	^300000! !
 
+!Hints methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 17:28:36'!
+initialize
+	super initialize.
+! !
+
+!Hints methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 17:30:33'!
+listName
+	^ 'Hints for Construction Game'! !
+
+!Hints methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 17:34:16'!
+reportAsAssetFor: aPlayer
+	"Answer the game hints"
+
+	^ String streamContents: [:str |
+		(1 to: Construction hintsDesc size)
+			do: [:ix | 
+				str 
+					nextPutAll: (Construction hintsDesc at: ix);
+					newLine; newLine]]! !
+
+!Hints methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 17:28:36'!
+reset! !
+
+!Hints class methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 17:28:36'!
+price
+	^ 0! !
+
 !Iron methodsFor: 'as yet unclassified' stamp: 'dhn 7/19/2013 15:31'!
 canGoOnSale
 	^ true! !
@@ -2858,11 +2910,12 @@ reportAsAssetFor: aPlayer
 !Others methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2012 12:00'!
 reset! !
 
-!Others methodsFor: 'as yet unclassified' stamp: 'dhn 8/27/2016 15:08:31'!
+!Others methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 16:22:25'!
 spaceOf: aPlayer
 	"Answer a string describing the player's position on the board"
 	| str i1 sub2 i2 sub |
-	str := (Contract spaces at: aPlayer position) value.
+	
+	str := (owner mgr spaces at: aPlayer position) label.
 	i1 := str indexOf: Character space ifAbsent: [0].
 	sub2 := str copyFrom: i1 + 1 to: 20.
 	i2 := sub2 indexOf: Character lf ifAbsent: [0].
@@ -4028,11 +4081,11 @@ statsItem: anObject
 		self triggerEvent: #itemChange.
 		self changed: #statsItem]! !
 
-!Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 12:17:08'!
+!Contract methodsFor: 'statistics' stamp: 'dhn 1/18/2017 17:26:36'!
 statsList
 	"Answer a list for the status window"
 	
-	^ self class equipmentList , self class franchiseList , {'Yourself'. 'Players'. 'Contingencies'}! !
+	^ self class equipmentList , self class franchiseList , {'Yourself'. 'Players'. 'Contingencies'. 'Hints'}! !
 
 !Contract methodsFor: 'statistics' stamp: 'dhn 8/28/2016 14:15:10'!
 statsReport
@@ -5053,7 +5106,7 @@ sellAsset: aString for: aNumber
 	asset value holder = self
 		ifTrue: [asset value holder: nil]! !
 
-!Contractor methodsFor: 'initialize-release' stamp: 'dhn 9/21/2016 20:23:23'!
+!Contractor methodsFor: 'initialize-release' stamp: 'dhn 1/18/2017 17:29:16'!
 setupAssets
 	"Answer the initial state for assets"
 	|set|
@@ -5072,6 +5125,7 @@ setupAssets
 		add: #Westwood->Westwood new;
 		add: #BigPhil->BigPhil new;
 		add: #Contingencies->Contingencies new;
+		add: #Hints->Hints new;
 		yourself.
 	(set at: #Yourself) owner: self.
 	(set at: #Players) owner: self.
