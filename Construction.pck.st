@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 18 January 2017 at 5:38:39 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 18 January 2017 at 6:24:52 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 43!
+!provides: 'Construction' 1 45!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -853,13 +853,13 @@ makeSettingsButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
 		setBalloonText: 'Change some of the game parameters'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:52:04'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 17:59:37'!
 makeShowStatsButton
 	"Answer the 'Stats' button"
 	
 	^ (GameButtonMorph label: 'Stats' action: #showStats state: true model: self)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
-		setBalloonText: 'Show statistics which have been accumulated during the game.'! !
+		setBalloonText: 'Lots of information here'! !
 
 !Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:05:41'!
 makeTourButton
@@ -1257,15 +1257,16 @@ defaultGoal
 	^ 1500000.
 ! !
 
-!Construction class methodsFor: 'database' stamp: 'dhn 1/18/2017 17:31:36'!
+!Construction class methodsFor: 'database' stamp: 'dhn 1/18/2017 18:12:56'!
 hintsDesc
 	"Answer the game hints"
 	
 	^ OrderedCollection new
 	add: '
 Enter two to six names of players, then use the "Move" and "End Turn" buttons alternately to take turns. During your turn, any button which is not gray is enabled for your use. To see what buttons and other parts of the board do, let the cursor linger over them.';
-	add: 'If you have the required equipment at a space on the board, the "Do Job" button will be enabled. Whether this is advantageous for you depends on your amount of that particular equipment and the "roll" of the die when you optionally click the "Do Job" button. Clicking the "End Turn" button instead will skip the job.';
+	add: 'If you have the required equipment at a space on the board, the "Do Job" button will be enabled. Whether this is advantageous for you depends on your amount of that particular equipment and the "roll" of the die when you optionally click the "Do Job" button. Clicking the "End Turn" button instead will skip the job. Try to take advantage of being doubled in a market.';
 	add: 'Some jobs involve competetive bidding. The auction will be held even if only one player has the equipment. When there are no more bids, the auctioneer will declare "SOLD" after a few seconds.';
+	add: 'To purchase a franchise (e.g. Stinky''s) a player must be on that space.';
 	yourself
 ! !
 

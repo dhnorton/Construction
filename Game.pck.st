@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 16 January 2017 at 11:36:19 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 18 January 2017 at 6:24:31 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 28!
+!provides: 'Game' 1 29!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
 	instanceVariableNames: ''
@@ -103,7 +103,7 @@ CellView class
 
 !classDefinition: #PlotGraphMorph category: #'Game-Graphics'!
 FunctionGraphMorph subclass: #PlotGraphMorph
-	instanceVariableNames: 'data points yScaleFactor startTime deltaT ticN tics yFactor xFactor resumed players sorted'
+	instanceVariableNames: 'data points yScaleFactor startTime deltaT yFactor xFactor resumed players sorted'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
@@ -1022,15 +1022,11 @@ textPane: anObject
 
 	textPane _ anObject! !
 
-!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 9/28/2016 20:14:51'!
+!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 1/18/2017 18:21:02'!
 asNormalizedPoints: aCollection
 	"Answer an array of points which are mapped on [0, T] in both dimensions, where T is a multiple of 10"
 	| yArray xArray result |
 
-	aCollection size == 2 ifTrue: [ticN _ 10].
-	(aCollection size > self ticN) ifTrue: [
-		self tics add: aCollection size.
-		ticN _ ticN + 10].
 	yArray _ yFactor * (self normalize: aCollection asOrderedCollection with: yScaleFactor).
 	xArray _ xFactor * (self normalize: (0 to: aCollection size) asArray).
 	
@@ -1059,9 +1055,11 @@ details
 		players: owner owner model players;
 		plotData! !
 
-!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 10/1/2016 16:51:42'!
+!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 1/18/2017 18:19:37'!
 drawOn: aCanvas
+	"Draw all the lines, including axes, on the graph"
 	| fully lineColor |
+	
 	fully _ 10 raisedTo: yMax log asInteger.
 
 	aCanvas line: (self toMorphic:0@yMin) to: (self toMorphic: 0 @ yMax) width: 2 color: Color lightGray.
@@ -1079,12 +1077,7 @@ drawOn: aCanvas
 				aCanvas 	"continue the graph"
 					line: (self toMorphic: (p _ points at: n)) 	"from point"
 					to: (self toMorphic: (points at: n + 1)) 	"to point"
-					width: 2 color: lineColor.
-				(self tics includes: n) ifTrue: [
-					aCanvas 	"plot the tic"
-						line: (self toMorphic: (p x) @ 0) 
-						to: (self toMorphic: (p x) @ (self class ticLength)) 
-						width: 2 color: Color lightGray]]]].! !
+					width: 2 color: lineColor]]].! !
 
 !PlotGraphMorph methodsFor: 'initialization' stamp: 'dhn 5/12/2016 09:50'!
 initialize
@@ -1172,26 +1165,6 @@ startTime: anObject
 	"Set the value of startTime"
 
 	startTime _ anObject! !
-
-!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 5/12/2016 10:49'!
-ticN
-	"Answer the value of ticN"
-	
-	ticN ifNil: [ticN _ 1000].
-	^ ticN! !
-
-!PlotGraphMorph methodsFor: 'accessing' stamp: 'dhn 5/12/2016 10:15'!
-ticN: anObject
-	"Set the value of ticN"
-
-	ticN _ anObject! !
-
-!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 5/12/2016 10:19'!
-tics
-	"Answer the value of tics"
-	
-	tics ifNil: [tics _ OrderedCollection new].
-	^ tics! !
 
 !PlotGraphMorph methodsFor: 'accessing' stamp: 'dhn 5/26/2015 12:25'!
 yScaleFactor: aNumber
