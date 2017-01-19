@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 18 January 2017 at 6:24:31 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 19 January 2017 at 11:16:29 am'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 29!
+!provides: 'Game' 1 30!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
 	instanceVariableNames: ''
@@ -1712,15 +1712,6 @@ quitGame
 	self triggerEvent: #deleteOpenWindows.
 	self triggerEvent: #quitGame! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 8/24/2016 12:40:16'!
-removeMarkerIDInMarks
-	| col ix |
-"
-	col := marks at: currentPlayer position.
-	ix := col indexOf: currentPlayer identity ifAbsent: [nil].
-	ix ifNotNil: [col at: ix put: ''.]
-"! !
-
 !Game methodsFor: 'operating' stamp: 'dhn 1/15/2017 21:59:40'!
 removeMarkers
 	"Remove a player's marker from space and cell"
@@ -1736,16 +1727,6 @@ response
 	{#response. response} print.
 	response ifNil: [response _ ''].
 	^ response
-! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 7/23/2016 22:16'!
-response: aText
-	"Set response and signal position"
-
-	| position |
-	response _ aText asString.
-	{#response:. aText. response} print.
-	self triggerEvent: #nameEntry with: {response. position}
 ! !
 
 !Game methodsFor: 'initialize' stamp: 'dhn 9/17/2011 13:19'!
@@ -1774,21 +1755,6 @@ setGoal
 	goal ifNil: [goal _ self class defaultGoal].
 	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
 	x ~= '' ifTrue:  [goal _ x asNumber]! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 7/28/2016 19:10:26'!
-setupMarksFor: aNumber 
-	"Answer places for markers, one per aNumber spaces on the board"
-	| set array |
-	
-	set _ Array new: aNumber.
-	array _ Array new: players size.
-	1
-		to: array size
-		do: [:m | array at: m put: ''].
-	1
-		to: aNumber
-		do: [:each | set at: each put: array copy].
-	^ set! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/28/2016 12:40:49'!
 slidTo: aPosition
