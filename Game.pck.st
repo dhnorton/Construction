@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 19 January 2017 at 11:16:29 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 20 January 2017 at 12:00:20 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 30!
+!provides: 'Game' 1 31!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
 	instanceVariableNames: ''
@@ -421,6 +421,11 @@ hopVComponent
 	HopVComponent ifNil: [HopVComponent _ self setupHop].
 	^ HopVComponent! !
 
+!Token class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:58:56'!
+includeInNewMorphMenu
+	"Not to be instantiated from the menu"
+	^ false! !
+
 !Token class methodsFor: 'operation' stamp: 'dhn 12/2/2011 22:32'!
 rollCount
 	"Answer the number of iterations for a roll"
@@ -741,6 +746,11 @@ form: anObject
 
 	form _ anObject! !
 
+!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:56:31'!
+includeInNewMorphMenu
+	"Not to be instantiated from the menu"
+	^ false! !
+
 !ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/30/2016 15:26:32'!
 leftOn: aWorld
 	"Open a right-pointing arrow in aWorld"
@@ -998,6 +1008,11 @@ wo: anObject
 	
 	wo _ anObject! !
 
+!DieMorph class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:54'!
+includeInNewMorphMenu
+	"Not to be instantiated from the menu"
+	^ false! !
+
 !CellView methodsFor: 'accessing' stamp: 'dhn 1/14/2017 13:17:39'!
 marksPane
 	"Answer the value of marksPane"
@@ -1021,6 +1036,11 @@ textPane: anObject
 	"Set the value of textPane"
 
 	textPane _ anObject! !
+
+!CellView class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:03'!
+includeInNewMorphMenu
+	"Not to be instantiated from the menu"
+	^ false! !
 
 !PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 1/18/2017 18:21:02'!
 asNormalizedPoints: aCollection
@@ -1171,6 +1191,11 @@ yScaleFactor: aNumber
 
 	yScaleFactor _ aNumber
 ! !
+
+!PlotGraphMorph class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:58:36'!
+includeInNewMorphMenu
+	"Not to be instantiated from the menu"
+	^ false! !
 
 !PlotGraphMorph class methodsFor: 'display' stamp: 'dhn 5/11/2016 16:01'!
 ticLength

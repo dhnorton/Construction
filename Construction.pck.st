@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 18 January 2017 at 6:24:52 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 20 January 2017 at 12:00:43 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 45!
+!provides: 'Construction' 1 46!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -525,6 +525,11 @@ setSize
 	w _ owner morphExtent x * 0.13.
 	h _ w * 0.5.
 	self morphExtent: w@h! !
+
+!ContractToken class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:32'!
+includeInNewMorphMenu
+	"Not to be instantiated from the menu"
+	^ false! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 11/7/2016 20:55:25'!
 buildMorphicWindow
