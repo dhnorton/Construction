@@ -1,6 +1,7 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 20 January 2017 at 12:00:20 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3040] on 21 January 2017 at 1:50:20 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 31!
+!provides: 'Game' 1 32!
+!requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
 	instanceVariableNames: ''
