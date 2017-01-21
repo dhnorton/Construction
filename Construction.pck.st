@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3025] on 20 January 2017 at 12:00:43 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3011] on 20 January 2017 at 7:04:47 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 46!
+!provides: 'Construction' 1 47!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1281,6 +1281,17 @@ how
 	Construction start.
 	"! !
 
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 18:50:43'!
+includeInNewMorphMenu
+	"Instantiate from the menu"
+	
+	^ true! !
+
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 18:58:07'!
+initializedInstance
+
+	^ self start! !
+
 !Construction class methodsFor: 'database' stamp: 'dhn 9/23/2016 15:29:05'!
 ironMap
 	"Provide the association between season and equipment"
@@ -1355,7 +1366,7 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 11/30/2016 17:51:11'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 19:01:13'!
 start
 	"Start the Construction Game"
 	| win |
@@ -1366,7 +1377,8 @@ start
 	win showSeasons: (win model parseSeasonsAt: 1).
 	win morphPosition: 0@60.
 	win model when: #nextPlayer: send: #nextPlayer: to: win with: #player.
-	win model when: #winningBidder send: #winningBidder:bid: to: win withArguments: #(#buyer #bid)
+	win model when: #winningBidder send: #winningBidder:bid: to: win withArguments: #(#buyer #bid).
+	^ win
 ! !
 
 !ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:22'!
