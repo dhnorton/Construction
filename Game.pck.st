@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3040] on 21 January 2017 at 1:50:20 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3040] on 21 January 2017 at 4:49:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 32!
+!provides: 'Game' 1 33!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -582,17 +582,6 @@ layoutMorph
 	"Answer the value of layoutMorph"
 	
 	^ layoutMorph! !
-
-!GameBoard methodsFor: 'initialization' stamp: 'dhn 11/8/2016 17:54:16'!
-layoutSubmorphs
-	"Lay out path as a transparent overlay"
-	
-	super layoutSubmorphs.
-	
-     layoutMorph layoutSubmorphs. "ensure cell gets updated before updating path"
-	path
-		morphPosition: (self borderWidth)@(layoutMorph morphHeight * 0.4)		 
-		extent: layoutMorph morphWidth @ (model cells first morphHeight * 0.97)! !
 
 !GameBoard methodsFor: 'initialization' stamp: 'dhn 11/8/2016 16:51:43'!
 makeTitleArea

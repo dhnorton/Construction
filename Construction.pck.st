@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3011] on 20 January 2017 at 7:04:47 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3040] on 21 January 2017 at 4:49:13 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 47!
+!provides: 'Construction' 1 48!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -531,7 +531,7 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 11/7/2016 20:55:25'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/21/2017 14:15:15'!
 buildMorphicWindow
 
 	model arena: self.
@@ -548,7 +548,7 @@ buildMorphicWindow
 		addMorph: self makeCellsArea.
 	model positionBoardTo: 1.
 	
-	path _ OverlayMorph new
+	path _ PasteUpMorph new
 		name: #path;
 		color: Color transparent.
 		
@@ -672,6 +672,16 @@ getPlayers
 initialize
 
 	super initialize! !
+
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/21/2017 16:39:18'!
+layoutSubmorphs
+	"Lay out path as a transparent overlay"
+	
+	super layoutSubmorphs.
+	
+	path
+		morphPosition: (self borderWidth)@(layoutMorph morphHeight * 0.4)		 
+		extent: layoutMorph morphWidth @ (model cells first morphHeight * 0.97)! !
 
 !Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:03:14'!
 makeAddPlayerButton
