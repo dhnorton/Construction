@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3040] on 21 January 2017 at 4:49:13 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 7 February 2017 at 12:15:29 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 48!
+!provides: 'Construction' 1 49!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -4290,13 +4290,11 @@ defaultGoal
 	^ 1500000.
 ! !
 
-!Contract class methodsFor: 'operation' stamp: 'dhn 1/11/2017 15:34:01'!
+!Contract class methodsFor: 'operation' stamp: 'dhn 2/7/2017 12:06:28'!
 describeSpaces
 	"Descriptions for the spaces on the board."
-	| col |
 	
-	col _ OrderedCollection new.
-	col
+	^ OrderedCollection new
 		add: 'DECEMBER
 Week 4
 
@@ -4567,8 +4565,7 @@ Week 3
 
 If owned, pay owner for annual material purchases $15,000 to $90,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $500,000.';
 
-	yourself.
-	^ col! !
+	yourself! !
 
 !Contract class methodsFor: 'lists' stamp: 'dhn 8/18/2013 06:54'!
 equipmentList
