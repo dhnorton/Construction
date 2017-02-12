@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3040] on 21 January 2017 at 4:49:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 12 February 2017 at 4:05:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 33!
+!provides: 'Game' 1 34!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -14,8 +14,8 @@ OverlayMorph class
 
 !classDefinition: #Token category: #'Game-Graphics'!
 EllipseMorph subclass: #Token
-	instanceVariableNames: 'labelArea who count die arrow id'
-	classVariableNames: 'HopVComponent'
+	instanceVariableNames: 'labelArea who count die arrow id hopVComponent'
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
 !classDefinition: 'Token class' category: #'Game-Graphics'!
@@ -353,22 +353,23 @@ identity: aString
 		emphasis: AbstractFont boldCode)
 			morphPosition: 50@18! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 10/1/2016 19:26:26'!
+!Token methodsFor: 'initialization' stamp: 'dhn 2/12/2017 14:35:14'!
 initialize
 
 	super initialize.
+	hopVComponent _ self setupHop.
 	self setBalloonText: 'A token representing the player. When the Move button is clicked, 
 a die is "rolled" and the token moves that number of spaces.'! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 11/13/2016 19:08:03'!
+!Token methodsFor: 'stepping' stamp: 'dhn 2/12/2017 15:59:21'!
 jump: aCount
 	"Move the receiver in aCount hops"
 	| step limit i hop horiz |
 	
-	step _ 4.	"time of each increment of the hop"
-	hop _ self class hopVComponent.
+	step _ 16.	"time of each increment of the hop"
+	hop _ hopVComponent.
 	limit _ hop size * (aCount min: 6).
-	horiz _ who mgr cells first morphWidth / hop size.
+	horiz _ who mgr cells last morphWidth / hop size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :delta |
 		i _ i + 1.
@@ -393,6 +394,18 @@ labelArea: anObject
 
 	labelArea _ anObject! !
 
+!Token methodsFor: 'initialization' stamp: 'dhn 2/12/2017 15:53:56'!
+setupHop
+	"Answer the vertical component of a jump"
+	| col up |
+	
+	up _ OrderedCollection new.
+	col _ OrderedCollection new.
+	0 to: 9 do: [:i | up add: 4 * ((i * 10) degreesToRadians cos * 2) negated].
+	col _ col addAll: up; yourself.
+	col _ col addAll: up reversed negated; yourself.
+	^ col! !
+
 !Token methodsFor: 'accessing' stamp: 'dhn 10/11/2011 21:53'!
 who
 	"Answer the value of who"
@@ -415,13 +428,6 @@ colors
 		Color r: 0.634 g: 0.729 b: 1. 
 		Color cyan. Color green. Color red. Color orange. Color magenta}! !
 
-!Token class methodsFor: 'operation' stamp: 'dhn 10/2/2016 17:56:06'!
-hopVComponent
-	"Answer the value of HopVComponent"
-	
-	HopVComponent ifNil: [HopVComponent _ self setupHop].
-	^ HopVComponent! !
-
 !Token class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:58:56'!
 includeInNewMorphMenu
 	"Not to be instantiated from the menu"
@@ -431,18 +437,6 @@ includeInNewMorphMenu
 rollCount
 	"Answer the number of iterations for a roll"
 	^ 1! !
-
-!Token class methodsFor: 'instance creation' stamp: 'dhn 8/22/2016 18:15:31'!
-setupHop
-	"Answer the vertical component of a jump"
-	| col up |
-	
-	up _ OrderedCollection new.
-	col _ OrderedCollection new.
-	0 to: 45 do: [:i | up add: ((i * 2) degreesToRadians cos * 2) negated].
-	col _ col addAll: up; yourself.
-	col _ col addAll: up reversed negated; yourself.
-	^ col! !
 
 !GameButtonMorph methodsFor: 'state' stamp: 'dhn 7/23/2016 15:33'!
 disableButton
