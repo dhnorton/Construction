@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 12 February 2017 at 4:05:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 12 February 2017 at 5:28:22 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 34!
+!provides: 'Game' 1 35!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -394,17 +394,17 @@ labelArea: anObject
 
 	labelArea _ anObject! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 2/12/2017 15:53:56'!
+!Token methodsFor: 'initialization' stamp: 'dhn 2/12/2017 17:25:50'!
 setupHop
 	"Answer the vertical component of a jump"
-	| col up |
+	| up |
 	
 	up _ OrderedCollection new.
-	col _ OrderedCollection new.
 	0 to: 9 do: [:i | up add: 4 * ((i * 10) degreesToRadians cos * 2) negated].
-	col _ col addAll: up; yourself.
-	col _ col addAll: up reversed negated; yourself.
-	^ col! !
+	^ OrderedCollection new
+		addAll: up;
+		addAll: up reversed negated; 
+		yourself! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/11/2011 21:53'!
 who
