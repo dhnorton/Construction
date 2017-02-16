@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 8:59:28 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 9:48:16 am'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 39!
+!provides: 'Game' 1 40!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -1569,12 +1569,11 @@ initialButtonState
 	"Establish the button state at the start of the game"
 	self subclassResponsibility! !
 
-!Game methodsFor: 'initialize' stamp: 'dhn 1/13/2017 20:02:02'!
+!Game methodsFor: 'initialize' stamp: 'dhn 2/16/2017 09:36:09'!
 initialize
 
 	players _ OrderedCollection new.
-	cells _ OrderedCollection new.
-	self when: #slidTo: send: #slidTo: to: self with: #position.! !
+	cells _ OrderedCollection new! !
 
 !Game methodsFor: 'initialize' stamp: 'dhn 7/11/2013 14:53'!
 markerSize
@@ -1610,7 +1609,7 @@ moveFrom: positionA to: positionB
 	currentPlayer token deleteArrow
 ! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:58:10'!
+!Game methodsFor: 'operating' stamp: 'dhn 2/16/2017 09:35:25'!
 moveFrom: start to: end by: direction 
 	"Animate moves forward or backward."
 	| a b |
@@ -1625,7 +1624,7 @@ moveFrom: start to: end by: direction
 		self arena world doOneCycleNow.
 		(Delay forSeconds: self currentPlayer class moveInterval) wait.
 		n = b ifTrue: [
-			self triggerEvent: #slidTo: with: (self wrapIndex: n around: spaces size)]]! !
+			self slidTo: (self wrapIndex: n around: spaces size)]]! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 17:55:22'!
 nextPlayer
