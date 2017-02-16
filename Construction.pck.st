@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 7 February 2017 at 12:15:29 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 9:00:02 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 49!
+!provides: 'Construction' 1 50!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -3689,7 +3689,7 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 11/13/2016 16:58:33'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 2/16/2017 08:56:39'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName with a die and with token and marker colored aColor"
 	| pl  tok |
@@ -3708,7 +3708,6 @@ setupPlayer: aName color: aColor
 		setSize;
 		setPosition.
 	tok id contents: aName.
-	tok when: #jumped send: #moved to: tok.
 	self when: #deleteOpenWindows send: #delete to: tok.
 	self availableOptions do: [:opt | pl options addLast: opt].! !
 

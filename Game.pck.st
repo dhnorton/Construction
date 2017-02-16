@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 13 February 2017 at 3:51:59 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 8:59:28 am'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 38!
+!provides: 'Game' 1 39!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -364,7 +364,7 @@ initialize
 	self setBalloonText: 'A token representing the player. When the Move button is clicked, 
 a die is "rolled" and the token moves that number of spaces.'! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/13/2017 15:50:38'!
+!Token methodsFor: 'stepping' stamp: 'dhn 2/16/2017 08:55:57'!
 jump: aCount
 	"Move the receiver in aCount hops"
 	| step limit i horiz |
@@ -380,7 +380,7 @@ jump: aCount
 			ifTrue: [self morphPosition: (self morphPosition translatedBy: horiz@(hop atWrap: i))]
 			ifFalse: [
 				self stopStepping.
-				self triggerEvent: #jumped.
+				self moved.
 				self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: step. 	
 ! !
