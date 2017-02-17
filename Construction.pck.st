@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 8:47:28 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 10:59:16 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 51!
+!provides: 'Construction' 1 52!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -4289,7 +4289,7 @@ defaultGoal
 	^ 1500000.
 ! !
 
-!Contract class methodsFor: 'operation' stamp: 'dhn 2/7/2017 12:06:28'!
+!Contract class methodsFor: 'operation' stamp: 'dhn 2/17/2017 10:57:42'!
 describeSpaces
 	"Descriptions for the spaces on the board."
 	
@@ -4466,7 +4466,7 @@ Pay BIG PHIL''S $30,000 for concrete to build an overpass for a new freeway to t
 	add: 'AUGUST
 Week 3
 
-COMPETETIVE BID
+COMPETITIVE BID
 (Don''t get burned like last time!!!!)';
 
 	add: 'AUGUST
@@ -4508,7 +4508,7 @@ Contractor Contingency.';
 	add: 'OCTOBER
 Week 1
 
-COMPETETIVE BID
+COMPETITIVE BID
 (Who needs this job the most??)';
 
 	add: 'OCTOBER
