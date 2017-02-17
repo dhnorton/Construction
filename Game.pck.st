@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 9:48:16 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 9:29:23 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 40!
+!provides: 'Game' 1 43!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -154,7 +154,7 @@ Direction class
 
 !classDefinition: #Game category: #'Game-Model'!
 Object subclass: #Game
-	instanceVariableNames: 'arena cells spaces goal response players currentPlayer playerIndex buttons token outs cellCount hardRoll won spaceFreq chantBeat'
+	instanceVariableNames: 'arena cells spaces goal response players currentPlayer playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
 	classVariableNames: 'TestGoal TestMode'
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -396,6 +396,32 @@ labelArea: anObject
 	"Set the value of labelArea"
 
 	labelArea _ anObject! !
+
+!Token methodsFor: 'stepping' stamp: 'dhn 2/16/2017 20:52:11'!
+moveFrom: start to: end by: direction
+	"Animate moves forward or backward."
+	| a b board posns limit i |
+	
+	a _ start.
+	b _ end.
+	board _ who mgr class describeSpaces size.
+	direction < 0
+		ifTrue: [start < end ifTrue: [	a _ start + board]]
+		ifFalse: [start > end ifTrue: [b _ end + board]].
+	posns _ (Interval from: a to: b by: direction) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		who mgr positionBoardTo: (who mgr wrapIndex: (posns at: i) around: board).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self halt.
+				who slidTo: (who mgr wrapIndex: (posns at: i) around: board).
+				self removeActionsForEvent: #morphicStep]].
+	self startSteppingStepTime: who class moveInterval
+! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/11/2011 21:53'!
 who
@@ -1590,7 +1616,7 @@ move
 	bone adjustTo: currentPlayer token.
 	bone show: bone combo shuffled event: #rolled! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:51:33'!
+!Game methodsFor: 'operating' stamp: 'dhn 2/16/2017 21:25:20'!
 moveFrom: positionA to: positionB
 	"Determine best direction and move token"
 	| dir |
@@ -1602,29 +1628,12 @@ moveFrom: positionA to: positionB
 	dir < 0
 		ifTrue: [currentPlayer token arrowLeft]
 		ifFalse: [currentPlayer token arrowRight].
-	self
+	currentPlayer token
 		moveFrom: positionA
 		to: positionB
 		by: dir.
 	currentPlayer token deleteArrow
 ! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 2/16/2017 09:35:25'!
-moveFrom: start to: end by: direction 
-	"Animate moves forward or backward."
-	| a b |
-
-	a _ start.
-	b _ end.
-	direction < 0
-		ifTrue: [start < end ifTrue: [	a _ start + spaces size]]
-		ifFalse: [start > end ifTrue: [b _ end + spaces size]].
-	a to: b by: direction do: [:n | 
-		self positionBoardTo: (self wrapIndex: n around: spaces size).
-		self arena world doOneCycleNow.
-		(Delay forSeconds: self currentPlayer class moveInterval) wait.
-		n = b ifTrue: [
-			self slidTo: (self wrapIndex: n around: spaces size)]]! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 17:55:22'!
 nextPlayer
@@ -1755,8 +1764,8 @@ setGoal
 	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
 	x ~= '' ifTrue:  [goal _ x asNumber]! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 9/28/2016 12:40:49'!
-slidTo: aPosition
+!Game methodsFor: 'operating' stamp: 'dhn 2/16/2017 20:12:04'!
+slidToX: aPosition
 	"Account for player being relocated to aPosition"
 	| x |
 
@@ -1792,15 +1801,15 @@ wrapIndex: anIndex around: aLimit
 				ifTrue: [^ aLimit].
 			^ anIndex]! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 1/11/2017 15:52:30'!
+!Gamer methodsFor: 'movement' stamp: 'dhn 2/16/2017 20:17:31'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	| pos |
 	
 	token arrowRight.
 	pos _ self position - self roll.
-	self mgr moveFrom: pos to: aPosition - self roll by: 1.
-	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size).
+	token moveFrom: pos to: aPosition - self roll by: 1.
+	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size)
 ! !
 
 !Gamer methodsFor: 'accessing' stamp: 'dhn 9/3/2013 21:29'!
@@ -2067,6 +2076,16 @@ rollStats: aRoll
 	self totalRoll: aRoll + self totalRoll. 
 	self turns: 1 + self turns. 
 	self mgr triggerEvent: #itemChange! !
+
+!Gamer methodsFor: 'movement' stamp: 'dhn 2/16/2017 20:24:48'!
+slidTo: aPosition
+	"Account for being relocated to aPosition"
+	| x |
+
+	token deleteArrow.
+	x _ position + aPosition - oldPosition.
+	position _ x >= 0 ifTrue: [x] ifFalse: [aPosition].
+	self token doubled contents: self doubledString! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/26/2012 17:52'!
 tally: anAmount

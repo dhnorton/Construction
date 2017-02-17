@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 9:00:02 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 8:47:28 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 50!
+!provides: 'Construction' 1 51!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -5288,10 +5288,11 @@ updateIron: anAsset with: aRoll
 	expenseFactor _ 1.
 	^ total! !
 
-!Contractor class methodsFor: 'as yet unclassified' stamp: 'dhn 8/25/2016 10:43:11'!
+!Contractor class methodsFor: 'as yet unclassified' stamp: 'dhn 2/16/2017 19:57:23'!
 moveInterval
-	"Answer the amount of time in seconds between moves during animation"
-	^ 0.4! !
+	"Answer the amount of time in milliseconds between moves during animation"
+	
+	^ 400! !
 
 !Contingency methodsFor: 'as yet unclassified' stamp: 'dhn 9/10/2014 21:07'!
 argument
