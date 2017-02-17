@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 11:35:34 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 4:00:05 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 44!
+!provides: 'Game' 1 45!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -397,7 +397,7 @@ labelArea: anObject
 
 	labelArea _ anObject! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/17/2017 11:29:17'!
+!Token methodsFor: 'stepping' stamp: 'dhn 2/17/2017 11:48:49'!
 moveFrom: start to: end by: direction
 	"Animate moves forward or backward."
 	| a b board posns limit i |
@@ -411,6 +411,7 @@ moveFrom: start to: end by: direction
 	posns _ (Interval from: a to: b by: direction) asArray.
 	limit _ posns size.
 	i _ 0.
+	self removeActionsForEvent: #morphicStep.
 	self when: #morphicStep evaluate: [ :unused |
 		i _ i + 1.
 		who mgr positionBoardTo: (who mgr wrapIndex: (posns at: i) around: board).
@@ -1763,18 +1764,6 @@ setGoal
 	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
 	x ~= '' ifTrue:  [goal _ x asNumber]! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 2/16/2017 20:12:04'!
-slidToX: aPosition
-	"Account for player being relocated to aPosition"
-	| x |
-
-	currentPlayer token deleteArrow.
-	x _ currentPlayer position + aPosition - currentPlayer oldPosition.
-	x >= 0
-		ifTrue: [currentPlayer position: x]
-		ifFalse: [currentPlayer position: aPosition].
-	currentPlayer token doubled contents: currentPlayer doubledString! !
-
 !Game methodsFor: 'accessing' stamp: 'dhn 10/7/2014 12:23'!
 spaceFreq
 	"Answer the value of spaceFreq"
@@ -1800,13 +1789,14 @@ wrapIndex: anIndex around: aLimit
 				ifTrue: [^ aLimit].
 			^ anIndex]! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 2/16/2017 20:17:31'!
+!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 15:42:05'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	| pos |
 	
 	token arrowRight.
 	pos _ self position - self roll.
+self halt.
 	token moveFrom: pos to: aPosition - self roll by: 1.
 	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size)
 ! !
@@ -2076,11 +2066,10 @@ rollStats: aRoll
 	self turns: 1 + self turns. 
 	self mgr triggerEvent: #itemChange! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 11:18:43'!
+!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 15:51:17'!
 slidTo: aPosition
 	"Account for being relocated to aPosition"
 
-	token deleteArrow.
 	position _ aPosition.
 	self token doubled contents: self doubledString! !
 

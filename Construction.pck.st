@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 10:59:16 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 4:00:41 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 52!
+!provides: 'Construction' 1 53!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1152,7 +1152,7 @@ windowPosition
 	
 	^ model cells second morphPosition + (model windowPosition: 0@-40)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 1/12/2017 11:37:14'!
+!Construction methodsFor: 'operation' stamp: 'dhn 2/17/2017 15:53:32'!
 winningBidder: aPlayer bid: aBid
 	"Change current player to aPlayer and move to job, if necessary"
 	| space |
@@ -1173,7 +1173,6 @@ winningBidder: aPlayer bid: aBid
 			(model spaces at: model currentPlayer position) markRemFor: model currentPlayer.
 			model currentPlayer token setPosition.
 			model moveFrom: model currentPlayer position to: space.
-			model currentPlayer position: space.
 			model currentPlayer token doubled contents: model currentPlayer doubledString.
 			model currentPlayer canDoJob].
 	model updateHistory.
