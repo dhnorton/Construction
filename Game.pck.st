@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 16 February 2017 at 9:29:23 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 11:35:34 am'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 43!
+!provides: 'Game' 1 44!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -397,7 +397,7 @@ labelArea: anObject
 
 	labelArea _ anObject! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/16/2017 20:52:11'!
+!Token methodsFor: 'stepping' stamp: 'dhn 2/17/2017 11:29:17'!
 moveFrom: start to: end by: direction
 	"Animate moves forward or backward."
 	| a b board posns limit i |
@@ -417,7 +417,6 @@ moveFrom: start to: end by: direction
 		i < limit 
 			ifFalse: [
 				self stopStepping.
-				self halt.
 				who slidTo: (who mgr wrapIndex: (posns at: i) around: board).
 				self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: who class moveInterval
@@ -2077,14 +2076,12 @@ rollStats: aRoll
 	self turns: 1 + self turns. 
 	self mgr triggerEvent: #itemChange! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 2/16/2017 20:24:48'!
+!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 11:18:43'!
 slidTo: aPosition
 	"Account for being relocated to aPosition"
-	| x |
 
 	token deleteArrow.
-	x _ position + aPosition - oldPosition.
-	position _ x >= 0 ifTrue: [x] ifFalse: [aPosition].
+	position _ aPosition.
 	self token doubled contents: self doubledString! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/26/2012 17:52'!
