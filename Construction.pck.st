@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 4:07:54 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 4:48:11 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 61!
+!provides: 'Construction' 1 62!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -2496,6 +2496,12 @@ buttonArea: anObject
 
 	buttonArea _ anObject! !
 
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:46:54'!
+describe
+	"This method necessary only for initial layout; other implementations will be used in operation"
+
+	^ ''! !
+
 !TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
 gameTitle
 	"Answer the value of gameTitle"
@@ -2507,6 +2513,65 @@ gameTitle: anObject
 	"Set the value of gameTitle"
 
 	gameTitle _ anObject! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:27:01'!
+makeButtonArea
+	"Lay out the area for buttons"
+	
+	buttonArea _ (LayoutMorph newRow separation: 5)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	buttonArea
+			color: Color transparent;
+			name: #buttons;
+			padding: #center.
+			
+	board addMorph: buttonArea.
+	
+	^ buttonArea
+		! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:34:21'!
+makeCellsArea
+	"Lay out the area which shows some spaces of the board"
+	| cellArea view mm mt |
+	
+	cellArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 1.0
+			minorDirectionPadding: #center);
+		name: #'cell area'.
+	
+	1 to: self class cellsForGame do: [:ix |
+		view _ (CellView newColumn
+			layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
+			name: #cell).
+		view addMorph: (mt _ (GameCell 
+			textProvider: self
+			textGetter: #describe)
+				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
+				color: self class cellColor;
+				borderWidth: 1;
+				name: 'cell text').
+		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				fixedHeight: 20
+				minorDirectionPadding: #center);
+			color: self class cellColor;
+			padding: #center;
+			name: #marks).
+		view 
+			marksPane: mm;
+			textPane: mt.
+		model cells add: view].
+		
+	^ cellArea addAllMorphs: model cells reversed
+		
+! !
 
 !TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:00:07'!
 makeNumbersArea
@@ -2538,6 +2603,19 @@ makeOthersArea
 		color: Color transparent;
 		name: #others;
 		padding: #center! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:33:28'!
+makeSeasonsArea
+	"Lay out the area for seasons"
+	
+	seasonsArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.08
+			minorDirectionPadding: #center).
+	^ seasonsArea
+			color: Color lightGreen;
+			name: #seasons! !
 
 !TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 15:50:36'!
 makeTitleArea
@@ -2607,7 +2685,19 @@ seasonsArea: anObject
 
 	seasonsArea _ anObject! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:04:37'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:34:48'!
+cellColor
+	"Answer the color for a cell"
+	
+	^ Color r: 1.0 g: 0.93 b: 0.83! !
+
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:37:11'!
+cellsForGame
+	"Answer the number of board spaces in view at any time"
+	
+	^ 7! !
+
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:36:01'!
 start
 	| win |
 	
@@ -2620,6 +2710,11 @@ start
 	win gameTitle 
 		contents: 'Construction';
 		color: Color lightBrown.
+	win model buttons: win makeButtonArea.
+	win board
+		addMorph: win makeSeasonsArea;
+		addMorph: win makeCellsArea.
+	win model positionBoardTo: 1.
 
 	^ win
 ! !
