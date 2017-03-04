@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 4:48:11 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 5:03:35 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 62!
+!provides: 'Construction' 1 63!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -2514,6 +2514,15 @@ gameTitle: anObject
 
 	gameTitle _ anObject! !
 
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:58:57'!
+makeAddPlayerButton
+	"Answer the 'Players' button"
+
+	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Use this button to enter names of two to six players;
+entering an empty name or cancel will start the game'! !
+
 !TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:27:01'!
 makeButtonArea
 	"Lay out the area for buttons"
@@ -2604,6 +2613,15 @@ makeOthersArea
 		name: #others;
 		padding: #center! !
 
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 17:00:50'!
+makeQuitGameButton
+	"Answer the 'Quit' button"
+	
+	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		setBalloonText: 'Completely ends the game. Nothing is saved.';
+		color: (Color orange alpha: 0.9)! !
+
 !TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:33:28'!
 makeSeasonsArea
 	"Lay out the area for seasons"
@@ -2616,6 +2634,14 @@ makeSeasonsArea
 	^ seasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:59:37'!
+makeSettingsButton
+	"Answer the 'Settings' button"
+	
+	^ (GameButtonMorph label: 'Settings' action: #doSettings state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Change some of the game parameters'! !
 
 !TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 15:50:36'!
 makeTitleArea
@@ -2636,6 +2662,14 @@ makeTitleArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0
 		proportionalHeight: self class titleHeight)	! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 17:00:21'!
+makeTourButton
+	"Answer the 'Tour' button"
+	
+	^ (GameButtonMorph label: 'Tour' action: #doTour state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
 
 !TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
 numbersArea
@@ -2685,6 +2719,18 @@ seasonsArea: anObject
 
 	seasonsArea _ anObject! !
 
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:54:47'!
+startButtonSet
+	"Answer the buttons used to start the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeAddPlayerButton;
+		addMorph: self makeSettingsButton;
+		addMorph: self makeTourButton;
+		addMorph: self makeQuitGameButton.
+! !
+
 !TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:34:48'!
 cellColor
 	"Answer the color for a cell"
@@ -2697,7 +2743,7 @@ cellsForGame
 	
 	^ 7! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:36:01'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:55:39'!
 start
 	| win |
 	
@@ -2715,6 +2761,7 @@ start
 		addMorph: win makeSeasonsArea;
 		addMorph: win makeCellsArea.
 	win model positionBoardTo: 1.
+	win startButtonSet.
 
 	^ win
 ! !
