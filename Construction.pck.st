@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 4:00:41 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 4:07:54 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 53!
+!provides: 'Construction' 1 61!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -110,6 +110,16 @@ ConstructionView subclass: #StatsView
 	category: 'Construction-Graphics'!
 !classDefinition: 'StatsView class' category: #'Construction-Graphics'!
 StatsView class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestPasteUp category: #'Construction-Graphics'!
+SystemWindow subclass: #TestPasteUp
+	instanceVariableNames: 'path buttonArea gameTitle board seasonsArea numbersArea othersArea'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Construction-Graphics'!
+!classDefinition: 'TestPasteUp class' category: #'Construction-Graphics'!
+TestPasteUp class
 	instanceVariableNames: ''!
 
 !classDefinition: #ConAsset category: #'Construction-Model'!
@@ -1152,33 +1162,38 @@ windowPosition
 	
 	^ model cells second morphPosition + (model windowPosition: 0@-40)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 2/17/2017 15:53:32'!
+!Construction methodsFor: 'operation' stamp: 'dhn 2/28/2017 21:08:20'!
 winningBidder: aPlayer bid: aBid
 	"Change current player to aPlayer and move to job, if necessary"
-	| space |
-
+	| space playr |
+self halt.
 	aPlayer = model currentPlayer identity
+		ifTrue: [
+			playr _ model currentPlayer.
+			space _ playr position.
+			self setupToken: playr.
+			playr canDoJob]
 		ifFalse: [
 			space _ model currentPlayer position.
 			model currentPlayer token delete.
 			(model spaces at: model currentPlayer position) markAddFor: model currentPlayer.
 			model currentPlayer: (model players detect: [:pl | pl identity = aPlayer] ifNone: []).
+			playr _ model currentPlayer.
 			gameTitle contents: aPlayer, '''s turn.'.
-			gameTitle color: model currentPlayer token color.
-			self setupToken: model currentPlayer.
-			model currentPlayer rollForHarvest.
+			gameTitle color: playr token color.
+			self setupToken: playr.
+			playr rollForHarvest.
 			model 
 				updatePlayer; 
-				positionBoardTo: model currentPlayer position.
-			(model spaces at: model currentPlayer position) markRemFor: model currentPlayer.
-			model currentPlayer token setPosition.
-			model moveFrom: model currentPlayer position to: space.
-			model currentPlayer token doubled contents: model currentPlayer doubledString.
-			model currentPlayer canDoJob].
+				positionBoardTo: playr position.
+			playr token setPosition.
+			(model spaces at: playr position) markRemFor: playr.
+			"model moveFrom: model currentPlayer position to: space."
+			playr token moveFrom: playr position + 1 to: space.
+			playr canDoJob].
 	model updateHistory.
 	model enableAll: {'End Turn'. 'Do Job'}.
-	model currentPlayer tally: aBid negated.
-	(model spaces at: model currentPlayer position) markAddFor: model currentPlayer.
+	playr tally: aBid negated.
 	model updatePlayer! !
 
 !Construction class methodsFor: 'instance creation' stamp: 'dhn 7/19/2016 15:54'!
@@ -2444,6 +2459,176 @@ endIt
 		statsItem: nil;
 		enableAll: {'Stats'}.
 	self delete! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+board
+	"Answer the value of board"
+
+	^ board! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+board: anObject
+	"Set the value of board"
+
+	board _ anObject! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 15:15:50'!
+buildMorphicWindow
+
+	path _ PasteUpMorph new
+		name: #path;
+		color: Color transparent.
+		
+	layoutMorph addMorph: path layoutSpec: LayoutSpec useAll.
+	board _ LayoutMorph newColumn name: #AREA.
+	path addMorph: board.
+! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+buttonArea
+	"Answer the value of buttonArea"
+
+	^ buttonArea! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+buttonArea: anObject
+	"Set the value of buttonArea"
+
+	buttonArea _ anObject! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+gameTitle
+	"Answer the value of gameTitle"
+
+	^ gameTitle! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+gameTitle: anObject
+	"Set the value of gameTitle"
+
+	gameTitle _ anObject! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:00:07'!
+makeNumbersArea
+	"Lay out the area for player cash on hand"
+	
+	numbersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	numbersArea
+			color: Color transparent;
+			name: #numbers;
+			padding: #center.
+			
+	^ numbersArea addMorph: ((StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 22))
+		! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:02:39'!
+makeOthersArea
+	"Lay out the area for player cash on hand"
+	
+	othersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	^ othersArea
+		color: Color transparent;
+		name: #others;
+		padding: #center! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 15:50:36'!
+makeTitleArea
+	"Lay out the area for title"
+	| area |
+	
+	area _ LayoutMorph newRow.
+	area
+			color: Color transparent;
+			name: #title;
+			padding: #center.
+	
+	gameTitle _ (StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 22).
+		
+	area addMorph: gameTitle.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0
+		proportionalHeight: self class titleHeight)	! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+numbersArea
+	"Answer the value of numbersArea"
+
+	^ numbersArea! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+numbersArea: anObject
+	"Set the value of numbersArea"
+
+	numbersArea _ anObject! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+othersArea
+	"Answer the value of othersArea"
+
+	^ othersArea! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+othersArea: anObject
+	"Set the value of othersArea"
+
+	othersArea _ anObject! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+path
+	"Answer the value of path"
+
+	^ path! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+path: anObject
+	"Set the value of path"
+
+	path _ anObject! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+seasonsArea
+	"Answer the value of seasonsArea"
+
+	^ seasonsArea! !
+
+!TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
+seasonsArea: anObject
+	"Set the value of seasonsArea"
+
+	seasonsArea _ anObject! !
+
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:04:37'!
+start
+	| win |
+	
+	win _ self open: Contract new label: 'A Board Game'.
+	win board morphExtent: win path morphExtent.
+	win board
+		addMorph: win makeTitleArea;
+		addMorph: win makeNumbersArea;
+		addMorph: win makeOthersArea.
+	win gameTitle 
+		contents: 'Construction';
+		color: Color lightBrown.
+
+	^ win
+! !
+
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 15:52:28'!
+titleHeight
+	"Answer the proportional height for morphs such as title"
+	
+	^ 0.11! !
 
 !ConAsset methodsFor: 'as yet unclassified' stamp: 'dhn 4/15/2012 13:21'!
 assetValue
@@ -4047,11 +4232,11 @@ space8
 	self updatePlayer.
 	^ (self spacePlain: x) -> nil! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:16:21'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 2/17/2017 18:04:02'!
 space9
 	"Feb week 3"
 	self disableAll: {'Move'}.
-	self currentPlayer advanceTo: 21.
+	self currentPlayer token advanceTo: 21.
 	self updateHistory.
 	self enableAll: {'End Turn'}.
 	^ 0 -> nil! !
