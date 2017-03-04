@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 5:03:35 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 5:20:47 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 63!
+!provides: 'Construction' 1 64!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -2707,6 +2707,13 @@ path: anObject
 
 	path _ anObject! !
 
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 17:06:46'!
+quitGame
+	(self confirm: 'Are you sure you want to quit ', Construction asString, '?')
+		ifTrue: [
+			model currentPlayer ifNotNil: [model currentPlayer token ifNotNil: [model currentPlayer token delete]].
+			model quitGame]! !
+
 !TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
 seasonsArea
 	"Answer the value of seasonsArea"
@@ -2718,6 +2725,39 @@ seasonsArea: anObject
 	"Set the value of seasonsArea"
 
 	seasonsArea _ anObject! !
+
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 17:14:03'!
+showSeasons: associations 
+	"Display the seasons contained in associations"
+	| width set bm txt dx |
+			
+	seasonsArea removeAllMorphs.
+	width _ layoutMorph morphWidth / self class cellsForGame.
+	set _ OrderedCollection new.
+	associations do: [:k | 	| first last sea |
+			first _ k key x - 1.
+			last _ k key y.
+			bm _ LayoutMorph newRow
+				padding: #center;
+				name: #season.
+			seasonsArea addMorph: bm
+				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
+			sea _ k value.
+			bm color: sea color.
+			txt _ StringMorph new
+				emphasis: 1;  "emphasis: bold=1"
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+			bm addMorph: txt..
+			txt color: (sea textColor
+				ifTrue: [Color white]
+				ifFalse: [Color black]).
+			txt contents: sea desc.
+			dx _ Construction ironMap.
+			(dx includesKey: sea desc asSymbol)
+				ifTrue: [txt
+						setBalloonText: ('Requires ' , (dx at: sea desc asSymbol) asString)].
+			set add: txt].
+	^ set! !
 
 !TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:54:47'!
 startButtonSet
@@ -2743,11 +2783,12 @@ cellsForGame
 	
 	^ 7! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:55:39'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 17:16:04'!
 start
 	| win |
 	
 	win _ self open: Contract new label: 'A Board Game'.
+	
 	win board morphExtent: win path morphExtent.
 	win board
 		addMorph: win makeTitleArea;
@@ -2762,6 +2803,7 @@ start
 		addMorph: win makeCellsArea.
 	win model positionBoardTo: 1.
 	win startButtonSet.
+	win showSeasons: (win model parseSeasonsAt: 1).
 
 	^ win
 ! !
