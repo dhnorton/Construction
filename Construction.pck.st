@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 4:30:03 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 6:13:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 67!
+!provides: 'Construction' 1 68!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -551,28 +551,18 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 1/21/2017 14:15:15'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/5/2017 17:54:28'!
 buildMorphicWindow
 
 	model arena: self.
-	layoutMorph 
-		addMorph: self makeTitleArea;
-		addMorph: self makeNumbersArea;
-		addMorph: self makeOthersArea.
-	gameTitle 
-		contents: 'Construction';
-		color: Color lightBrown.
-	model buttons: self makeButtonArea.
-	layoutMorph
-		addMorph: self makeSeasonsArea;
-		addMorph: self makeCellsArea.
-	model positionBoardTo: 1.
-	
+
 	path _ PasteUpMorph new
 		name: #path;
 		color: Color transparent.
 		
-	self addMorphFront: path.
+	layoutMorph addMorph: path layoutSpec: LayoutSpec useAll.
+	board _ LayoutMorph newColumn name: #AREA.
+	path addMorph: board.
 	
 	model when: #quitGame send: #delete to: self.
 	model when: #itemChange send: #displayNumbers to: self.
@@ -693,8 +683,8 @@ initialize
 
 	super initialize! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 1/21/2017 16:39:18'!
-layoutSubmorphs
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/5/2017 17:59:04'!
+layoutSubmorphsX
 	"Lay out path as a transparent overlay"
 	
 	super layoutSubmorphs.
@@ -1400,18 +1390,35 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 19:01:13'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 3/5/2017 17:52:44'!
 start
 	"Start the Construction Game"
 	| win |
 	
 	win _ self open: Contract new label: 'A Board Game'.
-	win startButtonSet.
+	
 	win morphExtent: (win owner morphExtent * (1.0@0.8)).
-	win showSeasons: (win model parseSeasonsAt: 1).
 	win morphPosition: 0@60.
+	win owner doOneCycleNow.
+	win board morphExtent: win board owner morphExtent.
+	win board
+		addMorph: win makeTitleArea;
+		addMorph: win makeNumbersArea;
+		addMorph: win makeOthersArea.
+	win gameTitle 
+		contents: 'Construction';
+		color: Color lightBrown.
+	win model buttons: win makeButtonArea.
+	win board
+		addMorph: win makeSeasonsArea;
+		addMorph: win makeCellsArea.
+	win model positionBoardTo: 1.
+	win startButtonSet.
+	win showSeasons: (win model parseSeasonsAt: 1).
+	
 	win model when: #nextPlayer: send: #nextPlayer: to: win with: #player.
 	win model when: #winningBidder send: #winningBidder:bid: to: win withArguments: #(#buyer #bid).
+	
 	^ win
 ! !
 
@@ -2793,19 +2800,20 @@ cellsForGame
 	
 	^ 7! !
 
-!TestDnD class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 16:28:27'!
+!TestDnD class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 17:03:51'!
 start
-	| win |
+	| win in out |
 	
 	win _ self open: Contract new label: 'A Board Game'.
 	
 	win morphExtent: (win owner morphExtent * (1.0@0.8)).
 	win morphPosition: 0@60.
-	self halt.
+	win owner doOneCycleNow.
+	in _ win path morphExtent.
 	win board morphExtent: win path morphExtent.
-	"win board morphExtent: win board owner morphExtent.
-	{win board morphExtent} print.
-	win board
+	out _ win board morphExtent.
+	{in. out} print.
+	"win board
 		addMorph: win makeTitleArea;
 		addMorph: win makeNumbersArea;
 		addMorph: win makeOthersArea.
@@ -3152,7 +3160,7 @@ cellsForGame
 	
 	^ 7! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 11:29:50'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 17:06:00'!
 start
 	| win |
 	
@@ -3160,6 +3168,7 @@ start
 	
 	win morphExtent: (win owner morphExtent * (1.0@0.8)).
 	win morphPosition: 0@60.
+	win owner doOneCycleNow.
 	win board morphExtent: win board owner morphExtent.
 	{win board morphExtent} print.
 	win board

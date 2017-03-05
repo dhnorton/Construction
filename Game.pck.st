@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3043] on 17 February 2017 at 4:00:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 6:06:57 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 45!
+!provides: 'Game' 1 52!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -54,7 +54,7 @@ GameCell class
 
 !classDefinition: #GameBoard category: #'Game-Graphics'!
 SystemWindow subclass: #GameBoard
-	instanceVariableNames: 'path buttonArea gameTitle'
+	instanceVariableNames: 'path board buttonArea gameTitle'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
@@ -278,30 +278,43 @@ wantsDroppedMorph: aMorph event: evt
 
 	^super wantsDroppedMorph: aMorph event: evt! !
 
+!Token methodsFor: 'stepping' stamp: 'dhn 2/18/2017 17:11:11'!
+advanceTo: aPosition 
+	"Slide the board under a token, forward to aPosition"
+	
+self halt.
+	self arrowRight.
+	self moveFrom: who position to: aPosition by: 1.
+	self deleteArrow
+! !
+
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
 	"Answer the value of arrow"
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/30/2016 17:09:14'!
+!Token methodsFor: 'initialization' stamp: 'dhn 2/18/2017 18:18:01'!
 arrowLeft
 
-	arrow _ ArrowMorph leftOn: owner.
+	arrow _ ArrowMorph leftOn: self.
+	arrow openInWorld: self.
 	arrow morphPosition: self arrowPosition.
 	self addMorph: arrow
+
 ! !
 
-!Token methodsFor: 'accessing' stamp: 'dhn 11/30/2016 17:15:03'!
+!Token methodsFor: 'accessing' stamp: 'dhn 2/18/2017 18:16:13'!
 arrowPosition
 	"Answer the position for the arrow"
 
-	^ self morphPosition + ((self morphWidth * 0.3)@-60)! !
+	^ (self morphWidth / 3)@-60! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/30/2016 17:10:56'!
+!Token methodsFor: 'initialization' stamp: 'dhn 2/18/2017 18:18:20'!
 arrowRight
 
-	arrow _ ArrowMorph rightOn: owner.
+	arrow _ ArrowMorph rightOn: self.
+	arrow openInWorld: self.
 	arrow morphPosition: self arrowPosition.
 	self addMorph: arrow
 ! !
@@ -319,10 +332,11 @@ count: anObject
 
 	count := anObject! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 11/12/2016 20:05:47'!
+!Token methodsFor: 'initialization' stamp: 'dhn 2/17/2017 17:53:39'!
 deleteArrow
 	"Delete the arrow"
 	
+	self removeMorph: self submorphs first.
 	arrow delete! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
@@ -397,28 +411,47 @@ labelArea: anObject
 
 	labelArea _ anObject! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/17/2017 11:48:49'!
+!Token methodsFor: 'stepping' stamp: 'dhn 2/28/2017 15:26:28'!
+moveFrom: positionA to: positionB
+	"Determine best direction and move"
+	| dir |
+	
+	dir _ Direction
+		shortest: positionA
+		to: positionB
+		in: who mgr spaces size.
+	dir < 0
+		ifTrue: [self arrowLeft]
+		ifFalse: [self arrowRight].
+	self
+		moveFrom: positionA
+		to: positionB
+		by: dir.
+	self deleteArrow
+! !
+
+!Token methodsFor: 'stepping' stamp: 'dhn 2/28/2017 15:06:23'!
 moveFrom: start to: end by: direction
 	"Animate moves forward or backward."
 	| a b board posns limit i |
 	
 	a _ start.
 	b _ end.
-	board _ who mgr class describeSpaces size.
+	board _ who mgr class describeSpaces.
 	direction < 0
-		ifTrue: [start < end ifTrue: [	a _ start + board]]
-		ifFalse: [start > end ifTrue: [b _ end + board]].
+		ifTrue: [start < end ifTrue: [	a _ start + board size]]
+		ifFalse: [start > end ifTrue: [b _ end + board size]].
 	posns _ (Interval from: a to: b by: direction) asArray.
 	limit _ posns size.
 	i _ 0.
 	self removeActionsForEvent: #morphicStep.
 	self when: #morphicStep evaluate: [ :unused |
 		i _ i + 1.
-		who mgr positionBoardTo: (who mgr wrapIndex: (posns at: i) around: board).
+		who mgr positionBoardTo: (who mgr wrapIndex: (posns at: i) around: board size).
 		i < limit 
 			ifFalse: [
 				self stopStepping.
-				who slidTo: (who mgr wrapIndex: (posns at: i) around: board).
+				who slidTo: (who mgr wrapIndex: (posns at: i) around: board size).
 				self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: who class moveInterval
 ! !
@@ -561,6 +594,12 @@ describe
 	{owner. model} print.
 	model actualContents ifNil: [model actualContents: ''].
 	^ model actualContents! !
+
+!GameBoard methodsFor: 'accessing' stamp: 'dhn 3/5/2017 18:00:18'!
+board
+	"Answer the value of board"
+
+	^ board! !
 
 !GameBoard methodsFor: 'initialization' stamp: 'dhn 7/12/2016 19:58'!
 buttonAreaHeight
@@ -1616,8 +1655,8 @@ move
 	bone adjustTo: currentPlayer token.
 	bone show: bone combo shuffled event: #rolled! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 2/16/2017 21:25:20'!
-moveFrom: positionA to: positionB
+!Game methodsFor: 'operating' stamp: 'dhn 2/28/2017 15:23:48'!
+moveFromX: positionA to: positionB
 	"Determine best direction and move token"
 	| dir |
 	
@@ -1801,6 +1840,18 @@ self halt.
 	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size)
 ! !
 
+!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 18:09:03'!
+advanceToX: aPosition 
+	"Slide the board under a token, forward to aPosition"
+	| pos |
+	
+	token arrowRight.
+	pos _ self position - self roll.
+self halt.
+	token moveFrom: pos to: aPosition - self roll by: 1.
+	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size)
+! !
+
 !Gamer methodsFor: 'accessing' stamp: 'dhn 9/3/2013 21:29'!
 assets
 	^ assets! !
@@ -1899,15 +1950,12 @@ history: anObject
 
 	history := anObject! !
 
-!Gamer methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:52:50'!
+!Gamer methodsFor: 'accessing' stamp: 'dhn 2/17/2017 16:41:39'!
 hopFor: anObject
-	"Hop token anObject number of spaces"
-	| r |
+	"Hop token for anObject number of spaces"
 	
-	r _ anObject.
 	oldPosition _ position.
-	mgr testMode ifTrue: [r _ self mgr hardRoll].
-	roll _ r.
+	roll _ mgr testMode ifTrue: [self mgr hardRoll] ifFalse: [anObject].
 	token jump: roll.
 	self 
 		position: (self forwardTo: (roll + self position) 
