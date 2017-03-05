@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 4 March 2017 at 5:20:47 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 11:32:06 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 64!
+!provides: 'Construction' 1 66!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -2783,13 +2783,16 @@ cellsForGame
 	
 	^ 7! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 17:16:04'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 11:29:50'!
 start
 	| win |
 	
 	win _ self open: Contract new label: 'A Board Game'.
 	
-	win board morphExtent: win path morphExtent.
+	win morphExtent: (win owner morphExtent * (1.0@0.8)).
+	win morphPosition: 0@60.
+	win board morphExtent: win board owner morphExtent.
+	{win board morphExtent} print.
 	win board
 		addMorph: win makeTitleArea;
 		addMorph: win makeNumbersArea;
