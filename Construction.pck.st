@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 11:32:06 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 4:30:03 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 66!
+!provides: 'Construction' 1 67!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -110,6 +110,16 @@ ConstructionView subclass: #StatsView
 	category: 'Construction-Graphics'!
 !classDefinition: 'StatsView class' category: #'Construction-Graphics'!
 StatsView class
+	instanceVariableNames: ''!
+
+!classDefinition: #TestDnD category: #'Construction-Graphics'!
+SystemWindow subclass: #TestDnD
+	instanceVariableNames: 'path buttonArea gameTitle board seasonsArea numbersArea othersArea'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Construction-Graphics'!
+!classDefinition: 'TestDnD class' category: #'Construction-Graphics'!
+TestDnD class
 	instanceVariableNames: ''!
 
 !classDefinition: #TestPasteUp category: #'Construction-Graphics'!
@@ -2460,6 +2470,365 @@ endIt
 		enableAll: {'Stats'}.
 	self delete! !
 
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+board
+	"Answer the value of board"
+
+	^ board! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+board: anObject
+	"Set the value of board"
+
+	board _ anObject! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 14:03:01'!
+buildMorphicWindow
+
+	path _ DragAndDropAreaMorph new
+		name: #path;
+		color: Color transparent.
+		
+	layoutMorph addMorph: path layoutSpec: LayoutSpec useAll.
+	board _ LayoutMorph newColumn name: #AREA.
+	path addMorph: board.
+! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+buttonArea
+	"Answer the value of buttonArea"
+
+	^ buttonArea! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+buttonArea: anObject
+	"Set the value of buttonArea"
+
+	buttonArea _ anObject! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+describe
+	"This method necessary only for initial layout; other implementations will be used in operation"
+
+	^ ''! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+gameTitle
+	"Answer the value of gameTitle"
+
+	^ gameTitle! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+gameTitle: anObject
+	"Set the value of gameTitle"
+
+	gameTitle _ anObject! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeAddPlayerButton
+	"Answer the 'Players' button"
+
+	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Use this button to enter names of two to six players;
+entering an empty name or cancel will start the game'! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeButtonArea
+	"Lay out the area for buttons"
+	
+	buttonArea _ (LayoutMorph newRow separation: 5)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	buttonArea
+			color: Color transparent;
+			name: #buttons;
+			padding: #center.
+			
+	board addMorph: buttonArea.
+	
+	^ buttonArea
+		! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeCellsArea
+	"Lay out the area which shows some spaces of the board"
+	| cellArea view mm mt |
+	
+	cellArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 1.0
+			minorDirectionPadding: #center);
+		name: #'cell area'.
+	
+	1 to: self class cellsForGame do: [:ix |
+		view _ (CellView newColumn
+			layoutSpec: (LayoutSpec proportionalWidth: 1 / self class cellsForGame);
+			name: #cell).
+		view addMorph: (mt _ (GameCell 
+			textProvider: self
+			textGetter: #describe)
+				layoutSpec: (LayoutSpec proportionalWidth: 1.0);
+				color: self class cellColor;
+				borderWidth: 1;
+				name: 'cell text').
+		view addMorph: (mm _ (LayoutMorph newRow separation: 4)
+			layoutSpec: (LayoutSpec 
+				proportionalWidth: 1.0
+				fixedHeight: 20
+				minorDirectionPadding: #center);
+			color: self class cellColor;
+			padding: #center;
+			name: #marks).
+		view 
+			marksPane: mm;
+			textPane: mt.
+		model cells add: view].
+		
+	^ cellArea addAllMorphs: model cells reversed
+		
+! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeNumbersArea
+	"Lay out the area for player cash on hand"
+	
+	numbersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	numbersArea
+			color: Color transparent;
+			name: #numbers;
+			padding: #center.
+			
+	^ numbersArea addMorph: ((StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 22))
+		! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeOthersArea
+	"Lay out the area for player cash on hand"
+	
+	othersArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0
+			proportionalHeight: self class titleHeight
+			minorDirectionPadding: #center).
+	^ othersArea
+		color: Color transparent;
+		name: #others;
+		padding: #center! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeQuitGameButton
+	"Answer the 'Quit' button"
+	
+	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		setBalloonText: 'Completely ends the game. Nothing is saved.';
+		color: (Color orange alpha: 0.9)! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeSeasonsArea
+	"Lay out the area for seasons"
+	
+	seasonsArea _ (LayoutMorph newRow separation: 0)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.08
+			minorDirectionPadding: #center).
+	^ seasonsArea
+			color: Color lightGreen;
+			name: #seasons! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeSettingsButton
+	"Answer the 'Settings' button"
+	
+	^ (GameButtonMorph label: 'Settings' action: #doSettings state: true model: model)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		setBalloonText: 'Change some of the game parameters'! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeTitleArea
+	"Lay out the area for title"
+	| area |
+	
+	area _ LayoutMorph newRow.
+	area
+			color: Color transparent;
+			name: #title;
+			padding: #center.
+	
+	gameTitle _ (StringMorph contents: '') 
+		emphasis: AbstractFont boldCode;
+		font: (AbstractFont familyName: 'DejaVu' aroundPointSize: 22).
+		
+	area addMorph: gameTitle.
+	^ area	layoutSpec: (LayoutSpec  
+		proportionalWidth: 1.0
+		proportionalHeight: self class titleHeight)	! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+makeTourButton
+	"Answer the 'Tour' button"
+	
+	^ (GameButtonMorph label: 'Tour' action: #doTour state: true model: self)
+		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+numbersArea
+	"Answer the value of numbersArea"
+
+	^ numbersArea! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+numbersArea: anObject
+	"Set the value of numbersArea"
+
+	numbersArea _ anObject! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+othersArea
+	"Answer the value of othersArea"
+
+	^ othersArea! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+othersArea: anObject
+	"Set the value of othersArea"
+
+	othersArea _ anObject! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+path
+	"Answer the value of path"
+
+	^ path! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+path: anObject
+	"Set the value of path"
+
+	path _ anObject! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+quitGame
+	(self confirm: 'Are you sure you want to quit ', Construction asString, '?')
+		ifTrue: [
+			model currentPlayer ifNotNil: [model currentPlayer token ifNotNil: [model currentPlayer token delete]].
+			model quitGame]! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+seasonsArea
+	"Answer the value of seasonsArea"
+
+	^ seasonsArea! !
+
+!TestDnD methodsFor: 'accessing' stamp: 'dhn 3/5/2017 13:40:09'!
+seasonsArea: anObject
+	"Set the value of seasonsArea"
+
+	seasonsArea _ anObject! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+showSeasons: associations 
+	"Display the seasons contained in associations"
+	| width set bm txt dx |
+			
+	seasonsArea removeAllMorphs.
+	width _ layoutMorph morphWidth / self class cellsForGame.
+	set _ OrderedCollection new.
+	associations do: [:k | 	| first last sea |
+			first _ k key x - 1.
+			last _ k key y.
+			bm _ LayoutMorph newRow
+				padding: #center;
+				name: #season.
+			seasonsArea addMorph: bm
+				layoutSpec: (LayoutSpec proportionalWidth: width * (last - first) proportionalHeight: 1.0).
+			sea _ k value.
+			bm color: sea color.
+			txt _ StringMorph new
+				emphasis: 1;  "emphasis: bold=1"
+				font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+			bm addMorph: txt..
+			txt color: (sea textColor
+				ifTrue: [Color white]
+				ifFalse: [Color black]).
+			txt contents: sea desc.
+			dx _ Construction ironMap.
+			(dx includesKey: sea desc asSymbol)
+				ifTrue: [txt
+						setBalloonText: ('Requires ' , (dx at: sea desc asSymbol) asString)].
+			set add: txt].
+	^ set! !
+
+!TestDnD methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+startButtonSet
+	"Answer the buttons used to start the game"
+
+	buttonArea 
+		removeAllMorphs;
+		addMorph: self makeAddPlayerButton;
+		addMorph: self makeSettingsButton;
+		addMorph: self makeTourButton;
+		addMorph: self makeQuitGameButton.
+! !
+
+!TestDnD class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+cellColor
+	"Answer the color for a cell"
+	
+	^ Color r: 1.0 g: 0.93 b: 0.83! !
+
+!TestDnD class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+cellsForGame
+	"Answer the number of board spaces in view at any time"
+	
+	^ 7! !
+
+!TestDnD class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 16:28:27'!
+start
+	| win |
+	
+	win _ self open: Contract new label: 'A Board Game'.
+	
+	win morphExtent: (win owner morphExtent * (1.0@0.8)).
+	win morphPosition: 0@60.
+	self halt.
+	win board morphExtent: win path morphExtent.
+	"win board morphExtent: win board owner morphExtent.
+	{win board morphExtent} print.
+	win board
+		addMorph: win makeTitleArea;
+		addMorph: win makeNumbersArea;
+		addMorph: win makeOthersArea.
+	win gameTitle 
+		contents: 'Construction';
+		color: Color lightBrown.
+	win model buttons: win makeButtonArea.
+	win board
+		addMorph: win makeSeasonsArea;
+		addMorph: win makeCellsArea.
+	win model positionBoardTo: 1.
+	win startButtonSet.
+	win showSeasons: (win model parseSeasonsAt: 1)."
+
+	^ win
+! !
+
+!TestDnD class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 13:40:09'!
+titleHeight
+	"Answer the proportional height for morphs such as title"
+	
+	^ 0.11! !
+
 !TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
 board
 	"Answer the value of board"
@@ -2472,7 +2841,7 @@ board: anObject
 
 	board _ anObject! !
 
-!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 15:15:50'!
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 11:41:43'!
 buildMorphicWindow
 
 	path _ PasteUpMorph new
