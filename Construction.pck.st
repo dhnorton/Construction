@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 6:13:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 6 March 2017 at 12:25:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 68!
+!provides: 'Construction' 1 69!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -710,7 +710,7 @@ makeAuctionButton
 		layoutSpec: (LayoutSpec proportionalWidth: 0.08 proportionalHeight: 0.8);
 		setBalloonText: 'Start an auction for assets'! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 11/8/2016 16:54:52'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/6/2017 12:19:48'!
 makeButtonArea
 	"Lay out the area for buttons"
 	
@@ -724,7 +724,7 @@ makeButtonArea
 			name: #buttons;
 			padding: #center.
 			
-	layoutMorph addMorph: buttonArea.
+	board addMorph: buttonArea.
 	
 	^ buttonArea
 		! !
