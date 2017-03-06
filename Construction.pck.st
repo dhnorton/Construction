@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 6 March 2017 at 12:25:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 6 March 2017 at 1:46:38 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 69!
+!provides: 'Construction' 1 70!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -683,16 +683,6 @@ initialize
 
 	super initialize! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/5/2017 17:59:04'!
-layoutSubmorphsX
-	"Lay out path as a transparent overlay"
-	
-	super layoutSubmorphs.
-	
-	path
-		morphPosition: (self borderWidth)@(layoutMorph morphHeight * 0.4)		 
-		extent: layoutMorph morphWidth @ (model cells first morphHeight * 0.97)! !
-
 !Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:03:14'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
@@ -1156,11 +1146,11 @@ tourAt: anInterval
 	self startSteppingStepTime: anInterval. 	"time of each increment of the hop"
 ! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:35:44'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/6/2017 12:52:49'!
 windowPosition
 	"Answer the position for a window"
 	
-	^ model cells second morphPosition + (model windowPosition: 0@-40)! !
+	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
 
 !Construction methodsFor: 'operation' stamp: 'dhn 2/28/2017 21:08:20'!
 winningBidder: aPlayer bid: aBid
