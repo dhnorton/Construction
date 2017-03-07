@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 6 March 2017 at 1:46:38 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 7 March 2017 at 6:15:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 70!
+!provides: 'Construction' 1 71!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -3150,7 +3150,7 @@ cellsForGame
 	
 	^ 7! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 17:06:00'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/7/2017 18:12:18'!
 start
 	| win |
 	
@@ -3158,7 +3158,7 @@ start
 	
 	win morphExtent: (win owner morphExtent * (1.0@0.8)).
 	win morphPosition: 0@60.
-	win owner doOneCycleNow.
+	win owner someSubmorphPositionOrExtentChanged.
 	win board morphExtent: win board owner morphExtent.
 	{win board morphExtent} print.
 	win board
