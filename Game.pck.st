@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3057] on 5 March 2017 at 6:06:57 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 13 March 2017 at 9:07:43 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 52!
+!provides: 'Game' 1 53!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -70,6 +70,16 @@ SystemWindow subclass: #ListView
 	category: 'Game-Graphics'!
 !classDefinition: 'ListView class' category: #'Game-Graphics'!
 ListView class
+	instanceVariableNames: ''!
+
+!classDefinition: #Die2 category: #'Game-Graphics'!
+PluggableMorph subclass: #Die2
+	instanceVariableNames: 'layoutMorph row1 row2 row3 dot dash'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Game-Graphics'!
+!classDefinition: 'Die2 class' category: #'Game-Graphics'!
+Die2 class
 	instanceVariableNames: ''!
 
 !classDefinition: #ArrowMorph category: #'Game-Graphics'!
@@ -213,6 +223,9 @@ Abstract class for views of a board game.!
 
 !ListView commentStamp: 'dhn 7/10/2016 17:20' prior: 0!
 An abstract class for game windows.!
+
+!Die2 commentStamp: '<historical>' prior: 0!
+An experiment with PluggableMorph as a die.!
 
 !ArrowMorph commentStamp: '<historical>' prior: 0!
 Enable a form to be opened on a world.!
@@ -768,6 +781,201 @@ text1
 text1: aString 
 	text1 := aString.
 ! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 16:53:48'!
+clearDots
+	"remove dots from rows"
+	
+	row1 removeAllMorphs.
+	row2 removeAllMorphs.
+	row3 removeAllMorphs
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:19:51'!
+face1
+	"Set the die to 1"
+	
+	self clearDots.
+	row1 addAllMorphs: {dash copy. dash copy. dash copy}.
+	row2 addAllMorphs: {dash copy. dot copy. dash copy}.
+	row3 addAllMorphs: {dash copy. dash copy. dash copy}.
+	^ 1
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:21:57'!
+face2
+	"Set the die to 2, left"
+	
+	self clearDots.
+	row1 addAllMorphs: {dash copy. dash copy. dot copy}.
+	row2 addAllMorphs: {dash copy. dash copy. dash copy}.
+	row3 addAllMorphs: {dot copy. dash copy. dash copy}.
+	^ 2
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 21:03:24'!
+face2b
+	"Set the die to 2, right"
+	
+	self clearDots.
+	row1 addAllMorphs: {dot copy. dash copy. dash copy}.
+	row2 addAllMorphs: {dash copy. dash copy. dash copy}.
+	row3 addAllMorphs: {dash copy. dash copy. dot copy}.
+	^ 2
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:30:47'!
+face3
+	"Set the die to 3, left"
+	
+	self clearDots.
+	row1 addAllMorphs: {dash copy. dash copy. dot copy}.
+	row2 addAllMorphs: {dash copy. dot copy. dash copy}.
+	row3 addAllMorphs: {dot copy. dash copy. dash copy}.
+	^ 3
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:26:17'!
+face3b
+	"Set the die to 3, right"
+	
+	self clearDots.
+	row1 addAllMorphs: {dot copy. dash copy. dash copy}.
+	row2 addAllMorphs: {dash copy. dot copy. dash copy}.
+	row3 addAllMorphs: {dash copy. dash copy. dot copy}.
+	^ 3
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:15:50'!
+face4
+	"Set the die to 4"
+	
+	self clearDots.
+	row1 addAllMorphs: {dot copy. dash copy. dot copy}.
+	row2 addAllMorphs: {dash copy. dash copy. dash copy}.
+	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
+	^ 4
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:31:36'!
+face5
+	"Set the die to 5"
+	
+	self clearDots.
+	row1 addAllMorphs: {dot copy. dash copy. dot copy}.
+	row2 addAllMorphs: {dash copy. dot copy. dash copy}.
+	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
+	^ 5
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:11:44'!
+face6
+	"Set the die to 6, horizontal"
+	
+	self clearDots.
+	row1 addAllMorphs: {dot copy. dot copy. dot copy}.
+	row2 addAllMorphs: {dash copy. dash copy. dash copy}.
+	row3 addAllMorphs: {dot copy. dot copy. dot copy}.
+! !
+
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:16:41'!
+face6b
+	"Set the die to 6, vertical"
+	
+	self clearDots.
+	row1 addAllMorphs: {dot copy. dash copy. dot copy}.
+	row2 addAllMorphs: {dot copy. dash copy. dot copy}.
+	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
+	^ 6! !
+
+!Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:50:39'!
+initialize
+	| sep |
+	super initialize.
+	self color: Color white.
+	self morphExtent: 90@100.
+	self setDots.
+	layoutMorph _ LayoutMorph newColumn
+		color: Color transparent;
+		name: #layout.
+	self addMorph: layoutMorph.
+	
+	sep _ 0.09@0.
+	row1 _ LayoutMorph newRow
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
+		separation: self morphExtent x * sep;
+		color: Color transparent;
+		name: #row1.
+	row2 _ LayoutMorph newRow
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
+		separation: self morphExtent x * sep;
+		color: Color transparent;
+		name: #row2.
+	row3 _ LayoutMorph newRow
+		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
+		separation: self morphExtent x * sep;
+		color: Color transparent;
+		name: #row3.
+		
+	layoutMorph addAllMorphs: {row3. row2. row1}! !
+
+!Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:11:56'!
+layoutSubmorphs
+
+	layoutMorph 
+		morphExtent: self morphExtent * 0.8;
+		morphPosition: self morphExtent * 0.1! !
+
+!Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:57:17'!
+setDots
+	"Initialize the dot and anti-dot"
+	| scale |
+	
+	scale _ 0.22.
+	dot _ EllipseMorph new
+		color: Color black;
+		borderWidth: 0;
+		morphExtent: self morphExtent * scale.
+	dash _ EllipseMorph new
+		color: Color transparent;
+		borderWidth: 0;
+		morphExtent: self morphExtent * scale! !
+
+!Die2 methodsFor: 'operation' stamp: 'dhn 3/13/2017 20:39:29'!
+show: aCollection event: aSymbol
+	"Display the succession of faces in aCollection, triggering aSymbol at the end"
+	| limit linger t i x |
+	
+	limit _ 1600 + (500 atRandom).
+	linger _ limit + 700. 	"to pause before vanishing"
+	t _ 0.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		t _ t + delta.
+		t < limit 	"limit on the total time of activity"
+			ifTrue: [x _ self perform: (aCollection atWrap: i)]
+			ifFalse: [
+				t > linger ifTrue: [
+					self stopStepping.
+					self triggerEvent: aSymbol with: x.
+					self removeActionsForEvent: #morphicStep.
+					owner removeMorph: self]]].
+	self startSteppingStepTime: 85. 	"time of each step in the activity"
+! !
+
+!Die2 class methodsFor: 'reference' stamp: 'dhn 3/13/2017 20:31:58'!
+faces
+	"Answer the possible faces, in both orientations"
+	
+	^ #(
+		#face1 	#face1
+		#face2 	#face2b
+		#face3 	#face3b
+		#face4 	#face4
+		#face5 	#face5
+		#face6 	#face6b
+		)! !
 
 !ArrowMorph methodsFor: 'drawing' stamp: 'dhn 11/12/2016 19:13:00'!
 drawOn: aCanvas
