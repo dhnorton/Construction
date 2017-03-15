@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 13 March 2017 at 9:07:43 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 14 March 2017 at 8:50:58 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 53!
+!provides: 'Game' 1 54!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -888,13 +888,12 @@ face6b
 	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
 	^ 6! !
 
-!Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:50:39'!
+!Die2 methodsFor: 'initialization' stamp: 'dhn 3/14/2017 20:31:08'!
 initialize
 	| sep |
 	super initialize.
 	self color: Color white.
-	self morphExtent: 90@100.
-	self setDots.
+	self morphExtent: 45@50.
 	layoutMorph _ LayoutMorph newColumn
 		color: Color transparent;
 		name: #layout.
@@ -903,19 +902,20 @@ initialize
 	sep _ 0.09@0.
 	row1 _ LayoutMorph newRow
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
-		separation: self morphExtent x * sep;
 		color: Color transparent;
+		padding: #center;
 		name: #row1.
 	row2 _ LayoutMorph newRow
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
-		separation: self morphExtent x * sep;
 		color: Color transparent;
+		padding: #center;
 		name: #row2.
 	row3 _ LayoutMorph newRow
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
-		separation: self morphExtent x * sep;
 		color: Color transparent;
+		padding: #center;
 		name: #row3.
+	self setDots.
 		
 	layoutMorph addAllMorphs: {row3. row2. row1}! !
 
@@ -926,20 +926,20 @@ layoutSubmorphs
 		morphExtent: self morphExtent * 0.8;
 		morphPosition: self morphExtent * 0.1! !
 
-!Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:57:17'!
+!Die2 methodsFor: 'initialization' stamp: 'dhn 3/14/2017 20:31:59'!
 setDots
 	"Initialize the dot and anti-dot"
 	| scale |
 	
-	scale _ 0.22.
+	scale _ 0.25.
 	dot _ EllipseMorph new
 		color: Color black;
 		borderWidth: 0;
-		morphExtent: self morphExtent * scale.
+		morphExtent: (row1 morphExtent x * scale) asPoint.
 	dash _ EllipseMorph new
 		color: Color transparent;
 		borderWidth: 0;
-		morphExtent: self morphExtent * scale! !
+		morphExtent: (row1 morphExtent x * scale) asPoint! !
 
 !Die2 methodsFor: 'operation' stamp: 'dhn 3/13/2017 20:39:29'!
 show: aCollection event: aSymbol
