@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 12:33:43 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 3:44:13 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 55!
+!provides: 'Game' 1 57!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -291,11 +291,11 @@ wantsDroppedMorph: aMorph event: evt
 
 	^super wantsDroppedMorph: aMorph event: evt! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 3/17/2017 12:29:50'!
+!Token methodsFor: 'stepping' stamp: 'dhn 3/17/2017 14:13:34'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	
-self halt.
+self halt: 'Token is where we are'.
 	self arrowRight.
 	self moveFrom: who position to: aPosition - who roll by: 1.
 	self deleteArrow
@@ -391,7 +391,7 @@ initialize
 	self setBalloonText: 'A token representing the player. When the Move button is clicked, 
 a die is "rolled" and the token moves that number of spaces.'! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/16/2017 08:55:57'!
+!Token methodsFor: 'stepping' stamp: 'dhn 3/17/2017 14:16:23'!
 jump: aCount
 	"Move the receiver in aCount hops"
 	| step limit i horiz |
@@ -399,7 +399,6 @@ jump: aCount
 	step _ 30.	"time of each increment of the hop"
 	limit _ hop size * (aCount min: 6).
 	horiz _ (who mgr cells first morphWidth +2)/ (hop size).
-	{aCount. hop size. horiz} print.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :delta |
 		i _ i + 1.
@@ -2035,17 +2034,6 @@ wrapIndex: anIndex around: aLimit
 		ifFalse: [anIndex <= 0
 				ifTrue: [^ aLimit].
 			^ anIndex]! !
-
-!Gamer methodsFor: 'movement' stamp: 'dhn 3/17/2017 12:32:08'!
-advanceTo: aPosition 
-	"Slide the board under a token, forward to aPosition"
-	| pos |
-	
-	token arrowRight.
-	pos _ self position - self roll.
-	token moveFrom: pos to: aPosition - self roll by: 1.
-	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size)
-! !
 
 !Gamer methodsFor: 'accessing' stamp: 'dhn 9/3/2013 21:29'!
 assets

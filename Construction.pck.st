@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 12:16:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 3:41:41 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 72!
+!provides: 'Construction' 1 73!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1152,7 +1152,7 @@ windowPosition
 	
 	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 2/28/2017 21:08:20'!
+!Construction methodsFor: 'operation' stamp: 'dhn 3/17/2017 15:27:07'!
 winningBidder: aPlayer bid: aBid
 	"Change current player to aPlayer and move to job, if necessary"
 	| space playr |
@@ -1161,7 +1161,6 @@ self halt.
 		ifTrue: [
 			playr _ model currentPlayer.
 			space _ playr position.
-			self setupToken: playr.
 			playr canDoJob]
 		ifFalse: [
 			space _ model currentPlayer position.
@@ -1171,11 +1170,11 @@ self halt.
 			playr _ model currentPlayer.
 			gameTitle contents: aPlayer, '''s turn.'.
 			gameTitle color: playr token color.
-			self setupToken: playr.
 			playr rollForHarvest.
 			model 
 				updatePlayer; 
 				positionBoardTo: playr position.
+			self setupToken: playr.
 			playr token setPosition.
 			(model spaces at: playr position) markRemFor: playr.
 			"model moveFrom: model currentPlayer position to: space."
