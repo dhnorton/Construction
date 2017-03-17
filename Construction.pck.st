@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 7 March 2017 at 6:15:50 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 12:16:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 71!
+!provides: 'Construction' 1 72!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -759,13 +759,13 @@ makeCellsArea
 		
 ! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:53:17'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 3/17/2017 11:37:36'!
 makeDoJobButton
 	"Answer the 'Do Job' button"
 	
 	^ (GameButtonMorph label: 'Do Job' action: #doJob state: false model: model)
 		layoutSpec: (LayoutSpec proportionalWidth: 0.07 proportionalHeight: 0.8);
-		setBalloonText: 'Do the job for the season indicated above the space.'! !
+		setBalloonText: 'Do the job for the market indicated above the space.'! !
 
 !Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:57:27'!
 makeEndTurnButton
