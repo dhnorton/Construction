@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 14 March 2017 at 8:50:58 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 12:33:43 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 54!
+!provides: 'Game' 1 55!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -291,13 +291,13 @@ wantsDroppedMorph: aMorph event: evt
 
 	^super wantsDroppedMorph: aMorph event: evt! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/18/2017 17:11:11'!
+!Token methodsFor: 'stepping' stamp: 'dhn 3/17/2017 12:29:50'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	
 self halt.
 	self arrowRight.
-	self moveFrom: who position to: aPosition by: 1.
+	self moveFrom: who position to: aPosition - who roll by: 1.
 	self deleteArrow
 ! !
 
@@ -2036,26 +2036,13 @@ wrapIndex: anIndex around: aLimit
 				ifTrue: [^ aLimit].
 			^ anIndex]! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 15:42:05'!
+!Gamer methodsFor: 'movement' stamp: 'dhn 3/17/2017 12:32:08'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	| pos |
 	
 	token arrowRight.
 	pos _ self position - self roll.
-self halt.
-	token moveFrom: pos to: aPosition - self roll by: 1.
-	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size)
-! !
-
-!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 18:09:03'!
-advanceToX: aPosition 
-	"Slide the board under a token, forward to aPosition"
-	| pos |
-	
-	token arrowRight.
-	pos _ self position - self roll.
-self halt.
 	token moveFrom: pos to: aPosition - self roll by: 1.
 	self position: (self mgr wrapIndex: aPosition around: self mgr spaces size)
 ! !
