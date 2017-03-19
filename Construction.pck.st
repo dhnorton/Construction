@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:42:45 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:59:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 79!
+!provides: 'Construction' 1 80!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -4456,10 +4456,10 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 3/18/2017 12:59:00'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 3/18/2017 20:46:32'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName and colored aColor"
-	| pl  tok |
+	| pl |
 	
 	self players add: (pl _ Contractor new
 		marker: (EllipseMorph new
@@ -4467,13 +4467,9 @@ setupPlayer: aName color: aColor
 		color: aColor;
 		mgr: self;
 		identity: aName).
-	tok _ ContractToken new
-		openInWorld: arena path;
-		color: aColor;
-		setSize;
-		setPosition.
-	tok id contents: aName.
-	self when: #deleteOpenWindows send: #delete to: tok.
+	self token: ContractToken new.
+	self setTokenFor: pl.
+	self when: #deleteOpenWindows send: #delete to: token.
 	self availableOptions do: [:opt | pl options addLast: opt].! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:15:47'!
@@ -5558,12 +5554,12 @@ self halt: 'should not occur'.
 		morphExtent: 310@180;						
 		details: details! !
 
-!Contractor methodsFor: 'space-related' stamp: 'dhn 9/25/2016 12:33:35'!
+!Contractor methodsFor: 'space-related' stamp: 'dhn 3/18/2017 20:52:27'!
 doubledString
 	"Answer the string signifying whether the market is doubled for the receiver"
 	| mkt |
 	
-	mkt _ (mgr seasonAt: position) desc asSymbol.
+	mkt _ (mgr seasonAt: self position) desc asSymbol.
 	^ (markets at: mkt ifAbsent: [^ '']) > 1 ifTrue: ['(doubled)'] ifFalse:['']! !
 
 !Contractor methodsFor: 'option-related' stamp: 'dhn 5/3/2012 17:06'!
