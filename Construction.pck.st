@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:23:35 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:42:45 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 78!
+!provides: 'Construction' 1 79!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -891,21 +891,6 @@ model
 
 	^ model! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 13:35:55'!
-nextPlayer: aPlayer
-	"Begin the next player's turn"
-
-	gameTitle contents: aPlayer identity , '''s turn.'.
-	gameTitle color: aPlayer color.
-	model 
-		updatePlayer; 
-		positionBoardTo: aPlayer position;
-		removeMarkers.
-	aPlayer token: (ContractToken new openInWorld: path).
-	self setupToken: aPlayer.
-	model testMode
-		ifTrue: [model hardRoll: (6 min: (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6') asNumber)]! !
-
 !Construction methodsFor: 'accessing' stamp: 'dhn 7/25/2016 11:26'!
 numbersArea
 	"Answer the value of numbersArea"
@@ -935,15 +920,6 @@ quitGame
 		ifTrue: [
 			model currentPlayer ifNotNil: [model currentPlayer token ifNotNil: [model currentPlayer token delete]].
 			model quitGame]! !
-
-!Construction methodsFor: 'initialization' stamp: 'dhn 7/18/2016 10:53'!
-setupNumbers: aBoard
-	|title|
-	
-	title color: Color white;
-		name: 'numbers';
-		string: '____'.
-! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 13:35:28'!
 setupToken: aPlayer
