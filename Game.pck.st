@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:36:53 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:47:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 68!
+!provides: 'Game' 1 69!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -1933,11 +1933,12 @@ moveFromX: positionA to: positionB
 	currentPlayer token deleteArrow
 ! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 19:01:41'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 14:45:02'!
 nextPlayer
 	"Begin the next player's turn"
 	
 	self triggerEvent: #deleteOpenWindows.
+	token delete.
 	currentPlayer _ (players atWrap: (playerIndex _ playerIndex + 1)).
 	self triggerEvent: #itemChange.
 	self 
