@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 12:48:13 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:19:44 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 64!
+!provides: 'Game' 1 67!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -902,7 +902,7 @@ face6b
 	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
 	^ 6! !
 
-!Die2 methodsFor: 'initialization' stamp: 'dhn 3/19/2017 11:17:52'!
+!Die2 methodsFor: 'initialization' stamp: 'dhn 3/19/2017 14:07:19'!
 initialize
 	| sep |
 	super initialize.
@@ -931,9 +931,7 @@ initialize
 		name: #row3.
 	self setDots.
 		
-	layoutMorph addAllMorphs: {row3. row2. row1}.
-	
-	self when: #rolled send: #hopFor: to: model with: #roll! !
+	layoutMorph addAllMorphs: {row3. row2. row1}! !
 
 !Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:11:56'!
 layoutSubmorphs
@@ -957,7 +955,7 @@ setDots
 		borderWidth: 0;
 		morphExtent: (row1 morphExtent x * scale) asPoint! !
 
-!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 11:57:22'!
+!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 14:13:07'!
 show: aCollection event: aSymbol
 	"Display the succession of faces in aCollection, triggering aSymbol at the end"
 	| limit linger t i x |
@@ -974,8 +972,7 @@ show: aCollection event: aSymbol
 			ifFalse: [
 				t > linger ifTrue: [
 					self stopStepping.
-					self halt.
-					self triggerEvent: aSymbol with: x.
+					model hopFor: x.
 					self removeActionsForEvent: #morphicStep.
 					owner removeMorph: self]]].
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
@@ -1853,14 +1850,13 @@ hardRoll: anObject
 	
 	hardRoll _ anObject! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 22:44:42'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 14:18:42'!
 hopFor: anObject
 	"Hop token for anObject number of spaces"
 	| roll |
 	
 	token who oldPosition: token who position.
 	roll _ self testMode ifTrue: [self hardRoll] ifFalse: [anObject].
-	self halt.
 	token jump: roll.
 	currentPlayer 
 		position: (currentPlayer forwardTo: (roll + currentPlayer position) 
@@ -2207,19 +2203,6 @@ history: anObject
 
 	history := anObject! !
 
-!Gamer methodsFor: 'accessing' stamp: 'dhn 3/18/2017 22:07:30'!
-hopForX: anObject
-	"Hop token for anObject number of spaces"
-	
-	oldPosition _ position.
-	roll _ mgr testMode ifTrue: [self mgr hardRoll] ifFalse: [anObject].
-	self halt.
-	token jump: roll.
-	self 
-		position: (self forwardTo: (roll + self position) 
-		around: mgr spaces size).
-	self rollStats: roll! !
-
 !Gamer methodsFor: 'accessing' stamp: 'dhn 7/24/2016 12:46'!
 identity
 	"Answer the value of identity"
@@ -2390,18 +2373,6 @@ tally: anAmount
 		self mgr updatePlayer.
 		self tally: self emergencyLoan].
 ! !
-
-!Gamer methodsFor: 'accessing' stamp: 'dhn 8/22/2016 20:04:42'!
-token
-	"Answer the value of token"
-
-	^ token! !
-
-!Gamer methodsFor: 'accessing' stamp: 'dhn 8/22/2016 20:05:11'!
-token: anObject
-	"Set the value of token"
-
-	token _ anObject! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/25/2012 21:00'!
 totalRoll

@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 12:44:55 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:17:53 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 82!
+!provides: 'Construction' 1 83!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -914,11 +914,11 @@ playButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'termination' stamp: 'dhn 10/2/2016 16:00:42'!
+!Construction methodsFor: 'termination' stamp: 'dhn 3/19/2017 14:17:42'!
 quitGame
 	(self confirm: 'Are you sure you want to quit ', Construction asString, '?')
 		ifTrue: [
-			model currentPlayer ifNotNil: [model currentPlayer token ifNotNil: [model currentPlayer token delete]].
+			model token ifNotNil: [model token delete].
 			model quitGame]! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 13:35:28'!
