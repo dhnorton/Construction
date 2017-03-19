@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:19:44 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:36:53 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 67!
+!provides: 'Game' 1 68!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -882,7 +882,7 @@ face5
 	^ 5
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:11:44'!
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/19/2017 14:33:01'!
 face6
 	"Set the die to 6, horizontal"
 	
@@ -890,7 +890,7 @@ face6
 	row1 addAllMorphs: {dot copy. dot copy. dot copy}.
 	row2 addAllMorphs: {dash copy. dash copy. dash copy}.
 	row3 addAllMorphs: {dot copy. dot copy. dot copy}.
-! !
+	^ 6! !
 
 !Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:16:41'!
 face6b
@@ -954,6 +954,29 @@ setDots
 		color: Color transparent;
 		borderWidth: 0;
 		morphExtent: (row1 morphExtent x * scale) asPoint! !
+
+!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 14:27:50'!
+show: aCollection
+	"Display the succession of faces in aCollection on the die, then hop the token"
+	| limit linger t i x |
+	
+	limit _ 1600 + (500 atRandom).
+	linger _ limit + 700. 	"to pause before vanishing"
+	t _ 0.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		t _ t + delta.
+		t < limit 	"limit on the total time of activity"
+			ifTrue: [x _ self perform: (aCollection atWrap: i)]
+			ifFalse: [
+				t > linger ifTrue: [
+					self stopStepping.
+					model hopFor: x.
+					self removeActionsForEvent: #morphicStep.
+					owner removeMorph: self]]].
+	self startSteppingStepTime: 85. 	"time of each step in the activity"
+! !
 
 !Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 14:13:07'!
 show: aCollection event: aSymbol
@@ -1879,7 +1902,7 @@ markerSize
 	"Answer the size for markers"
 	^ 28! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 12:03:06'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 14:28:22'!
 move
 	"Roll the die"
 	| bone |
@@ -1889,7 +1912,7 @@ move
 	bone model: self.
 	currentPlayer die: bone.
 	bone adjustTo: token.
-	bone show: bone class faces shuffled event: #rolled! !
+	bone show: bone class faces shuffled! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 2/28/2017 15:23:48'!
 moveFromX: positionA to: positionB
