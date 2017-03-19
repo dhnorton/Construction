@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:17:53 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 3:18:29 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 83!
+!provides: 'Construction' 1 84!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -4455,15 +4455,16 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 3/18/2017 20:46:32'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 3/19/2017 14:56:06'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName and colored aColor"
 	| pl |
 	
 	self players add: (pl _ Contractor new
-		marker: (EllipseMorph new
-			morphExtent: 18@10);
 		color: aColor;
+		marker: (EllipseMorph new
+			color: aColor;
+			morphExtent: 18@10);
 		mgr: self;
 		identity: aName).
 	self token: ContractToken new.
