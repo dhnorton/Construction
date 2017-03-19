@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 2:47:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 3:57:15 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 69!
+!provides: 'Game' 1 70!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -955,7 +955,7 @@ setDots
 		borderWidth: 0;
 		morphExtent: (row1 morphExtent x * scale) asPoint! !
 
-!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 14:27:50'!
+!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 15:36:52'!
 show: aCollection
 	"Display the succession of faces in aCollection on the die, then hop the token"
 	| limit linger t i x |
@@ -973,6 +973,7 @@ show: aCollection
 				t > linger ifTrue: [
 					self stopStepping.
 					model hopFor: x.
+					model currentPlayer roll: x.
 					self removeActionsForEvent: #morphicStep.
 					owner removeMorph: self]]].
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
@@ -1738,6 +1739,15 @@ shortest: a to: b in: n
 addMarkerIDInMarks
 	"(self marks at: self currentPlayer position) at: self playerIndex
 		put: self currentPlayer identity" ! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 15:52:32'!
+advanceTo: aPosition 
+	"Slide the board under a token, forward to aPosition"
+	
+	token arrowRight.
+	token moveFrom: token who position to: aPosition - token who roll by: 1.
+	token deleteArrow
+! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
 arena
