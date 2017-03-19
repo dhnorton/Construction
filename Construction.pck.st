@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:59:36 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 12:44:55 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 80!
+!provides: 'Construction' 1 82!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -1100,13 +1100,12 @@ startButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 19:12:20'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/19/2017 11:04:10'!
 startGame
 	"Change the buttons and start the game"
 	
 	self playButtonSet.
 	model players do: [:ea | 
-		ea die when: #rolled send: #hopFor: to: ea with: #value.
 		ea die when: #franchiseEffect: send: #franchiseEffect: to: model with: #value.
 		ea die when: #jobDone send: #remainder: to: ea mgr with: #value.
 		ea 
@@ -5928,14 +5927,6 @@ setupAssets
 	(set at: #Players) owner: self.
 	^ set
 ! !
-
-!Contractor methodsFor: 'initialize-release' stamp: 'dhn 8/22/2016 20:56:03'!
-setupMarker
-	"Set a marker for the player's position"
-	
-	marker _ (EllipseMorph new
-		color: token color;
-		morphExtent: 18@10)! !
 
 !Contractor methodsFor: 'initialize-release' stamp: 'dhn 8/17/2016 21:50:43'!
 setupMarkets

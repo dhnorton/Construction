@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:22:29 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 12:48:13 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 62!
+!provides: 'Game' 1 64!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -174,7 +174,7 @@ Game class
 
 !classDefinition: #Gamer category: #'Game-Model'!
 Object subclass: #Gamer
-	instanceVariableNames: 'color identity cash debt inFlow outFlow interestPd paidInterest avoidedDebt assets history passedGo years mgr position oldPosition token die marker roll totalRoll turns expenseCount'
+	instanceVariableNames: 'color identity cash debt inFlow outFlow interestPd paidInterest avoidedDebt assets history passedGo years mgr position oldPosition die marker roll totalRoll turns expenseCount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -787,6 +787,15 @@ text1: aString
 	text1 := aString.
 ! !
 
+!Die2 methodsFor: 'drawing' stamp: 'dhn 3/18/2017 22:56:44'!
+adjustTo: aMorph
+	"Set position and dot size based on anObject"
+	| s |
+	
+	s _ aMorph morphExtent x * 50 / 132.
+	self morphExtent: s@s.
+	self referencePosition: aMorph referencePosition - (0@2 * aMorph morphHeight)! !
+
 !Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 16:53:48'!
 clearDots
 	"remove dots from rows"
@@ -893,7 +902,7 @@ face6b
 	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
 	^ 6! !
 
-!Die2 methodsFor: 'initialization' stamp: 'dhn 3/14/2017 20:31:08'!
+!Die2 methodsFor: 'initialization' stamp: 'dhn 3/19/2017 11:17:52'!
 initialize
 	| sep |
 	super initialize.
@@ -922,7 +931,9 @@ initialize
 		name: #row3.
 	self setDots.
 		
-	layoutMorph addAllMorphs: {row3. row2. row1}! !
+	layoutMorph addAllMorphs: {row3. row2. row1}.
+	
+	self when: #rolled send: #hopFor: to: model with: #roll! !
 
 !Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:11:56'!
 layoutSubmorphs
@@ -946,7 +957,7 @@ setDots
 		borderWidth: 0;
 		morphExtent: (row1 morphExtent x * scale) asPoint! !
 
-!Die2 methodsFor: 'operation' stamp: 'dhn 3/13/2017 20:39:29'!
+!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 11:57:22'!
 show: aCollection event: aSymbol
 	"Display the succession of faces in aCollection, triggering aSymbol at the end"
 	| limit linger t i x |
@@ -963,6 +974,7 @@ show: aCollection event: aSymbol
 			ifFalse: [
 				t > linger ifTrue: [
 					self stopStepping.
+					self halt.
 					self triggerEvent: aSymbol with: x.
 					self removeActionsForEvent: #morphicStep.
 					owner removeMorph: self]]].
@@ -1179,7 +1191,7 @@ face6b
 	^ 6
 ! !
 
-!DieMorph methodsFor: 'initialization' stamp: 'dhn 12/2/2016 08:38:09'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 3/18/2017 22:40:12'!
 initialize
 
 	super initialize.
@@ -1188,15 +1200,18 @@ initialize
 	wo bits atAllPut: 0. 		"a white dot"
 	self 
 		color: Color white;
-		morphExtent: 50@50
+		morphExtent: 50@50.
+		
+	self when: #rolled send: #hopFor: to: self owner owner owner model with: #roll
 
 	! !
 
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 12/8/2016 19:23:41'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/18/2017 22:29:48'!
 show: aCollection event: aSymbol
 	"Display the succession of faces in aCollection, triggering aSymbol at the end"
 	| limit linger t i x |
 	
+	self halt.
 	limit _ 1600 + (500 atRandom).
 	linger _ limit + 700. 	"to pause before vanishing"
 	t _ 0.
@@ -1728,10 +1743,6 @@ buttons: anObject
 
 	buttons := anObject! !
 
-!Game methodsFor: 'initialize' stamp: 'dhn 9/22/2016 21:04:48'!
-cellWidth
-	^ cells first morphWidth! !
-
 !Game methodsFor: 'accessing' stamp: 'dhn 9/22/2016 21:02:27'!
 cells
 	"Answer the value of cells"
@@ -1842,6 +1853,20 @@ hardRoll: anObject
 	
 	hardRoll _ anObject! !
 
+!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 22:44:42'!
+hopFor: anObject
+	"Hop token for anObject number of spaces"
+	| roll |
+	
+	token who oldPosition: token who position.
+	roll _ self testMode ifTrue: [self hardRoll] ifFalse: [anObject].
+	self halt.
+	token jump: roll.
+	currentPlayer 
+		position: (currentPlayer forwardTo: (roll + currentPlayer position) 
+			around: spaces size).
+	currentPlayer rollStats: roll! !
+
 !Game methodsFor: 'as yet unclassified' stamp: 'dhn 8/2/2014 21:49'!
 initialButtonState
 	"Establish the button state at the start of the game"
@@ -1858,16 +1883,17 @@ markerSize
 	"Answer the size for markers"
 	^ 28! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 20:01:42'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 12:03:06'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
-	bone _ DieMorph new openInWorld: arena path.
-	token die: bone.
+	bone _ Die2 new openInWorld: arena path.
+	bone model: self.
+	currentPlayer die: bone.
 	bone adjustTo: token.
-	bone show: bone combo shuffled event: #rolled! !
+	bone show: bone class faces shuffled event: #rolled! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 2/28/2017 15:23:48'!
 moveFromX: positionA to: positionB
@@ -2181,8 +2207,8 @@ history: anObject
 
 	history := anObject! !
 
-!Gamer methodsFor: 'accessing' stamp: 'dhn 3/18/2017 13:57:46'!
-hopFor: anObject
+!Gamer methodsFor: 'accessing' stamp: 'dhn 3/18/2017 22:07:30'!
+hopForX: anObject
 	"Hop token for anObject number of spaces"
 	
 	oldPosition _ position.
