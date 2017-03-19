@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 3:41:41 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:23:35 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 73!
+!provides: 'Construction' 1 78!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -551,7 +551,7 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/5/2017 17:54:28'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 19:18:00'!
 buildMorphicWindow
 
 	model arena: self.
@@ -566,8 +566,9 @@ buildMorphicWindow
 	
 	model when: #quitGame send: #delete to: self.
 	model when: #itemChange send: #displayNumbers to: self.
+	model when: #titleChange: send: #titleChange: to: self with: #player.
 	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
-	model when: #setupToken: send: #setupToken: to: self with: #player.
+	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 
 ! !
@@ -591,7 +592,7 @@ displayInvoice: details title: aTitle
 		morphExtent: 310@180;						
 		details: details! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 1/16/2017 11:09:46'!
+!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 13:00:16'!
 displayNumbers
 	"Display cash, debt, and goal progress"
 	| c d net otherLead pluralForm others |
@@ -601,7 +602,7 @@ displayNumbers
 	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
 	numbersArea submorphs first 
 		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
-		color: model currentPlayer token color.
+		color: model currentPlayer color.
 	pluralForm _ model players size = 2
 		ifTrue: ['Player''s']
 		ifFalse: ['Players'''].
@@ -622,7 +623,7 @@ displayNumbers
 		x _ ' $', ea cash truncated printStringWithCommas.
 		othersArea addMorph: ((StringMorph contents: x) 
 			emphasis: AbstractFont boldCode;
-			color: ea token color;
+			color: ea color;
 			setBalloonText: 'cash held by ', ea identity;
 			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
 
@@ -890,20 +891,18 @@ model
 
 	^ model! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 1/15/2017 22:00:52'!
+!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 13:35:55'!
 nextPlayer: aPlayer
 	"Begin the next player's turn"
 
 	gameTitle contents: aPlayer identity , '''s turn.'.
-	gameTitle color: aPlayer token color.
+	gameTitle color: aPlayer color.
 	model 
 		updatePlayer; 
 		positionBoardTo: aPlayer position;
 		removeMarkers.
-	aPlayer token 
-		openInWorld: path;
-		setSize;
-		setPosition.
+	aPlayer token: (ContractToken new openInWorld: path).
+	self setupToken: aPlayer.
 	model testMode
 		ifTrue: [model hardRoll: (6 min: (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6') asNumber)]! !
 
@@ -946,15 +945,20 @@ setupNumbers: aBoard
 		string: '____'.
 ! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 10/30/2016 17:06:00'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 13:35:28'!
 setupToken: aPlayer
 	"Place the player's token on the board"
 	
-	aPlayer token doubled contents: ''.
+	aPlayer token id contents: aPlayer identity.
+	aPlayer token doubled contents: aPlayer doubledString.
+	aPlayer token 
+		color: aPlayer color;
+		setSize;
+		setPosition.
 	path addMorph: aPlayer token.
 	^ aPlayer token who: aPlayer! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:39:53'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:17:31'!
 showAssetAuction
 	"Open an asset auction window"
 	| pl win purpose |
@@ -970,7 +974,7 @@ showAssetAuction
 		setLabel: 'Auction of ', purpose;
 		startButtons;
 		color: (Color r: 0.986 g: 0.986 b: 0.986);
-		setWindowColor: pl token color;
+		setWindowColor: pl color;
 		morphPosition: self windowPosition;
 		morphExtent: 450@300! !
 
@@ -1013,7 +1017,7 @@ showJobAuctionAt: aPosition
 		morphExtent: 450@300;
 		openInHand! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:39:26'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:13:51'!
 showLoan
 	"Show window for reducing debt"
 	| pl win |
@@ -1023,14 +1027,14 @@ showLoan
 	win openInWorld: path.
 	win
 		setLabel: pl identity, '''s Debt';
-		setWindowColor: pl token color;
+		setWindowColor: pl color;
 		startButtons;
 		morphPosition: self windowPosition;
 		morphExtent: 300 @ 220.
 				
 	model disableAll: {'Pay Loan'}! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:38:32'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:14:21'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
@@ -1042,7 +1046,7 @@ showOpts
 			win openInWorld: path.
 			win
 				setLabel: pl identity, '''s Shopping';
-				setWindowColor: pl token color;
+				setWindowColor: pl color;
 				startButtons;
 				morphPosition: self windowPosition;
 				morphExtent: 300 @ 220.
@@ -1081,7 +1085,7 @@ showSeasons: associations
 			set add: txt].
 	^ set! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 11/13/2016 19:32:27'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:13:07'!
 showStats
 	"Open a window on a player's statistics"
 	| pl win |
@@ -1091,10 +1095,22 @@ showStats
 	win openInWorld: path.
 	win
 		setLabel: pl identity, '''s Statistics';
-		setWindowColor: pl token color;
+		setWindowColor: pl color;
 		morphPosition: self windowPosition;
 		morphExtent: 300 @ 260.
 	model disableAll: {'Stats'}! !
+
+!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 19:26:28'!
+showToken
+	"Establish the size and position of the token"
+	| w h |
+	
+	w _ self morphExtent x * 0.13.
+	h _ w * 0.5.
+	model token 
+		morphExtent: w@h;
+		morphPosition: self morphExtent * (0.006@0.72);
+		openInWorld: path! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 9/11/2016 16:12:56'!
 startButtonSet
@@ -1108,7 +1124,7 @@ startButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 1/13/2017 17:35:19'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 19:12:20'!
 startGame
 	"Change the buttons and start the game"
 	
@@ -1126,8 +1142,46 @@ startGame
 	model 
 		testGoal;
 		nextPlayer.
-	self setupToken: model currentPlayer.
 	model initialButtonState! !
+
+!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 20:21:07'!
+titleChange: aPlayer
+	"Change the title, showing player data in color"
+	"Display cash, debt, and goal progress"
+	| c d net otherLead pluralForm others |
+	
+	gameTitle contents: aPlayer identity , '''s turn.'.
+	gameTitle color: aPlayer color.
+	
+	c _ '$', model currentPlayer cash truncated printStringWithCommas.
+	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
+	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
+	numbersArea submorphs first 
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		color: model currentPlayer color.
+	pluralForm _ model players size = 2
+		ifTrue: ['Player''s']
+		ifFalse: ['Players'''].
+	otherLead _ (StringMorph contents: (String streamContents: [:string |
+		string
+			nextPutAll: 'Other ';
+			nextPutAll: pluralForm;
+			nextPutAll: ' Cash: '])).
+	otherLead
+		emphasis: AbstractFont boldCode;
+		color: Color lightBrown;
+		font: (AbstractFont familyName: 'DejaVu' pointSize: 18).
+	othersArea 
+		removeAllMorphs;
+		addMorph: otherLead.
+	others _ model players select: [:a | a ~= model currentPlayer].
+	others do: [:ea | | x |
+		x _ ' $', ea cash truncated printStringWithCommas.
+		othersArea addMorph: ((StringMorph contents: x) 
+			emphasis: AbstractFont boldCode;
+			color: ea color;
+			setBalloonText: 'cash held by ', ea identity;
+			font: (AbstractFont familyName: 'DejaVu' pointSize: 18))]! !
 
 !Construction methodsFor: 'operation' stamp: 'dhn 1/11/2017 15:45:58'!
 tourAt: anInterval 
@@ -1379,7 +1433,7 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 3/5/2017 17:52:44'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 3/18/2017 20:09:25'!
 start
 	"Start the Construction Game"
 	| win |
@@ -1405,7 +1459,6 @@ start
 	win startButtonSet.
 	win showSeasons: (win model parseSeasonsAt: 1).
 	
-	win model when: #nextPlayer: send: #nextPlayer: to: win with: #player.
 	win model when: #winningBidder send: #winningBidder:bid: to: win withArguments: #(#buyer #bid).
 	
 	^ win
@@ -1670,7 +1723,7 @@ buildMorphicWindow
 		addMorph: self setUpMidRow;
 		addMorph: (buyers _ self setUpBuyers)! !
 
-!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 9/17/2016 21:51:19'!
+!AuctionAsset methodsFor: 'buttons' stamp: 'dhn 3/18/2017 20:18:17'!
 buyerButtons
 	"Set bidding buttons for the players"
 	| col |
@@ -1679,7 +1732,7 @@ buyerButtons
 	model players do: [:ea |
 		col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
 			morphExtent: 70@30;
-			color: ea token color;
+			color: ea color;
 			setBalloonText: 'bidder')].
 	buyers addAllMorphs: col reversed! !
 
@@ -2079,7 +2132,7 @@ plotter
 	
 	^ plotter! !
 
-!HistoryView methodsFor: 'accessing' stamp: 'dhn 10/1/2016 16:49:51'!
+!HistoryView methodsFor: 'accessing' stamp: 'dhn 3/18/2017 20:15:20'!
 rank: aCollection
 	"Display players ranked in the legend"
 	| n field |
@@ -2092,7 +2145,7 @@ rank: aCollection
 			string 
 				nextPutAll: n asString, '. ';
 				nextPutAll: ea identity]).
-		field color: ea token color]
+		field color: ea color]
 ! !
 
 !HistoryView methodsFor: 'accessing' stamp: 'dhn 9/30/2016 18:41:21'!
@@ -4427,22 +4480,20 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 2/16/2017 08:56:39'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 3/18/2017 12:59:00'!
 setupPlayer: aName color: aColor
-	"Establish a player named aName with a die and with token and marker colored aColor"
+	"Establish a player named aName and colored aColor"
 	| pl  tok |
 	
 	self players add: (pl _ Contractor new
-		die: DieMorph new;
 		marker: (EllipseMorph new
-			color: aColor;
 			morphExtent: 18@10);
-		identity: aName).
-	pl 
+		color: aColor;
 		mgr: self;
-		token: (tok _ ContractToken new color: aColor).
-	tok 
+		identity: aName).
+	tok _ ContractToken new
 		openInWorld: arena path;
+		color: aColor;
 		setSize;
 		setPosition.
 	tok id contents: aName.
@@ -5436,6 +5487,18 @@ closeDown: aBool
 	self shutDown: true.
 	^ 0
 ! !
+
+!Contractor methodsFor: 'accessing' stamp: 'dhn 3/18/2017 12:35:42'!
+color
+	"Answer the value of color"
+
+	^ color! !
+
+!Contractor methodsFor: 'accessing' stamp: 'dhn 3/18/2017 12:35:20'!
+color: anObject
+	"Set the value of color"
+
+	color := anObject! !
 
 !Contractor methodsFor: 'contingency' stamp: 'dhn 9/7/2014 11:07'!
 contingency

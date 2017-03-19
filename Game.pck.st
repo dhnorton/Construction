@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 17 March 2017 at 3:44:13 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 18 March 2017 at 8:22:29 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 57!
+!provides: 'Game' 1 62!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -164,7 +164,7 @@ Direction class
 
 !classDefinition: #Game category: #'Game-Model'!
 Object subclass: #Game
-	instanceVariableNames: 'arena cells spaces goal response players currentPlayer playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
+	instanceVariableNames: 'arena cells spaces goal response players currentPlayer token playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
 	classVariableNames: 'TestGoal TestMode'
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -174,7 +174,7 @@ Game class
 
 !classDefinition: #Gamer category: #'Game-Model'!
 Object subclass: #Gamer
-	instanceVariableNames: 'identity cash debt inFlow outFlow interestPd paidInterest avoidedDebt assets history passedGo years mgr position oldPosition token die marker roll totalRoll turns expenseCount'
+	instanceVariableNames: 'color identity cash debt inFlow outFlow interestPd paidInterest avoidedDebt assets history passedGo years mgr position oldPosition token die marker roll totalRoll turns expenseCount'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -369,6 +369,12 @@ id
 	"Answer the value of id"
 
 	^ id! !
+
+!Token methodsFor: 'accessing' stamp: 'dhn 3/18/2017 13:10:52'!
+id: anObject
+	"Set the value of id"
+
+	id _ anObject! !
 
 !Token methodsFor: 'initialization' stamp: 'dhn 8/22/2016 20:12:13'!
 identity: aString
@@ -1322,7 +1328,7 @@ details
 		players: owner owner model players;
 		plotData! !
 
-!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 1/18/2017 18:19:37'!
+!PlotGraphMorph methodsFor: 'drawing' stamp: 'dhn 3/18/2017 20:16:23'!
 drawOn: aCanvas
 	"Draw all the lines, including axes, on the graph"
 	| fully lineColor |
@@ -1336,7 +1342,7 @@ drawOn: aCanvas
 	owner owner rank: sorted.
 	
 	sorted do: [:ea |
-		lineColor _ ea token color.
+		lineColor _ ea color.
 		ea history size > 1 ifTrue: [
 			points _ self asNormalizedPoints: ea history.
 
@@ -1852,14 +1858,15 @@ markerSize
 	"Answer the size for markers"
 	^ 28! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 12/8/2016 19:25:16'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 20:01:42'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
-	bone _ currentPlayer die openInWorld: arena path.
-	bone adjustTo: currentPlayer token.
+	bone _ DieMorph new openInWorld: arena path.
+	token die: bone.
+	bone adjustTo: token.
 	bone show: bone combo shuffled event: #rolled! !
 
 !Game methodsFor: 'operating' stamp: 'dhn 2/28/2017 15:23:48'!
@@ -1881,14 +1888,21 @@ moveFromX: positionA to: positionB
 	currentPlayer token deleteArrow
 ! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 9/25/2016 17:55:22'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 19:01:41'!
 nextPlayer
 	"Begin the next player's turn"
 	
-	currentPlayer _ (players atWrap: (playerIndex _ playerIndex + 1)).
 	self triggerEvent: #deleteOpenWindows.
+	currentPlayer _ (players atWrap: (playerIndex _ playerIndex + 1)).
 	self triggerEvent: #itemChange.
-	self triggerEvent: #nextPlayer: with: currentPlayer! !
+	self 
+		positionBoardTo: currentPlayer position;
+		removeMarkers.
+	self token: ContractToken new.
+	self setTokenFor: currentPlayer.
+	self triggerEvent: #titleChange: with: currentPlayer.
+	self testMode
+		ifTrue: [self hardRoll: (6 min: (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6') asNumber)]! !
 
 !Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/2/2016 17:01:38'!
 oldGoal
@@ -2010,11 +2024,33 @@ setGoal
 	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
 	x ~= '' ifTrue:  [goal _ x asNumber]! !
 
+!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 19:53:41'!
+setTokenFor: aPlayer
+	"Place the player's token on the board"
+	
+	token id contents: aPlayer identity.
+	token doubled contents: aPlayer doubledString.
+	token color: aPlayer color.
+	self triggerEvent: #showToken.
+	^ token who: aPlayer! !
+
 !Game methodsFor: 'accessing' stamp: 'dhn 10/7/2014 12:23'!
 spaceFreq
 	"Answer the value of spaceFreq"
 
 	^ spaceFreq! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 3/18/2017 18:39:37'!
+token
+	"Answer the value of token"
+
+	^ token! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 3/18/2017 18:39:03'!
+token: anObject
+	"Set the value of token"
+
+	token _ anObject! !
 
 !Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/10/2013 22:10'!
 won
@@ -2063,6 +2099,18 @@ cash: anObject
 	"Set the value of cash"
 
 	cash := anObject! !
+
+!Gamer methodsFor: 'accessing' stamp: 'dhn 3/18/2017 12:48:35'!
+color
+	"Answer the value of color"
+
+	^ color! !
+
+!Gamer methodsFor: 'accessing' stamp: 'dhn 3/18/2017 12:48:10'!
+color: anObject
+	"Set the value of color"
+
+	color := anObject! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/25/2012 20:18'!
 debt
@@ -2133,12 +2181,13 @@ history: anObject
 
 	history := anObject! !
 
-!Gamer methodsFor: 'accessing' stamp: 'dhn 2/17/2017 16:41:39'!
+!Gamer methodsFor: 'accessing' stamp: 'dhn 3/18/2017 13:57:46'!
 hopFor: anObject
 	"Hop token for anObject number of spaces"
 	
 	oldPosition _ position.
 	roll _ mgr testMode ifTrue: [self mgr hardRoll] ifFalse: [anObject].
+	self halt.
 	token jump: roll.
 	self 
 		position: (self forwardTo: (roll + self position) 
