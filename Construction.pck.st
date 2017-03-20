@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 3:57:29 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 4:59:38 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 85!
+!provides: 'Construction' 1 86!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -4809,7 +4809,7 @@ space8
 	self updatePlayer.
 	^ (self spacePlain: x) -> nil! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 3/19/2017 15:28:11'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 3/19/2017 16:36:07'!
 space9
 	"Feb week 3"
 	self disableAll: {'Move'}.

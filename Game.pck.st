@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 3:57:15 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 5:18:48 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 70!
+!provides: 'Game' 1 72!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -448,7 +448,7 @@ moveFrom: positionA to: positionB
 	self deleteArrow
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/28/2017 15:06:23'!
+!Token methodsFor: 'stepping' stamp: 'dhn 3/19/2017 16:28:00'!
 moveFrom: start to: end by: direction
 	"Animate moves forward or backward."
 	| a b board posns limit i |
@@ -469,8 +469,9 @@ moveFrom: start to: end by: direction
 		i < limit 
 			ifFalse: [
 				self stopStepping.
-				who slidTo: (who mgr wrapIndex: (posns at: i) around: board size).
-				self removeActionsForEvent: #morphicStep]].
+				"who slidTo: (who mgr wrapIndex: (posns at: i) around: board size)."
+				who position: (who mgr wrapIndex: (posns at: i) around: board size).
+		self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: who class moveInterval
 ! !
 
@@ -1740,12 +1741,12 @@ addMarkerIDInMarks
 	"(self marks at: self currentPlayer position) at: self playerIndex
 		put: self currentPlayer identity" ! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 15:52:32'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 17:10:21'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	
 	token arrowRight.
-	token moveFrom: token who position to: aPosition - token who roll by: 1.
+	[token moveFrom: token who position to: aPosition - token who roll by: 1] forkAndWait.
 	token deleteArrow
 ! !
 
