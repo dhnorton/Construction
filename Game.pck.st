@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 5:18:48 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 21 March 2017 at 2:20:27 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 72!
+!provides: 'Game' 1 73!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -474,6 +474,21 @@ moveFrom: start to: end by: direction
 		self removeActionsForEvent: #morphicStep]].
 	self startSteppingStepTime: who class moveInterval
 ! !
+
+!Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:56'!
+setPosition
+	"Set the location, so that for example, each turn starts with the token at the left-most cell"
+	
+	self morphPosition: owner morphExtent * (0.006@0.72)! !
+
+!Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:20'!
+setSize
+	"Set the extent of the receiver"
+	| w h |
+	
+	w _ owner morphExtent x * 0.13.
+	h _ w * 0.5.
+	self morphExtent: w@h! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/11/2011 21:53'!
 who

@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 19 March 2017 at 4:59:38 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 21 March 2017 at 2:20:40 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 86!
+!provides: 'Construction' 1 87!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
@@ -530,21 +530,6 @@ moved
 		ifFalse: [
 			mr updateHistory.
 			mr enableAll: {'End Turn'}]! !
-
-!ContractToken methodsFor: 'operations' stamp: 'dhn 10/30/2016 17:33:39'!
-setPosition
-	"Set the location, so that for example, each turn starts with the token at the left-most cell"
-	
-	self morphPosition: owner morphExtent * (0.006@0.72)! !
-
-!ContractToken methodsFor: 'initialization' stamp: 'dhn 11/30/2016 19:02:57'!
-setSize
-	"Set the extent of the receiver"
-	| w h |
-	
-	w _ owner morphExtent x * 0.13.
-	h _ w * 0.5.
-	self morphExtent: w@h! !
 
 !ContractToken class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:32'!
 includeInNewMorphMenu
