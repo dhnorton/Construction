@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 21 March 2017 at 2:20:27 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 21 March 2017 at 2:28:27 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 73!
+!provides: 'Game' 1 74!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
@@ -290,16 +290,6 @@ wantsDroppedMorph: aMorph event: evt
 	This method just answers super. It is included here to say it is relevant to D&D behavior."
 
 	^super wantsDroppedMorph: aMorph event: evt! !
-
-!Token methodsFor: 'stepping' stamp: 'dhn 3/17/2017 14:13:34'!
-advanceTo: aPosition 
-	"Slide the board under a token, forward to aPosition"
-	
-self halt: 'Token is where we are'.
-	self arrowRight.
-	self moveFrom: who position to: aPosition - who roll by: 1.
-	self deleteArrow
-! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
@@ -1756,12 +1746,14 @@ addMarkerIDInMarks
 	"(self marks at: self currentPlayer position) at: self playerIndex
 		put: self currentPlayer identity" ! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 17:10:21'!
+!Game methodsFor: 'operating' stamp: 'dhn 3/21/2017 14:25:39'!
 advanceTo: aPosition 
 	"Slide the board under a token, forward to aPosition"
 	
+	thisContext printStack: 40.
 	token arrowRight.
-	[token moveFrom: token who position to: aPosition - token who roll by: 1] forkAndWait.
+	self halt.
+	token moveFrom: token who position to: aPosition - token who roll by: 1.
 	token deleteArrow
 ! !
 
