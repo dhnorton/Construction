@@ -1,7 +1,17 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 21 March 2017 at 2:20:40 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 8 April 2017 at 10:13:00 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 87!
+!provides: 'Construction' 1 102!
 !requires: 'Game' 1 0 nil!
+!classDefinition: #Contract category: #'Construction-Model'!
+Game subclass: #Contract
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions fates drawnFates paymentList leases statsItem optionsItem optionsReport loanItem loanReport assetAuctionItem auctionList jobAuctionItem windowCount moveButton latestPlayer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Construction-Model'!
+!classDefinition: 'Contract class' category: #'Construction-Model'!
+Contract class
+	instanceVariableNames: ''!
+
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
 Token subclass: #ContractToken
 	instanceVariableNames: 'doubled'
@@ -302,16 +312,6 @@ ConAsset subclass: #You
 You class
 	instanceVariableNames: ''!
 
-!classDefinition: #Contract category: #'Construction-Model'!
-Game subclass: #Contract
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions fates drawnFates paymentList leases statsItem optionsItem optionsReport loanItem loanReport assetAuctionItem auctionList jobAuctionItem windowCount moveButton latestPlayer'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Construction-Model'!
-!classDefinition: 'Contract class' category: #'Construction-Model'!
-Contract class
-	instanceVariableNames: ''!
-
 !classDefinition: #Contractor category: #'Construction-Model'!
 Gamer subclass: #Contractor
 	instanceVariableNames: 'markets options priceFactor expenseFactor demo shutDown forfeitJob cutIncome spaceEffect contingency split drawnOption jobRoll jobCount jobDone rollAdjustment'
@@ -342,6 +342,9 @@ Contingency subclass: #Announcement
 Announcement class
 	instanceVariableNames: ''!
 
+
+!Contract commentStamp: 'dhn 8/22/2016 15:31:27' prior: 0!
+The model for the board of Construction Game.!
 
 !ContractToken commentStamp: 'dhn 8/22/2016 17:58:41' prior: 0!
 The game piece for a contractor - a player in Construction Game.!
@@ -429,9 +432,6 @@ Other players.!
 !You commentStamp: 'dhn 8/22/2016 15:55:22' prior: 0!
 The current player.!
 
-!Contract commentStamp: 'dhn 8/22/2016 15:31:27' prior: 0!
-The model for the board of Construction Game.!
-
 !Contractor commentStamp: 'dhn 4/15/2012 12:50' prior: 0!
 A player in the Construction Game.
 !
@@ -444,6 +444,1621 @@ An Announcement is a class which is detected by name, resulting in the early dis
 
 Instance Variables
 !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/15/2016 18:18:14'!
+assetAuctionItem
+	"Answer the value of assetAuctionItem"
+
+	assetAuctionItem ifNil: [assetAuctionItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ assetAuctionItem! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/19/2016 11:36:38'!
+assetAuctionItem: anObject
+	"Set the value of assetAuctionItem"
+	
+	(assetAuctionItem _ anObject) ifNotNil: [
+		self triggerEvent: #itemChange.
+		self changed: #assetAuctionItem]! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 14:15:17'!
+assetAuctionList
+	"Answer a list for the asset auction window"
+	
+	^ auctionList! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 14:13:42'!
+assetsToSell
+	"Answer the assets and quantities to be sold"
+	| list qty |
+	
+	list _ OrderedCollection new.
+	(self class equipmentList , self class franchiseList) do: [:each |
+		qty _ (currentPlayer assets at: each asSymbol) quantity.
+		qty > 0
+			ifTrue: [list addLast: each, '(', qty asString, ')']].
+	^ list! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 13:55:14'!
+auctionList
+	"Answer the value of auctionList"
+	
+	^ auctionList! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 13:56:07'!
+auctionList: anObject
+	"Set the value of auctionList"
+	
+	auctionList _ anObject! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 4/15/2012 12:41'!
+availableOptions
+	"Answer the value of availableOptions"
+
+	^ availableOptions! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:13:06'!
+decideCompetitive
+	"If one or more players have the equipment, enable Auction"
+	| req any |
+	
+	req _ Contract requiredEquipment
+				at: (Contract jobSeason at: currentPlayer position).
+	any _ players
+				detect: [:a | (a assets at: req) quantity > 0]
+				ifNone: [].
+	any notNil
+		ifTrue: [
+			self disableAll: {'Move'. 'End Turn'. 'Do Job'}.
+			self triggerEvent: #jobAuctionRequired with: currentPlayer position]
+		ifFalse: [
+			self disableAll: {'Do Job'}.
+			self updateHistory.
+			self enableAll: {'End Turn'}]! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 8/24/2016 10:14:20'!
+declareBroke: aString
+	"Inform that the player named aString is out of cash"
+	
+	GamePopUp 
+		inform: aString , ' is out of cash and must auction 
+assets until cash is no longer negative.'
+		title: 'Out of Cash'
+! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 9/28/2016 12:16:52'!
+declareOver: aString
+	"Inform that the player named aString is over the debt limit"
+	
+	GamePopUp 
+		inform: (String streamContents: [:str |
+			str
+				nextPutAll: currentPlayer identity;
+				nextPutAll: ' must use cash to bring debt to $';
+				nextPutAll: currentPlayer playerDebtLimit value negated printStringWithCommas;
+				nextPutAll: ' or less.']) 
+		title: 'Debt Too High'
+! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 8/24/2016 11:10:47'!
+declareWinner
+	"Inform that there is a winner"
+
+	GamePopUp 
+		inform: (String streamContents: [:str |
+			str
+				nextPutAll: self currentPlayer identity;
+				nextPutAll: ' has amassed net assets of more than $';
+				nextPutAll: self goal printStringWithCommas; nextLine;
+				nextPutAll: ' and is the winner of the game.']) 
+		title: 'THE WINNAH!!!!'.
+	arena owner removeMorph: currentPlayer token.
+	self won: true! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:13:26'!
+doJob
+	"Try to do the job for this space"
+
+	(currentPlayer shutDown
+			or: [currentPlayer forfeitJob])
+		ifFalse: [currentPlayer jobDone: true.
+			(self class ccSpaces includes: currentPlayer position)
+				ifTrue: [currentPlayer contingency: self drawContingency]
+				ifFalse: [currentPlayer contingency: nil].
+			self doSpace].
+	self disableAll: {'Do Job'}.
+	self updateHistory.
+	self enableAll: {'End Turn'}! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/28/2016 15:07:58'!
+doSettings
+	"Provide a facility for changing settings"
+	| ans |
+	
+	ans _ (PopUpMenu withCaption: 'Settings' chooseFrom: 'Change the goal of the game\Change auctioneer''s beat\Change test mode').
+	ans = 1 ifTrue: [self setGoal].
+	ans = 2 ifTrue: [self setBeat].
+	ans = 3 ifTrue: [self setTestMode]! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 9/28/2016 10:07:20'!
+doSpace
+	"Determine if player can do the job"
+	
+	(self class alwaysDo: currentPlayer position)
+		ifTrue: [currentPlayer spaceEffect: self whatSpaceSays]
+		ifFalse: [
+			currentPlayer forfeitJob
+				ifFalse:[
+					currentPlayer canDoJob
+						ifTrue: [self harvest]]]! !
+
+!Contract methodsFor: 'fates' stamp: 'dhn 9/25/2016 20:14:54'!
+drawContingency
+	"Randomly draw a fate card"
+	| con |
+	
+	con _ self drawCard: fates discard: drawnFates.
+	con result: (self currentPlayer perform: con function withArguments: {con argument}).
+	self triggerEvent: #itemChange.
+	con class = Announcement
+		ifTrue: [GamePopUp inform: con description title: 'Contractor Contingency:'].
+	^ con! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:36:58'!
+endTurn
+	"End a player's turn"
+	
+	(spaces at: currentPlayer position) markAddFor: currentPlayer.
+"	self addMarkerIDInMarks; removeAllMarkersInCells."
+	self enableAll: {'Auction'}.
+	currentPlayer cash < 0
+		ifTrue: [self disableAll: {'Move'}.
+			currentPlayer outOfAssets
+				ifTrue: [self removeFromGame]
+				ifFalse: [
+					self declareBroke: currentPlayer identity.
+					self disableAll: {'End Turn'}]]
+		ifFalse: [
+			currentPlayer debt < currentPlayer playerDebtLimit value
+				ifTrue: [
+					self declareOver: currentPlayer identity.
+					self disableAll: {'End Turn'}]
+				ifFalse: [currentPlayer netAssets >= self goal
+						ifTrue: [won
+								ifFalse: [self declareWinner]].
+					currentPlayer priceFactor: 1.
+					currentPlayer contingency: nil.
+					currentPlayer jobDone
+						ifFalse: [currentPlayer jobMissed].
+					currentPlayer 
+						jobDone: false;
+						forfeitJob: false.
+					self disableAll: {'Do Job'}.
+					self triggerEvent: #deleteOpenWindows.
+					windowCount _ 0.
+					self nextPlayer.
+					self won
+						ifTrue: [self wonButtonsState]
+						ifFalse: [self enableAll: {'Move'. 'Stats'}.
+							self disableAll: {'End Turn'}]]]! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 12/1/2016 15:45:52'!
+franchiseEffect: anObject
+	"Show the effect of landing on an owned franchise"
+	| fran z invoice amt owner user |
+	
+	self disableAll: {'Move'}.
+	fran _ self class requiredEquipment at: (self class jobSeason at: currentPlayer position).
+	amt _ Compiler evaluate: ((fran asString), ' duty').
+	z _ amt * anObject.
+	user _ currentPlayer.
+	owner _ (availableOptions at: fran) holder.
+	owner = user
+		ifTrue: [invoice _ (String streamContents: [:str |
+			str
+				nextPutAll: 'First Friendly Bank paid you $';
+				nextPutAll: z printStringWithCommas;
+				nextPutAll: ' because you own ';
+				nextPutAll: (leases at: fran) description]).
+			user triggerEvent: #displayInvoice withArguments: {invoice. 'Franchise Income'}.
+			user earned: z for: fran.
+			user tally: z]
+		ifFalse: [| payee | owner ifNotNil: [
+					payee _ owner identity.
+					owner earned: z for: fran.
+					owner tally: z.
+					owner appendHistory.
+					invoice _ (String streamContents: [:str |
+						str
+							nextPutAll: 'You paid ';
+							nextPutAll: payee;
+							nextPutAll: ' $';
+							nextPutAll: z printStringWithCommas;
+							nextPutAll: ' for your bill from ';
+							nextPutAll: (leases at: fran) description]).
+					user triggerEvent: #displayInvoice withArguments: {invoice. 'Franchise Expense'}.
+					user paid: z for: fran.
+					user tally: z negated]].
+	currentPlayer jobDone: true.
+	self updatePlayer.
+	self updateHistory.
+	self enableAll: {'End Turn'}.
+	^ z! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:14:07'!
+fund: aSymbol for: anAmount 
+	| owner user whom z |
+	owner := (self availableOptions at: aSymbol) holder.
+	user := self currentPlayer.
+	owner = user
+		ifTrue: [user avoided: anAmount for: aSymbol.
+			z := 0]
+		ifFalse: [owner isNil
+				ifTrue: [whom := 'First Friendly Bank']
+				ifFalse: [whom := owner identity.
+					owner tally: anAmount.
+					(owner assets at: aSymbol)
+						recordGross: anAmount].
+			(user assets at: aSymbol)
+				recordCost: anAmount
+				for: currentPlayer.
+			z := anAmount negated].
+	self updatePlayer.
+	self updateHistory.
+	self enableAll: {'End Turn'}.
+	^ z -> whom! !
+
+!Contract methodsFor: 'harvesting' stamp: 'dhn 9/22/2016 22:32:10'!
+harvest
+	"Determine how well the job is done"
+	
+	self currentPlayer spaceEffect: self whatSpaceSays.
+	self rollTheDie
+! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/27/2016 14:59:08'!
+initialButtonState
+	"Establish the button state at the start of the game"
+	
+	self enableAll: {'Purchase'}.
+	self disableAll: {'End Turn'. 'Do Job'}! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 20:57:21'!
+initialize
+
+	super initialize.
+	spaces _ self setUpSpaces.
+	spaceFreq _ Histogram ofSize: spaces size.
+	cellCount _ self class cellsForGame.
+	won _ false.
+	windowCount _ 0.
+	fates _ Construction contingencyDesc shuffled.
+	availableOptions _ Construction optionsDesc.
+	drawnFates _ OrderedCollection new.
+	leases _ self setUpLeases! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/20/2016 15:17:45'!
+jobAuctionItem
+	"Answer the value of jobAuctionItem"
+
+	jobAuctionItem ifNil: [jobAuctionItem _ 1]. 	"nil is unacceptable during model initialization"
+	^ jobAuctionItem! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/19/2016 17:50:21'!
+jobAuctionItem: anObject
+	"Set the value of jobAuctionItem"
+	
+	(jobAuctionItem _ anObject) ifNotNil: [
+		self triggerEvent: #itemChange.
+		self changed: #jobAuctionItem]! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 9/21/2016 12:43:26'!
+jobAuctionList
+	"Answer a list for the job auction window"
+
+	^ self class bidIncrement! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
+listOfOptions: anObject
+	"Set the value of listOfOptions"
+
+	listOfOptions := anObject! !
+
+!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:21:34'!
+loanItem
+	"Answer the value of loanItem"
+
+	loanItem ifNil: [loanItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ loanItem! !
+
+!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:21:16'!
+loanItem: anObject
+	"Set the value of loanItem and loanReport"
+	| enab |
+	
+	(loanItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [
+			loanReport _ self loanReportFor: anObject.
+			enab _ true]
+		ifFalse: [
+			loanReport _ ''.
+			enab _ false].
+		self triggerEvent: #itemChange.
+		self triggerEvent: #payButton: with: enab.
+		self changed: #loanItem]! !
+
+!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:19:28'!
+loanList
+	"Answer possible loan payment amounts"
+	| list |
+	
+	list _ OrderedCollection new.
+	1 to: 50 do: [:n | 
+		list add: (String streamContents: [:str |
+			str 
+				nextPut: $$;
+				nextPutAll: (n * self class paymentIncrement) printStringWithCommas;
+				newLine])].
+	^ list
+! !
+
+!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:19:50'!
+loanReportFor: anInteger
+	"Answer the effect on cash and debt of a payment selected by anInteger"
+	| pmt enab |
+
+	anInteger > 0
+		ifTrue: [
+			enab _ true.
+			pmt _ anInteger * self class paymentIncrement min: currentPlayer debt negated.
+			^ (String streamContents: [:string |
+				string 
+					nextPutAll: 'By making this payment, ', currentPlayer identity, ' would have:';
+					newLine; newLine;
+					nextPut: $$;
+					nextPutAll: (currentPlayer debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
+					newLine;
+					nextPut: $$;
+					nextPutAll: (currentPlayer cash - pmt) asInteger printStringWithCommas , ' in cash and';
+					newLine;
+					nextPutAll: '$' , currentPlayer playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
+		ifFalse: [
+			enab _ false.
+			^ ''].
+	self triggerEvent: #itemChange.
+	self triggerEvent: #payButton: with: enab.
+	self changed: #loanItem! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 9/28/2016 15:30:14'!
+moveButton
+	"Answer the value of moveButton"
+	
+	^ moveButton! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 9/28/2016 15:34:24'!
+moveButton: anObject
+	"Set the value of moveButton"
+	
+	^ moveButton _ anObject! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 08:05:52'!
+optionsItem
+	"Answer the value of optionsItem"
+
+	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ optionsItem! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 9/12/2016 11:28:30'!
+optionsItem: anObject
+	"Set the value of optionsItem and optionsReport"
+	| item enab |
+	
+	(optionsItem _ anObject) ifNotNil: [
+	anObject ~= 0
+		ifTrue: [item _ self optionsList at: anObject.
+			optionsReport _ self reportFor: currentPlayer on: item.
+			(Compiler evaluate: 'Franchise subclasses includes: ', item)
+				ifTrue: [
+					currentPlayer position = (Compiler evaluate: item, ' location')
+						ifTrue: [enab _ true]
+						ifFalse: [enab _ false]]
+				ifFalse: [enab _ true]]
+		ifFalse: [
+			optionsReport _ ''.
+			enab _ false].
+		self triggerEvent: #itemChange.
+		self triggerEvent: #buyButton: with: enab.
+		self changed: #optionsItem]! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 9/12/2016 14:34:48'!
+optionsList
+	"Answer the shopping list for a player"
+	
+	^ (OrderedCollection new)
+		addAll: self class equipmentList;
+		addAll: self class franchiseList;
+		yourself! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 19:39:19'!
+optionsReport
+
+	optionsItem > 0
+		ifTrue: [^ self optionsReport: (self optionsList at: optionsItem)]
+		ifFalse: [^ '']
+! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 18:50:18'!
+optionsReport: anAsset
+	"Show the status of anAsset for shopping purposes"
+	| p |
+	
+	p _ currentPlayer assets at: anAsset ifAbsent: [^ 'No such asset named ', anAsset].
+	p owner: currentPlayer.
+	"exerciseButton disableButton."
+	^ p reportOptionTo: currentPlayer mgr! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 9/12/2016 20:25:59'!
+pay: down borrow: balance for: aSymbol amount: qty 
+	"Purchase a franchise"
+	| asset x y |
+	
+	x := availableOptions at: aSymbol.
+	y := Franchise subclasses includes: x class.
+	y & x holder notNil
+		ifTrue: [
+			GamePopUp 
+				inform: (String streamContents: [:str |
+				str
+					nextPutAll: 'Sorry, but the ';
+					nextPutAll: x listName;
+					nextPutAll: ' franchise is held by ';
+					nextPutAll: x holder identity]) 
+			title: 'Franchise Taken']
+		ifFalse: [y ifTrue: [x holder: currentPlayer].
+			currentPlayer debt: balance negated + currentPlayer debt.
+			currentPlayer tally: down negated.
+			asset := currentPlayer assets at: aSymbol.
+			asset quantity: qty + asset quantity.
+			asset cost: down + balance + asset cost.
+			currentPlayer canDoJob
+				ifTrue: [currentPlayer jobDone
+					ifFalse: [self enableAll: {'Do Job'}]]].
+	self updatePlayer! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 9/25/2016 20:53:33'!
+payRent: anAmount for: aSymbol 
+	"Pay amount to the first player to the left who has asset named aSymbol."
+	| ix |
+	
+	ix _ self wrapIndex: self playerIndex - 1 around: players size.
+	players size - 1
+		timesRepeat: [| owner |
+			owner _ players at: ix.
+			(owner assets at: aSymbol) quantity > 0
+				ifTrue: [(currentPlayer assets at: aSymbol)
+						recordCost: anAmount
+						for: currentPlayer.
+					(owner assets at: aSymbol)
+						recordGross: anAmount.
+					owner tally: anAmount.
+					self updatePlayer.
+					^ anAmount negated -> owner identity].
+			ix _ self wrapIndex: ix - 1 around: players size].
+	"At this point, no player owns an asset named aSymbol."
+	(currentPlayer assets at: aSymbol)
+		recordCost: anAmount
+		for: currentPlayer.
+	^ anAmount negated -> 'First Friendly Bank'! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
+paymentList
+	"Answer the value of paymentList"
+
+	^ paymentList! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
+paymentList: anObject
+	"Set the value of paymentList"
+
+	paymentList := anObject! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:15:10'!
+queryWin: aBool
+		aBool ifTrue: [self wonButtonsState]
+		ifFalse: [
+			self updateHistory.
+			self enableAll: {'End Turn'}]! !
+
+!Contract methodsFor: 'harvesting' stamp: 'dhn 10/2/2016 16:01:34'!
+remainder: roll
+	"Do the rest of the job calculations"
+	| machine income |
+	
+	machine _ Construction ironMap
+		at: (Contract jobSeason at: self currentPlayer position).
+	currentPlayer jobRoll: roll + currentPlayer jobRoll.
+	currentPlayer jobCount: 1 + currentPlayer jobCount.
+	income _ 0.
+	((Smalltalk at: machine) inheritsFrom: Iron)
+		ifTrue: [income _ self currentPlayer updateIron: machine with: roll].
+	self
+		currentPlayer tally: income;
+		cutIncome: 1.
+	self updatePlayer.
+	^ income! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 10/2/2016 19:08:30'!
+removeFromGame
+	"Remove a player from the game"
+	
+	GamePopUp 
+		inform: currentPlayer identity , ' has exceeded the debt 
+limit and is out of the game' 
+		title: 'YER OUT!!!!'.
+	availableOptions
+		do: [:h | h value holder = currentPlayer
+				ifTrue: [h value holder: nil]].
+	(players includes: currentPlayer)
+		ifTrue: [players removeAll: {currentPlayer}.
+			playerIndex _ playerIndex - 1.
+			self 
+				nextPlayer; 
+				triggerEvent: #setupToken: with: currentPlayer;
+				enableAll: {'Move'}].
+	1 = players size
+		ifTrue: [nil inform: self players first identity , ' has won the game by default.'.
+			self disableAll: {'Pay Loan'. 'Purchases'. 'Do Job'. 'Move'}.
+			self won: true]! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 08:14:27'!
+reportFor: aPlayer on: anAsset
+	| p |
+	p := aPlayer assets at: anAsset ifAbsent: [^ 'No such asset named ', anAsset].
+	p owner: aPlayer.
+	"exerciseButton disableButton."
+	^ p reportOptionTo: aPlayer mgr! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 10/2/2016 16:02:09'!
+reviewOption
+	"Complete a purchase"
+	| option key cost down balance |
+	
+	self triggerEvent: #deleteOpenWindows.
+	key _ (listOfOptions list at: listOfOptions selectedItem) asSymbol.
+	option _ Construction optionsDesc at: key.
+	cost _ option class price * currentPlayer priceFactor.
+	down _ 0.2 * cost.
+	balance _ cost - down.
+	self
+		pay: down
+		borrow: balance
+		for: option listName asSymbol
+		amount: 1! !
+
+!Contract methodsFor: 'harvesting' stamp: 'dhn 3/23/2017 20:59:27'!
+rollForFranchise
+	"Show the die rolling"
+	| bone |
+
+	bone _ currentPlayer die openInWorld: arena pasteup.
+	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
+	bone show: bone combo shuffled event: #franchiseEffect:
+! !
+
+!Contract methodsFor: 'harvesting' stamp: 'dhn 4/4/2017 15:23:56'!
+rollTheDie
+	"Show the die rolling"
+	| bone |
+
+	bone _ currentPlayer die openInWorld: arena pasteup.
+	bone referencePosition: token referencePosition - (0@2 * token morphHeight).
+	bone show: bone class faces shuffled event: #jobDone
+! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 10/2/2016 16:01:41'!
+seasonAt: aPosition
+	| y |
+	y := Construction season select: [:a | a range x <= aPosition].
+	^ y last ! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 14:37:44'!
+setTestMode
+	"Optionally toggle test mode"
+	| trans ans |
+	
+	trans _ self testMode
+		ifTrue: ['true to false']
+		ifFalse: ['false to true'].
+	ans _ nil confirm: 'Change Test Mode (', trans, ')'.
+	ans ifTrue: [
+		self testMode: self testMode not.
+		self testMode ifTrue: [goal _ self testGoal]]! !
+
+!Contract methodsFor: 'options' stamp: 'dhn 9/23/2014 20:20'!
+setUpLeases
+	leases := Dictionary new.
+	leases at: #Stinky put: (Stinky new description: 'STINKY''S Garbage and Landfill').
+	leases at: #LostMiner put: (LostMiner new description: 'LOST MINER').
+	leases at: #Westwood put: (Westwood new description: 'WESTWOOD Asphalt and Paving').
+	leases at: #BigPhil put: (BigPhil new description: 'BIG PHIL''S Concrete Plant').
+	^ leases
+! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 20:56:37'!
+setUpSpaces
+	"Initialize the board spaces"
+	| col |
+	
+	col _ OrderedCollection new.
+	1 to: self class describeSpaces size do: [:ix |
+		col add: (BoardSpace new
+			label: (self class describeSpaces at: ix);
+			routine: ('space', ix asString) asSymbol)].
+	^ col! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 4/4/2017 10:43:38'!
+setupPlayer: aName color: aColor
+	"Establish a player named aName and colored aColor"
+	| pl |
+	
+	self players add: (pl _ Contractor new
+		color: aColor;
+		marker: (EllipseMorph new
+			color: aColor;
+			morphExtent: 18@10);
+		mgr: self;
+		identity: aName).
+	token ifNotNil: [token delete].
+	currentPlayer _ pl.
+	self setTokenFor: world.
+	self when: #deleteOpenWindows send: #delete to: token.
+	self availableOptions do: [:opt | pl options addLast: opt].! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:15:47'!
+space1
+	"Year End"
+	| z |
+	
+	self disableAll: {'Move'}.
+	GamePopUp inform: 'You will spend $1,000 for Christmas gifts.' title: 'Christmas for Employees'.
+	z := 1000 negated.
+	self currentPlayer tally: z.
+	self updatePlayer.
+	self currentPlayer salary.
+	self updatePlayer.
+	self updateHistory.
+	self enableAll: {'End Turn'}.
+	^ z -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:17'!
+space10
+	"Mar week 1"
+	^ (self
+		spacePlain: (self currentPlayer pay: 1000 negated for: #Backhoe)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:45'!
+space11
+	"Mar week 2"
+	^ self spaceTruck: 4000! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:00'!
+space12
+	"Mar week 3"
+	^ (self fund: #LostMiner for: 3000)
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:19'!
+space13
+	"Mar week 4"
+	^ (self spacePlain: 2000 negated) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:08'!
+space14
+	"Apr week 1"
+	^ (self
+		spacePlain: (self currentPlayer pay: 5000 negated for: #Grader)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 21:09'!
+space15
+	"Apr week 2"
+	^ self fund: #BigPhil for: 15000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:13'!
+space16
+	"Apr week 3"
+	^ 0 -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:14'!
+space17
+	"Apr week 4"
+	^ (self spacePlain: 5000 negated) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:02'!
+space18
+	"May week 1"
+	^ self fund: #Westwood for: 8000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:45'!
+space19
+	"May week 2"
+	^ self spaceTruck: 7000! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:06'!
+space2
+	"Jan week 1"
+	| z |
+	
+	self disableAll: {'Move'}.
+	z _ 0.
+	self currentPlayer passedGo
+		ifTrue: [z _ self currentPlayer salary].
+	self updatePlayer.
+	self currentPlayer markets at: #RESIDENTIAL put: 2.
+	self queryWin: won.
+	self triggerEvent: #itemChange.
+	^ z -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:03'!
+space20
+	"May week 3"
+	^ self fund: #BigPhil for: 12000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:15'!
+space21
+	"May week 4"
+	^ (self
+		spacePlain: (self currentPlayer pay: 3000 negated for: #Excavator)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:03'!
+space22
+	"Jun week 1"
+	^ self fund: #Westwood for: 10000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:16'!
+space23
+	"Jun week 2"
+	^ (self spacePlain: 10000 negated) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:18'!
+space24
+	"Jun week 3"
+	^ (self spacePlain: 7000 negated) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:18'!
+space25
+	"Jun week 4"
+	^ (self
+		spacePlain: (self currentPlayer pay: 2000 negated for: #Dozer)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 21:10'!
+space26
+	"Jul week 1"
+	^ self fund: #Stinky for: 3000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:19'!
+space27
+	"Jul week 2"
+	^ (self
+		spacePlain: (self currentPlayer pay: 1000 negated for: #Backhoe)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:20'!
+space28
+	"Jul week 3"
+	^ (self spacePlain: 4000 negated) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:20'!
+space29
+	"Jul week 4"
+	^ (self
+		spacePlain: (self currentPlayer pay: 10000 negated for: #Scraper)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:17'!
+space3
+	"Jan week 2"
+	| z |
+	
+	self disableAll: {'Move'}.
+	z _ 0.
+	self currentPlayer passedGo
+		ifTrue: [z _ self currentPlayer salary].
+	self updatePlayer.
+	self currentPlayer markets at: #COMMERCIAL put: 2.
+	self queryWin: won.
+	self triggerEvent: #itemChange.
+	^ z -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:04'!
+space30
+	"Aug week 1"
+	^ self fund: #Westwood for: 25000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:04'!
+space31
+	"Aug week 2"
+	^ self fund: #BigPhil for: 30000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:21'!
+space32
+	"Aug week 3"
+	^ 0 -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:21'!
+space33
+	"Aug week 4"
+	^ (self
+		spacePlain: (self currentPlayer pay: 15000 negated for: #Scraper)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:46'!
+space34
+	"Sep week 1"
+	^ self spaceTruck: 15000! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:22'!
+space35
+	"Sep week 2"
+	^ (self spacePlain: 10000 negated) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:23'!
+space36
+	"Sep week 3"
+	^ (self spacePlain: 3000 negated) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 21:10'!
+space37
+	"Sep week 4"
+	^ self fund: #LostMiner for: 2000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:46'!
+space38
+	"Sep week 5"
+	^ self spaceTruck: 10000! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:26'!
+space39
+	"Oct week 1"
+	^ 0 -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:25'!
+space4
+	"Jan week 3"
+	| z |
+	
+	self disableAll: {'Move'}.
+	z _ 0.
+	self currentPlayer passedGo
+		ifTrue: [z _ self currentPlayer salary].
+	self updatePlayer.
+	self currentPlayer markets at: #INSTITUTIONAL put: 2.
+	self queryWin: won.
+	self triggerEvent: #itemChange.
+	^ z -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:26'!
+space40
+	"Oct week 2"
+	^ (self
+		spacePlain: (self currentPlayer pay: 5000 negated for: #Excavator)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:05'!
+space41
+	"Oct week 3"
+	^ self fund: #LostMiner for: 5000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:05'!
+space42
+	"Oct week 4"
+	^ self fund: #BigPhil for: 7000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:05'!
+space43
+	"Nov week 1"
+	^ self fund: #Stinky for: 5000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:06'!
+space44
+	"Nov week 2"
+	^ self fund: #BigPhil for: 15000.
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:27'!
+space45
+	"Nov week 3"
+	^ (self
+		spacePlain: (self currentPlayer pay: 7000 negated for: #Grader)) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 12:00:09'!
+space46
+	"Nov week 4"
+	
+	((availableOptions at: #Stinky) holder)
+		ifNotNil: [^ self rollForFranchise]! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 11:59:36'!
+space47
+	"Dec week 1"
+	
+	((availableOptions at: #LostMiner) holder)
+		ifNotNil: [^ self rollForFranchise]! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 11:58:21'!
+space48
+	"Dec week 2"
+	
+	((availableOptions at: #Westwood) holder)
+		ifNotNil: [^ self rollForFranchise]! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 11:57:21'!
+space49
+	"Dec week 3"
+		
+	((availableOptions at: #BigPhil) holder)
+		ifNotNil: [^ self rollForFranchise]! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:34'!
+space5
+	"Jan week 4"
+	| z |
+	
+	self disableAll: {'Move'}.
+	z _ 0.
+	self currentPlayer passedGo
+		ifTrue: [z _ self currentPlayer salary].
+	self updatePlayer.
+	self currentPlayer markets at: #MUNICIPAL put: 2.
+	self queryWin: won.
+	self triggerEvent: #itemChange.
+	^ z -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:42'!
+space6
+	"Jan week 5"
+	| z |
+	
+	self disableAll: {'Move'}.
+	z _ 0.
+	self currentPlayer passedGo
+		ifTrue: [z _ self currentPlayer salary].
+	self updatePlayer.
+	self currentPlayer markets at: #'HEAVY HIGHWAY' put: 2.
+	self queryWin: won.
+	self triggerEvent: #itemChange.
+	^ z -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:28'!
+space7
+	"Feb week 1"
+	| x |
+	x := self currentPlayer tally: 5000.
+	self updatePlayer.
+	^ (self spacePlain: x) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:29'!
+space8
+	"Feb week 2"
+	| x |
+	x := self currentPlayer tally: 5000 negated.
+	self updatePlayer.
+	^ (self spacePlain: x) -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 4/8/2017 22:02:26'!
+space9
+	"Feb week 3"
+	| sp |
+	
+	self disableAll: {'Move'}.
+	"slide board so that player appears to advance to 21."
+	sp _ currentPlayer position - currentPlayer roll.
+	token moveFrom: sp to: 21 - currentPlayer roll + 1 by: 1.
+	self updateHistory.
+	self enableAll: {'End Turn'}.
+	^ 0 -> nil! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:16:38'!
+spacePlain: anAmount
+	"A plain, ordinary, unremarkable space"
+	self disableAll: {'Move'}.
+	self updateHistory.
+	self enableAll: {'End Turn'.}.
+	^ anAmount
+! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:17:32'!
+spaceTruck: aRent 
+	| z |
+	
+	z _ 0.
+	self disableAll: {'Move'}.
+	(self currentPlayer assets at: #Truck) quantity > 0
+		ifTrue: [
+			self currentPlayer avoided: aRent for: #Truck.
+			z _ 0 -> nil]
+		ifFalse: [z _ self payRent: aRent for: #Truck].
+	self updateHistory.
+	self enableAll: {'End Turn'}.
+	^ z! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:44:39'!
+spaces
+	"Answer the value of spaces"
+	
+	^ spaces! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:45:06'!
+spaces: anObject
+	"Set the value of spaces"
+	
+	^ spaces _ anObject! !
+
+!Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 12:46:45'!
+statsItem
+	"Answer the value of statsItem"
+
+	statsItem ifNil: [statsItem _ 0]. 	"nil is unacceptable during model initialization"
+	^ statsItem! !
+
+!Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 14:59:59'!
+statsItem: anObject
+	"Set the value of statsItem"
+	
+	(statsItem _ anObject) ifNotNil: [
+		self triggerEvent: #itemChange.
+		self changed: #statsItem]! !
+
+!Contract methodsFor: 'statistics' stamp: 'dhn 1/18/2017 17:26:36'!
+statsList
+	"Answer a list for the status window"
+	
+	^ self class equipmentList , self class franchiseList , {'Yourself'. 'Players'. 'Contingencies'. 'Hints'}! !
+
+!Contract methodsFor: 'statistics' stamp: 'dhn 8/28/2016 14:15:10'!
+statsReport
+	"Answer the status report for the asset listed at statsItem"
+
+	statsItem > 0
+		ifTrue: [^ self statsReport: (self statsList at: statsItem)]
+		ifFalse: [^ '']
+! !
+
+!Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 15:03:28'!
+statsReport: aString
+	"Answer the status of an asset named aString, possessed by the current player"
+	| p |
+	
+	p _ currentPlayer assets at: aString ifAbsent: [^ 'No such asset named ', aString].
+	^ String streamContents: [:str |
+		str
+			nextPutAll: p description;
+			nextPut: $:; newLine;
+			nextPutAll: (p reportAsAssetFor: currentPlayer); newLine]! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 15:53:53'!
+testGoal
+	"Answer the value of TestGoal"
+	| g x |
+	
+	TestMode ifTrue: [
+		TestGoal 
+			ifNil: [g _ goal asString]
+			ifNotNil: [g _ TestGoal asString].
+		x _ (FillInTheBlankMorph request: 'Test Goal?' initialAnswer: g).
+		x ~= '' 
+			ifTrue:  [self testGoal: x asNumber]
+			ifFalse: [self testGoal: self goal].
+		^ TestGoal]! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 14:04:35'!
+testGoal: anObject
+	"Set the value of TestGoal"
+	
+	TestGoal _ anObject! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 12:41:40'!
+testMode
+	"Answer the value of testMode"
+	
+	TestMode ifNil: [TestMode _ false].
+	^ TestMode! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 12:42:02'!
+testMode: aBool
+	"Set the value of testMode"
+	
+	TestMode _ aBool! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 13:42:49'!
+updateHistory
+	"Change player's history"
+	
+	latestPlayer = playerIndex 
+		ifTrue: [currentPlayer updateHistory]
+		ifFalse: [
+			latestPlayer _ playerIndex.
+			currentPlayer appendHistory].
+	self triggerEvent: #itemChange! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 9/25/2016 17:51:21'!
+updatePlayer
+	"Ensure that all the statistics are updated"
+
+	self triggerEvent: #itemChange! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 1/11/2017 21:08:33'!
+whatSpaceSays
+	"Perform the method associated with the space where the player is"
+
+	^ self perform: ((spaces at: self currentPlayer position) routine)! !
+
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:12'!
+whom: aSymbol
+	"Answer the owner of aSymbol"
+	| owner |
+	owner := (self availableOptions at: aSymbol) holder.
+	owner ifNotNil: [^ owner identity].
+	^ self class bankName
+! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 9/22/2016 20:24:17'!
+windowPosition: aPoint
+	"Answer a staggered position for a window"
+	
+	windowCount _ windowCount + 1.
+	^ aPoint + (windowCount * (20@20))! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:19:27'!
+wonButtonsState
+	"Set buttons to a state appropriate for the game having been won"
+
+	self disableAll: {'Pay Loan'. 'Purchases'. 'Do Job'. 'Move'}.
+	self updateHistory.
+	self enableAll: {'End Turn'}.
+! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 21:31'!
+alwaysDo: aPosition
+	"Answer true if expenses at aPosition apply."
+	^ #(1 2 3 4 5 6 7 8 9 46 47 48 49 ) includes: aPosition! !
+
+!Contract class methodsFor: 'lists' stamp: 'dhn 7/22/2016 17:43'!
+assetList
+	"Answer a list for the status window"
+	
+	^ Contract equipmentList , Contract franchiseList , {'Yourself'. 'Players'. 'Graphs'. 'Contingencies'}! !
+
+!Contract class methodsFor: 'auction' stamp: 'dhn 7/22/2016 17:42'!
+assetListAuction
+	"Answer the list of assets in order suitable for auction."
+	
+	^ #('Backhoe' 'Dozer' 'Excavator' 'Grader' 'Scraper' 'Truck' 'Stinky' 'LostMiner' 'Westwood' 'BigPhil')! !
+
+!Contract class methodsFor: 'auction' stamp: 'dhn 9/8/2014 13:14'!
+bankName
+	^ 'First Friendly Bank'! !
+
+!Contract class methodsFor: 'auction' stamp: 'dhn 9/19/2016 18:07:00'!
+bidBump
+	"Answer the bid increments"
+	
+	^ 1000 * #(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)! !
+
+!Contract class methodsFor: 'auction' stamp: 'dhn 9/21/2016 14:44:42'!
+bidIncrement
+	"Answer the list for an auction"
+	| col |
+	
+	col _ OrderedCollection new.
+	self bidBump do: [:each | col add: '$', each printStringWithCommas].
+	^ col
+
+	! !
+
+!Contract class methodsFor: 'auction' stamp: 'dhn 9/19/2016 22:09:56'!
+bidSpaces
+	"Answer the positions where competitive bids are required."
+	
+	^ #(16 32 39)! !
+
+!Contract class methodsFor: 'setup' stamp: 'dhn 5/19/2014 10:34'!
+boardColor
+	"Answer the color of the board itself"
+	^Color yellow alpha: 0.7! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 4/29/2012 19:58'!
+ccSpaces
+	"Answer the positions where Contractor Contingencies apply."
+	^ #(14 20 22 23 29 30 33 34 35 38 40 44 45 )! !
+
+!Contract class methodsFor: 'setup' stamp: 'dhn 7/13/2016 15:09'!
+cellColorForGame
+	"Answer the color of the board spaces"
+	
+	^ Color peach lighter! !
+
+!Contract class methodsFor: 'setup' stamp: 'dhn 4/26/2012 10:25'!
+cellsForGame
+	"Answer the number of board spaces game"
+	^7! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 10/2/2016 17:05:54'!
+defaultGoal
+	"Answer the default winning net asset goal"
+	
+	^ 1500000.
+! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 2/17/2017 10:57:42'!
+describeSpaces
+	"Descriptions for the spaces on the board."
+	
+	^ OrderedCollection new
+		add: 'DECEMBER
+Week 4
+
+PAY $1,000 for Christmas gifts to hard-working employees.
+
+Receive $10,000 from outstanding receivables as you pass.';
+
+	add: 'JANUARY
+Week 1
+
+Boomville approves thousands of new home permits. Double all residential construction gross profits this year.';
+
+	add: 'JANUARY
+Week 2
+
+Boomville is selected as the site for a new MegaMall. Double all commercial construction gross profits this year.';
+
+	add: 'JANUARY
+Week 3
+
+Boomville''s explosive growth requires new schools. Double all institutional construction gross profits this year.';
+
+add: 'JANUARY
+Week 4
+
+Boomville levies a big tax increase to pay for roads and utilities. Double all municipal construction gross profits this year.';
+
+	add: 'JANUARY
+Week 5
+
+Boomville approves a new airport. Double all heavy/highway construction gross profits this year.';
+
+	add: 'FEBRUARY
+Week 1
+
+Early warm weather allows you to start construction ahead of schedule. Collect $5,000.';
+
+	add: 'FEBRUARY
+Week 2
+
+
+Sudden blast of winter weather shuts down construction. Pay $5,000.';
+
+	add: 'FEBRUARY
+Week 3
+
+Bout of pneumonia puts you flat on your back for three months. Move to the 4th week in May';
+
+	add: 'MARCH
+Week 1
+
+Extra grading required in new single-family subdivision. Pay fuel bill of $1,000 per backhoe';
+
+	add: 'MARCH
+Week 2
+
+Big job requires you to pay $4,000 to rent a truck.';
+
+	add: 'MARCH
+Week 3
+
+Gravel is needed for house foundations. Pay LOST MINER $3,000.';
+
+	add: 'MARCH
+Week 4
+
+Hire surveyor to lay out tricky steep multi-family site for excavation. Pay $2,000.';
+
+	add: 'APRIL
+Week 1
+
+Federal funding of sewer line requires you to pay prevailing wage. Pay labor costs of $5,000 per grader.
+Contractor Contingency.';
+
+	add: 'APRIL
+Week 2
+
+Street improvements including curbs, sidewalks, and ADA ramps require concrete. Pay BIG PHIL''S CONCRETE $15,000.
+
+Pay Federal Income Taxes $5,000.';
+
+	add: 'APRIL
+Week 3
+
+COMPETITIVE BID
+(Good Luck)';
+
+	add: 'APRIL
+Week 4
+
+Worker accidentally runs over a stack of sewer pipe while excavating a MiniMall. Pay $5,000.';
+
+	add: 'MAY
+Week 1
+
+Mall parking lot requires paving. Pay WESTWOOD ASPHALT $8,000.';
+
+	add: 'MAY
+Week 2
+
+Huge boulders found during excavation require you to rent a truck for $7,000.';
+
+	add: 'MAY
+Week 3
+
+Design of new public library requires retaining walls, sidewalks, curbs, and ramps. Pay BIG PHIL''S CONCRETE $12,000.
+Contractor Contingency.';
+
+	add: 'MAY
+Week 4
+
+Layer of extra-hard rock hampers excavation of new school foundation. Replace bucket on every excavator you own. Pay $3,000.';
+
+	add: 'JUNE
+Week 1
+
+New school requires parking lot. Pay WESTWOOD PAVING $10,000.
+Contractor Contingency.';
+
+	add: 'JUNE
+Week 2
+
+Pay equipment operators $10,000 to excavate foundations for courthouse.
+Contractor Contingency.';
+
+	add: 'JUNE
+Week 3
+
+Extra material and labor costs for finish grading on shopping mall parking lot add up. Pay $7,000.';
+
+	add: 'JUNE
+Week 4
+
+Dozers need service. Pay $2,000 each for oil, filter, grease and hydraulic hoses.';
+
+	add: 'JULY
+Week 1
+
+Windstorm trashes your subdivision site. Pay STINKY''S GARBAGE & LANDFILL $3,000 to pick up the debris.
+
+Pay 10% interest on all outstanding notes.';
+
+	add: 'JULY
+Week 2
+
+Digging through hardpan at new housing site requires extra service to all backhoes. Pay $1,000 each.';
+
+	add: 'JULY
+Week 3
+
+While installing septic system backhoe punches through tank. Pay $4,000 to fix the mess.';
+
+	add: 'JULY
+Week 4
+
+Around-the-clock construction of the new airport wears out self-loading scraper parts. Pay $10,000 per machine to overhaul.
+Contractor Contingency.';
+
+	add: 'AUGUST
+Week 1
+
+Pay WESTWOOD PAVING $25,000 to asphalt a new section of four-lane highway.
+Contractor Contingency.';
+
+	add: 'AUGUST
+Week 2
+
+Pay BIG PHIL''S $30,000 for concrete to build an overpass for a new freeway to the airport.';
+
+	add: 'AUGUST
+Week 3
+
+COMPETITIVE BID
+(Don''t get burned like last time!!!!)';
+
+	add: 'AUGUST
+Week 4
+
+Pay equipment operators $15,000 per scraper for labor and overtime racked up building the new reservoir.
+Contractor Contingency.';
+
+	add: 'SEPTEMBER
+Week 1
+
+Illegal dumping requires you to remove trash. Pay $15,000 to rent a truck.
+Contractor Contingency.';
+
+	add: 'SEPTEMBER
+Week 2
+
+Pay $10,000 for traffic signals, signage and pavement striping to finish new 4-way intersection.
+Contractor Contingency.';
+
+	add: 'SEPTEMBER
+Week 3
+
+Install sanitary sewer system for single-family residence. Pay labor and materials costs of $3,000.';
+
+	add: 'SEPTEMBER
+Week 4
+
+Purchase crushed rock for pipe building. Pay LOST MINER $2,000.
+
+Pay 10% interest on all outstanding notes';
+
+	add: 'SEPTEMBER
+Week 5
+
+Excavation and removal job requires you to pay $10,000 to rent a truck.
+Contractor Contingency.';
+
+	add: 'OCTOBER
+Week 1
+
+COMPETITIVE BID
+(Who needs this job the most??)';
+
+	add: 'OCTOBER
+Week 2
+
+Purchase pipe, valves and fittings for potable water system servicing the new Buttercup Elementary School. Pay $5,000 per excavator.
+Contractor Contingency.';
+
+	add: 'OCTOBER
+Week 3
+
+Unstable soil at new warehouse site requires you to import sand and gravel. Pay LOST MINER $5,000.';
+
+	add: 'OCTOBER
+Week 4
+
+Megabucks Shopping Mall refinishes its sidewalks, ramps and gutters. Pay BIG PHIL''S CONCRETE $7,000.';
+
+	add: 'NOVEMBER
+Week 1
+
+Haul contaminated material from gas station project. Pay STINKY''S GARBAGE & LANDFILL $5,000.';
+
+	add: 'NOVEMBER
+Week 2
+
+Install new fire protection main, hydrants and replace the paving. Pay BIG PHIL''S CONCRETE $15,000.
+Contractor Contingency.';
+
+	add: 'NOVEMBER
+Week 3
+
+Flaggers and concrete barricades are needed for traffic control during road improvement job. Pay $7,000 per grader.
+Contractor Contingency.';
+
+	add: 'NOVEMBER
+Week 4
+
+If owned, pay owner for annual disposal usage $4,000 to $24,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $100,000.';
+
+	add: 'DECEMBER
+Week 1
+
+If owned, pay owner for annual material purchases $6,000 to $36,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $200,000.';
+
+	add: 'DECEMBER
+Week 2
+
+If owned, pay owner for annual material purchases $10,000 to $60,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $300,000.';
+
+	add: 'DECEMBER
+Week 3
+
+If owned, pay owner for annual material purchases $15,000 to $90,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $500,000.';
+
+	yourself! !
+
+!Contract class methodsFor: 'lists' stamp: 'dhn 8/18/2013 06:54'!
+equipmentList
+	"Answer a list in the order needed for purchases and status"
+	^ {'Backhoe'. 'Dozer'. 'Excavator'. 'Grader'. 'Scraper'. 'Truck'}! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 9/23/2016 15:53:04'!
+equipmentMarket
+	"Associate asset class with season."
+
+	^ Dictionary new
+		add: #Backhoe -> #RESIDENTIAL;
+		add: #Dozer -> #COMMERCIAL;
+		add: #Excavator -> #INSTITUTIONAL;
+		add: #Grader -> #MUNICIPAL;
+		add: #Scraper -> #'HEAVY HIGHWAY';
+		add: #Stinky -> #STINKY;
+		add: #LostMiner -> #'LOST MINER';
+		add: #Westwood -> #WESTWOOD;
+		add: #BigPhil -> #'BIG PHIL';
+		yourself! !
+
+!Contract class methodsFor: 'lists' stamp: 'dhn 8/18/2013 06:56'!
+franchiseList
+	"Answer a list in the order needed for purchases and status"
+	^ {'Stinky'. 'LostMiner'. 'Westwood'. 'BigPhil'}! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 9/28/2016 16:54:58'!
+franchiseSpaces
+	"Answer the positions which are franchises"
+	
+	^ #(46 47 48 49)! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 20:57'!
+interestDue: aPosition 
+	"Answer true if interest expenses are due at aPosition."
+	^ #(26 37 ) includes: aPosition! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 9/23/2016 13:59:13'!
+jobSeason
+	"Answer a collection of job seasons in order of their board positions."
+	
+	^ OrderedCollection new
+		addAll: #(nil nil nil nil nil nil nil nil nil);
+		addAll: #(#RESIDENTIAL #RESIDENTIAL #RESIDENTIAL #RESIDENTIAL);
+		addAll: #(#MUNICIPAL #MUNICIPAL #MUNICIPAL);
+		addAll: #(#COMMERCIAL #COMMERCIAL #COMMERCIAL);
+		addAll: #(#INSTITUTIONAL #INSTITUTIONAL #INSTITUTIONAL #INSTITUTIONAL);
+		addAll: #(#COMMERCIAL #COMMERCIAL);
+		addAll: #(#RESIDENTIAL #RESIDENTIAL #RESIDENTIAL);
+		addAll: #(#'HEAVY HIGHWAY' #'HEAVY HIGHWAY' #'HEAVY HIGHWAY' #'HEAVY HIGHWAY' #'HEAVY HIGHWAY');
+		addAll: #(#MUNICIPAL #MUNICIPAL);
+		addAll: #(#RESIDENTIAL #RESIDENTIAL);
+		addAll: #(#INSTITUTIONAL #INSTITUTIONAL #INSTITUTIONAL);
+		addAll: #(#COMMERCIAL #COMMERCIAL #COMMERCIAL);
+		addAll: #(#MUNICIPAL #MUNICIPAL);
+		add: #STINKY;
+		add: #'LOST MINER';
+		add: #WESTWOOD;
+		add: #'BIG PHIL';
+		yourself! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 4/29/2012 16:32'!
+paymentIncrement
+	"Answer the payment increment for displaying loan payment choices"
+	^ 10000! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 9/24/2016 12:54:58'!
+requiredEquipment
+	"Associate season with asset class."
+	
+	^ Dictionary new
+		add: #RESIDENTIAL -> #Backhoe;
+		add: #COMMERCIAL -> #Dozer;
+		add: #INSTITUTIONAL -> #Excavator;
+		add: #MUNICIPAL -> #Grader;
+		add: #'HEAVY HIGHWAY' -> #Scraper;
+		add: #STINKY -> #Stinky;
+		add: #'LOST MINER' -> #LostMiner;
+		add: #WESTWOOD -> #Westwood;
+		add: #'BIG PHIL' -> #BigPhil;
+		yourself! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 20:58'!
+taxDue: aPosition 
+	"Answer true if income tax is due at aPosition."
+	^ aPosition = 15! !
 
 !ContractToken methodsFor: 'accessing' stamp: 'dhn 9/24/2016 16:20:38'!
 doubled
@@ -536,18 +2151,18 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 19:18:00'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/23/2017 21:17:43'!
 buildMorphicWindow
 
 	model arena: self.
 
-	path _ PasteUpMorph new
-		name: #path;
+	pasteup _ PasteUpMorph new
+		name: #pasteup;
 		color: Color transparent.
 		
-	layoutMorph addMorph: path layoutSpec: LayoutSpec useAll.
-	board _ LayoutMorph newColumn name: #AREA.
-	path addMorph: board.
+	layoutMorph addMorph: pasteup layoutSpec: LayoutSpec useAll.
+	board _ LayoutMorph newColumn name: #board.
+	pasteup addMorph: board.
 	
 	model when: #quitGame send: #delete to: self.
 	model when: #itemChange send: #displayNumbers to: self.
@@ -563,7 +2178,7 @@ describe
 
 	^ ''! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 12/1/2016 12:29:51'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:55:41'!
 displayInvoice: details title: aTitle
 	"Display the results of doing the job"
 	| inv |
@@ -572,7 +2187,7 @@ displayInvoice: details title: aTitle
 	inv 
 		setLabel: aTitle;
 		setWindowColor: model currentPlayer token color;
-		openInWorld: path;
+		openInWorld: pasteup;
 		morphPosition: self windowPosition;
 		morphExtent: 310@180;						
 		details: details! !
@@ -906,7 +2521,7 @@ quitGame
 			model token ifNotNil: [model token delete].
 			model quitGame]! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/18/2017 13:35:28'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 3/23/2017 20:56:03'!
 setupToken: aPlayer
 	"Place the player's token on the board"
 	
@@ -916,10 +2531,10 @@ setupToken: aPlayer
 		color: aPlayer color;
 		setSize;
 		setPosition.
-	path addMorph: aPlayer token.
+	pasteup addMorph: aPlayer token.
 	^ aPlayer token who: aPlayer! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:17:31'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:16'!
 showAssetAuction
 	"Open an asset auction window"
 	| pl win purpose |
@@ -930,7 +2545,7 @@ showAssetAuction
 	purpose _ pl identity, '''s Assets'.
 	win _ AuctionAsset openOn: model.			
 	win buyers color: Color lightBrown.
-	win openInWorld: path.
+	win openInWorld: pasteup.
 	win 
 		setLabel: 'Auction of ', purpose;
 		startButtons;
@@ -978,14 +2593,14 @@ showJobAuctionAt: aPosition
 		morphExtent: 450@300;
 		openInHand! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:13:51'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:39'!
 showLoan
 	"Show window for reducing debt"
 	| pl win |
 		
 	pl _ model currentPlayer.
 	win _ LoanView openOn: model.
-	win openInWorld: path.
+	win openInWorld: pasteup.
 	win
 		setLabel: pl identity, '''s Debt';
 		setWindowColor: pl color;
@@ -995,7 +2610,7 @@ showLoan
 				
 	model disableAll: {'Pay Loan'}! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:14:21'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:49'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
@@ -1004,7 +2619,7 @@ showOpts
 	pl options notEmpty
 		ifTrue: [
 			win _ OptionsView openOn: model.
-			win openInWorld: path.
+			win openInWorld: pasteup.
 			win
 				setLabel: pl identity, '''s Shopping';
 				setWindowColor: pl color;
@@ -1046,14 +2661,14 @@ showSeasons: associations
 			set add: txt].
 	^ set! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 3/18/2017 20:13:07'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:57:30'!
 showStats
 	"Open a window on a player's statistics"
 	| pl win |
 		
 	pl _ model currentPlayer.
 	win _ StatsView openOn: model.
-	win openInWorld: path.
+	win openInWorld: pasteup.
 	win
 		setLabel: pl identity, '''s Statistics';
 		setWindowColor: pl color;
@@ -1061,7 +2676,7 @@ showStats
 		morphExtent: 300 @ 260.
 	model disableAll: {'Stats'}! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 19:26:28'!
+!Construction methodsFor: 'operation' stamp: 'dhn 3/23/2017 20:57:57'!
 showToken
 	"Establish the size and position of the token"
 	| w h |
@@ -1071,7 +2686,7 @@ showToken
 	model token 
 		morphExtent: w@h;
 		morphPosition: self morphExtent * (0.006@0.72);
-		openInWorld: path! !
+		openInWorld: pasteup! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 9/11/2016 16:12:56'!
 startButtonSet
@@ -1085,14 +2700,12 @@ startButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/19/2017 11:04:10'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 4/8/2017 14:08:32'!
 startGame
 	"Change the buttons and start the game"
 	
 	self playButtonSet.
 	model players do: [:ea | 
-		ea die when: #franchiseEffect: send: #franchiseEffect: to: model with: #value.
-		ea die when: #jobDone send: #remainder: to: ea mgr with: #value.
 		ea 
 			when: #displayInvoice 
 			send: #displayInvoice:title: 
@@ -1393,17 +3006,18 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 3/18/2017 20:09:25'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 4/3/2017 19:56:55'!
 start
 	"Start the Construction Game"
 	| win |
 	
 	win _ self open: Contract new label: 'A Board Game'.
 	
+	win model world: win pasteup.
 	win morphExtent: (win owner morphExtent * (1.0@0.8)).
 	win morphPosition: 0@60.
 	win owner doOneCycleNow.
-	win board morphExtent: win board owner morphExtent.
+	win board morphExtent: win pasteup morphExtent.
 	win board
 		addMorph: win makeTitleArea;
 		addMorph: win makeNumbersArea;
@@ -3788,1617 +5402,6 @@ reset! !
 price
 	^ 0! !
 
-!Contract methodsFor: 'auction' stamp: 'dhn 9/15/2016 18:18:14'!
-assetAuctionItem
-	"Answer the value of assetAuctionItem"
-
-	assetAuctionItem ifNil: [assetAuctionItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ assetAuctionItem! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/19/2016 11:36:38'!
-assetAuctionItem: anObject
-	"Set the value of assetAuctionItem"
-	
-	(assetAuctionItem _ anObject) ifNotNil: [
-		self triggerEvent: #itemChange.
-		self changed: #assetAuctionItem]! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 14:15:17'!
-assetAuctionList
-	"Answer a list for the asset auction window"
-	
-	^ auctionList! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 14:13:42'!
-assetsToSell
-	"Answer the assets and quantities to be sold"
-	| list qty |
-	
-	list _ OrderedCollection new.
-	(self class equipmentList , self class franchiseList) do: [:each |
-		qty _ (currentPlayer assets at: each asSymbol) quantity.
-		qty > 0
-			ifTrue: [list addLast: each, '(', qty asString, ')']].
-	^ list! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 13:55:14'!
-auctionList
-	"Answer the value of auctionList"
-	
-	^ auctionList! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/17/2016 13:56:07'!
-auctionList: anObject
-	"Set the value of auctionList"
-	
-	auctionList _ anObject! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 4/15/2012 12:41'!
-availableOptions
-	"Answer the value of availableOptions"
-
-	^ availableOptions! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:13:06'!
-decideCompetitive
-	"If one or more players have the equipment, enable Auction"
-	| req any |
-	
-	req _ Contract requiredEquipment
-				at: (Contract jobSeason at: currentPlayer position).
-	any _ players
-				detect: [:a | (a assets at: req) quantity > 0]
-				ifNone: [].
-	any notNil
-		ifTrue: [
-			self disableAll: {'Move'. 'End Turn'. 'Do Job'}.
-			self triggerEvent: #jobAuctionRequired with: currentPlayer position]
-		ifFalse: [
-			self disableAll: {'Do Job'}.
-			self updateHistory.
-			self enableAll: {'End Turn'}]! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 8/24/2016 10:14:20'!
-declareBroke: aString
-	"Inform that the player named aString is out of cash"
-	
-	GamePopUp 
-		inform: aString , ' is out of cash and must auction 
-assets until cash is no longer negative.'
-		title: 'Out of Cash'
-! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 9/28/2016 12:16:52'!
-declareOver: aString
-	"Inform that the player named aString is over the debt limit"
-	
-	GamePopUp 
-		inform: (String streamContents: [:str |
-			str
-				nextPutAll: currentPlayer identity;
-				nextPutAll: ' must use cash to bring debt to $';
-				nextPutAll: currentPlayer playerDebtLimit value negated printStringWithCommas;
-				nextPutAll: ' or less.']) 
-		title: 'Debt Too High'
-! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 8/24/2016 11:10:47'!
-declareWinner
-	"Inform that there is a winner"
-
-	GamePopUp 
-		inform: (String streamContents: [:str |
-			str
-				nextPutAll: self currentPlayer identity;
-				nextPutAll: ' has amassed net assets of more than $';
-				nextPutAll: self goal printStringWithCommas; nextLine;
-				nextPutAll: ' and is the winner of the game.']) 
-		title: 'THE WINNAH!!!!'.
-	arena owner removeMorph: currentPlayer token.
-	self won: true! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:13:26'!
-doJob
-	"Try to do the job for this space"
-
-	(currentPlayer shutDown
-			or: [currentPlayer forfeitJob])
-		ifFalse: [currentPlayer jobDone: true.
-			(self class ccSpaces includes: currentPlayer position)
-				ifTrue: [currentPlayer contingency: self drawContingency]
-				ifFalse: [currentPlayer contingency: nil].
-			self doSpace].
-	self disableAll: {'Do Job'}.
-	self updateHistory.
-	self enableAll: {'End Turn'}! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/28/2016 15:07:58'!
-doSettings
-	"Provide a facility for changing settings"
-	| ans |
-	
-	ans _ (PopUpMenu withCaption: 'Settings' chooseFrom: 'Change the goal of the game\Change auctioneer''s beat\Change test mode').
-	ans = 1 ifTrue: [self setGoal].
-	ans = 2 ifTrue: [self setBeat].
-	ans = 3 ifTrue: [self setTestMode]! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 9/28/2016 10:07:20'!
-doSpace
-	"Determine if player can do the job"
-	
-	(self class alwaysDo: currentPlayer position)
-		ifTrue: [currentPlayer spaceEffect: self whatSpaceSays]
-		ifFalse: [
-			currentPlayer forfeitJob
-				ifFalse:[
-					currentPlayer canDoJob
-						ifTrue: [self harvest]]]! !
-
-!Contract methodsFor: 'fates' stamp: 'dhn 9/25/2016 20:14:54'!
-drawContingency
-	"Randomly draw a fate card"
-	| con |
-	
-	con _ self drawCard: fates discard: drawnFates.
-	con result: (self currentPlayer perform: con function withArguments: {con argument}).
-	self triggerEvent: #itemChange.
-	con class = Announcement
-		ifTrue: [GamePopUp inform: con description title: 'Contractor Contingency:'].
-	^ con! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 1/12/2017 12:00:52'!
-endTurn
-	"End a player's turn"
-	
-	(spaces at: currentPlayer position) markAddFor: currentPlayer.
-"	self addMarkerIDInMarks; removeAllMarkersInCells."
-	self enableAll: {'Auction'}.
-	currentPlayer cash < 0
-		ifTrue: [self disableAll: {'Move'}.
-			currentPlayer outOfAssets
-				ifTrue: [self removeFromGame]
-				ifFalse: [
-					self declareBroke: currentPlayer identity.
-					self disableAll: {'End Turn'}]]
-		ifFalse: [
-			currentPlayer debt < currentPlayer playerDebtLimit value
-				ifTrue: [
-					self declareOver: currentPlayer identity.
-					self disableAll: {'End Turn'}]
-				ifFalse: [currentPlayer netAssets >= self goal
-						ifTrue: [won
-								ifFalse: [self declareWinner]].
-					currentPlayer priceFactor: 1.
-					currentPlayer contingency: nil.
-					currentPlayer jobDone
-						ifFalse: [currentPlayer jobMissed].
-					currentPlayer 
-						jobDone: false;
-						forfeitJob: false.
-					self disableAll: {'Do Job'}.
-					self triggerEvent: #deleteOpenWindows.
-					windowCount _ 0.
-					self nextPlayer.
-					self triggerEvent: #setupToken: with: currentPlayer.
-					self won
-						ifTrue: [self wonButtonsState]
-						ifFalse: [self enableAll: {'Move'. 'Stats'}.
-							self disableAll: {'End Turn'}]]]! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 12/1/2016 15:45:52'!
-franchiseEffect: anObject
-	"Show the effect of landing on an owned franchise"
-	| fran z invoice amt owner user |
-	
-	self disableAll: {'Move'}.
-	fran _ self class requiredEquipment at: (self class jobSeason at: currentPlayer position).
-	amt _ Compiler evaluate: ((fran asString), ' duty').
-	z _ amt * anObject.
-	user _ currentPlayer.
-	owner _ (availableOptions at: fran) holder.
-	owner = user
-		ifTrue: [invoice _ (String streamContents: [:str |
-			str
-				nextPutAll: 'First Friendly Bank paid you $';
-				nextPutAll: z printStringWithCommas;
-				nextPutAll: ' because you own ';
-				nextPutAll: (leases at: fran) description]).
-			user triggerEvent: #displayInvoice withArguments: {invoice. 'Franchise Income'}.
-			user earned: z for: fran.
-			user tally: z]
-		ifFalse: [| payee | owner ifNotNil: [
-					payee _ owner identity.
-					owner earned: z for: fran.
-					owner tally: z.
-					owner appendHistory.
-					invoice _ (String streamContents: [:str |
-						str
-							nextPutAll: 'You paid ';
-							nextPutAll: payee;
-							nextPutAll: ' $';
-							nextPutAll: z printStringWithCommas;
-							nextPutAll: ' for your bill from ';
-							nextPutAll: (leases at: fran) description]).
-					user triggerEvent: #displayInvoice withArguments: {invoice. 'Franchise Expense'}.
-					user paid: z for: fran.
-					user tally: z negated]].
-	currentPlayer jobDone: true.
-	self updatePlayer.
-	self updateHistory.
-	self enableAll: {'End Turn'}.
-	^ z! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:14:07'!
-fund: aSymbol for: anAmount 
-	| owner user whom z |
-	owner := (self availableOptions at: aSymbol) holder.
-	user := self currentPlayer.
-	owner = user
-		ifTrue: [user avoided: anAmount for: aSymbol.
-			z := 0]
-		ifFalse: [owner isNil
-				ifTrue: [whom := 'First Friendly Bank']
-				ifFalse: [whom := owner identity.
-					owner tally: anAmount.
-					(owner assets at: aSymbol)
-						recordGross: anAmount].
-			(user assets at: aSymbol)
-				recordCost: anAmount
-				for: currentPlayer.
-			z := anAmount negated].
-	self updatePlayer.
-	self updateHistory.
-	self enableAll: {'End Turn'}.
-	^ z -> whom! !
-
-!Contract methodsFor: 'harvesting' stamp: 'dhn 9/22/2016 22:32:10'!
-harvest
-	"Determine how well the job is done"
-	
-	self currentPlayer spaceEffect: self whatSpaceSays.
-	self rollTheDie
-! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/27/2016 14:59:08'!
-initialButtonState
-	"Establish the button state at the start of the game"
-	
-	self enableAll: {'Purchase'}.
-	self disableAll: {'End Turn'. 'Do Job'}! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 20:57:21'!
-initialize
-
-	super initialize.
-	spaces _ self setUpSpaces.
-	spaceFreq _ Histogram ofSize: spaces size.
-	cellCount _ self class cellsForGame.
-	won _ false.
-	windowCount _ 0.
-	fates _ Construction contingencyDesc shuffled.
-	availableOptions _ Construction optionsDesc.
-	drawnFates _ OrderedCollection new.
-	leases _ self setUpLeases! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/20/2016 15:17:45'!
-jobAuctionItem
-	"Answer the value of jobAuctionItem"
-
-	jobAuctionItem ifNil: [jobAuctionItem _ 1]. 	"nil is unacceptable during model initialization"
-	^ jobAuctionItem! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/19/2016 17:50:21'!
-jobAuctionItem: anObject
-	"Set the value of jobAuctionItem"
-	
-	(jobAuctionItem _ anObject) ifNotNil: [
-		self triggerEvent: #itemChange.
-		self changed: #jobAuctionItem]! !
-
-!Contract methodsFor: 'auction' stamp: 'dhn 9/21/2016 12:43:26'!
-jobAuctionList
-	"Answer a list for the job auction window"
-
-	^ self class bidIncrement! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
-listOfOptions: anObject
-	"Set the value of listOfOptions"
-
-	listOfOptions := anObject! !
-
-!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:21:34'!
-loanItem
-	"Answer the value of loanItem"
-
-	loanItem ifNil: [loanItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ loanItem! !
-
-!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:21:16'!
-loanItem: anObject
-	"Set the value of loanItem and loanReport"
-	| enab |
-	
-	(loanItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [
-			loanReport _ self loanReportFor: anObject.
-			enab _ true]
-		ifFalse: [
-			loanReport _ ''.
-			enab _ false].
-		self triggerEvent: #itemChange.
-		self triggerEvent: #payButton: with: enab.
-		self changed: #loanItem]! !
-
-!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:19:28'!
-loanList
-	"Answer possible loan payment amounts"
-	| list |
-	
-	list _ OrderedCollection new.
-	1 to: 50 do: [:n | 
-		list add: (String streamContents: [:str |
-			str 
-				nextPut: $$;
-				nextPutAll: (n * self class paymentIncrement) printStringWithCommas;
-				newLine])].
-	^ list
-! !
-
-!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:19:50'!
-loanReportFor: anInteger
-	"Answer the effect on cash and debt of a payment selected by anInteger"
-	| pmt enab |
-
-	anInteger > 0
-		ifTrue: [
-			enab _ true.
-			pmt _ anInteger * self class paymentIncrement min: currentPlayer debt negated.
-			^ (String streamContents: [:string |
-				string 
-					nextPutAll: 'By making this payment, ', currentPlayer identity, ' would have:';
-					newLine; newLine;
-					nextPut: $$;
-					nextPutAll: (currentPlayer debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
-					newLine;
-					nextPut: $$;
-					nextPutAll: (currentPlayer cash - pmt) asInteger printStringWithCommas , ' in cash and';
-					newLine;
-					nextPutAll: '$' , currentPlayer playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
-		ifFalse: [
-			enab _ false.
-			^ ''].
-	self triggerEvent: #itemChange.
-	self triggerEvent: #payButton: with: enab.
-	self changed: #loanItem! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 9/28/2016 15:30:14'!
-moveButton
-	"Answer the value of moveButton"
-	
-	^ moveButton! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 9/28/2016 15:34:24'!
-moveButton: anObject
-	"Set the value of moveButton"
-	
-	^ moveButton _ anObject! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 08:05:52'!
-optionsItem
-	"Answer the value of optionsItem"
-
-	optionsItem ifNil: [optionsItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ optionsItem! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 9/12/2016 11:28:30'!
-optionsItem: anObject
-	"Set the value of optionsItem and optionsReport"
-	| item enab |
-	
-	(optionsItem _ anObject) ifNotNil: [
-	anObject ~= 0
-		ifTrue: [item _ self optionsList at: anObject.
-			optionsReport _ self reportFor: currentPlayer on: item.
-			(Compiler evaluate: 'Franchise subclasses includes: ', item)
-				ifTrue: [
-					currentPlayer position = (Compiler evaluate: item, ' location')
-						ifTrue: [enab _ true]
-						ifFalse: [enab _ false]]
-				ifFalse: [enab _ true]]
-		ifFalse: [
-			optionsReport _ ''.
-			enab _ false].
-		self triggerEvent: #itemChange.
-		self triggerEvent: #buyButton: with: enab.
-		self changed: #optionsItem]! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 9/12/2016 14:34:48'!
-optionsList
-	"Answer the shopping list for a player"
-	
-	^ (OrderedCollection new)
-		addAll: self class equipmentList;
-		addAll: self class franchiseList;
-		yourself! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 19:39:19'!
-optionsReport
-
-	optionsItem > 0
-		ifTrue: [^ self optionsReport: (self optionsList at: optionsItem)]
-		ifFalse: [^ '']
-! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 18:50:18'!
-optionsReport: anAsset
-	"Show the status of anAsset for shopping purposes"
-	| p |
-	
-	p _ currentPlayer assets at: anAsset ifAbsent: [^ 'No such asset named ', anAsset].
-	p owner: currentPlayer.
-	"exerciseButton disableButton."
-	^ p reportOptionTo: currentPlayer mgr! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 9/12/2016 20:25:59'!
-pay: down borrow: balance for: aSymbol amount: qty 
-	"Purchase a franchise"
-	| asset x y |
-	
-	x := availableOptions at: aSymbol.
-	y := Franchise subclasses includes: x class.
-	y & x holder notNil
-		ifTrue: [
-			GamePopUp 
-				inform: (String streamContents: [:str |
-				str
-					nextPutAll: 'Sorry, but the ';
-					nextPutAll: x listName;
-					nextPutAll: ' franchise is held by ';
-					nextPutAll: x holder identity]) 
-			title: 'Franchise Taken']
-		ifFalse: [y ifTrue: [x holder: currentPlayer].
-			currentPlayer debt: balance negated + currentPlayer debt.
-			currentPlayer tally: down negated.
-			asset := currentPlayer assets at: aSymbol.
-			asset quantity: qty + asset quantity.
-			asset cost: down + balance + asset cost.
-			currentPlayer canDoJob
-				ifTrue: [currentPlayer jobDone
-					ifFalse: [self enableAll: {'Do Job'}]]].
-	self updatePlayer! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 9/25/2016 20:53:33'!
-payRent: anAmount for: aSymbol 
-	"Pay amount to the first player to the left who has asset named aSymbol."
-	| ix |
-	
-	ix _ self wrapIndex: self playerIndex - 1 around: players size.
-	players size - 1
-		timesRepeat: [| owner |
-			owner _ players at: ix.
-			(owner assets at: aSymbol) quantity > 0
-				ifTrue: [(currentPlayer assets at: aSymbol)
-						recordCost: anAmount
-						for: currentPlayer.
-					(owner assets at: aSymbol)
-						recordGross: anAmount.
-					owner tally: anAmount.
-					self updatePlayer.
-					^ anAmount negated -> owner identity].
-			ix _ self wrapIndex: ix - 1 around: players size].
-	"At this point, no player owns an asset named aSymbol."
-	(currentPlayer assets at: aSymbol)
-		recordCost: anAmount
-		for: currentPlayer.
-	^ anAmount negated -> 'First Friendly Bank'! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
-paymentList
-	"Answer the value of paymentList"
-
-	^ paymentList! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
-paymentList: anObject
-	"Set the value of paymentList"
-
-	paymentList := anObject! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:15:10'!
-queryWin: aBool
-		aBool ifTrue: [self wonButtonsState]
-		ifFalse: [
-			self updateHistory.
-			self enableAll: {'End Turn'}]! !
-
-!Contract methodsFor: 'harvesting' stamp: 'dhn 10/2/2016 16:01:34'!
-remainder: roll
-	"Do the rest of the job calculations"
-	| machine income |
-	
-	machine _ Construction ironMap
-		at: (Contract jobSeason at: self currentPlayer position).
-	currentPlayer jobRoll: roll + currentPlayer jobRoll.
-	currentPlayer jobCount: 1 + currentPlayer jobCount.
-	income _ 0.
-	((Smalltalk at: machine) inheritsFrom: Iron)
-		ifTrue: [income _ self currentPlayer updateIron: machine with: roll].
-	self
-		currentPlayer tally: income;
-		cutIncome: 1.
-	self updatePlayer.
-	^ income! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 10/2/2016 19:08:30'!
-removeFromGame
-	"Remove a player from the game"
-	
-	GamePopUp 
-		inform: currentPlayer identity , ' has exceeded the debt 
-limit and is out of the game' 
-		title: 'YER OUT!!!!'.
-	availableOptions
-		do: [:h | h value holder = currentPlayer
-				ifTrue: [h value holder: nil]].
-	(players includes: currentPlayer)
-		ifTrue: [players removeAll: {currentPlayer}.
-			playerIndex _ playerIndex - 1.
-			self 
-				nextPlayer; 
-				triggerEvent: #setupToken: with: currentPlayer;
-				enableAll: {'Move'}].
-	1 = players size
-		ifTrue: [nil inform: self players first identity , ' has won the game by default.'.
-			self disableAll: {'Pay Loan'. 'Purchases'. 'Do Job'. 'Move'}.
-			self won: true]! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 8/26/2016 08:14:27'!
-reportFor: aPlayer on: anAsset
-	| p |
-	p := aPlayer assets at: anAsset ifAbsent: [^ 'No such asset named ', anAsset].
-	p owner: aPlayer.
-	"exerciseButton disableButton."
-	^ p reportOptionTo: aPlayer mgr! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 10/2/2016 16:02:09'!
-reviewOption
-	"Complete a purchase"
-	| option key cost down balance |
-	
-	self triggerEvent: #deleteOpenWindows.
-	key _ (listOfOptions list at: listOfOptions selectedItem) asSymbol.
-	option _ Construction optionsDesc at: key.
-	cost _ option class price * currentPlayer priceFactor.
-	down _ 0.2 * cost.
-	balance _ cost - down.
-	self
-		pay: down
-		borrow: balance
-		for: option listName asSymbol
-		amount: 1! !
-
-!Contract methodsFor: 'harvesting' stamp: 'dhn 12/8/2016 19:29:42'!
-rollForFranchise
-	"Show the die rolling"
-	| bone |
-
-	bone _ currentPlayer die openInWorld: arena path.
-	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
-	bone show: bone combo shuffled event: #franchiseEffect:
-! !
-
-!Contract methodsFor: 'harvesting' stamp: 'dhn 12/8/2016 19:28:04'!
-rollTheDie
-	"Show the die rolling"
-	| bone |
-
-	bone _ currentPlayer die openInWorld: arena path.
-	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
-	bone show: bone combo shuffled event: #jobDone
-! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 10/2/2016 16:01:41'!
-seasonAt: aPosition
-	| y |
-	y := Construction season select: [:a | a range x <= aPosition].
-	^ y last ! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 14:37:44'!
-setTestMode
-	"Optionally toggle test mode"
-	| trans ans |
-	
-	trans _ self testMode
-		ifTrue: ['true to false']
-		ifFalse: ['false to true'].
-	ans _ nil confirm: 'Change Test Mode (', trans, ')'.
-	ans ifTrue: [
-		self testMode: self testMode not.
-		self testMode ifTrue: [goal _ self testGoal]]! !
-
-!Contract methodsFor: 'options' stamp: 'dhn 9/23/2014 20:20'!
-setUpLeases
-	leases := Dictionary new.
-	leases at: #Stinky put: (Stinky new description: 'STINKY''S Garbage and Landfill').
-	leases at: #LostMiner put: (LostMiner new description: 'LOST MINER').
-	leases at: #Westwood put: (Westwood new description: 'WESTWOOD Asphalt and Paving').
-	leases at: #BigPhil put: (BigPhil new description: 'BIG PHIL''S Concrete Plant').
-	^ leases
-! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 20:56:37'!
-setUpSpaces
-	"Initialize the board spaces"
-	| col |
-	
-	col _ OrderedCollection new.
-	1 to: self class describeSpaces size do: [:ix |
-		col add: (BoardSpace new
-			label: (self class describeSpaces at: ix);
-			routine: ('space', ix asString) asSymbol)].
-	^ col! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 3/19/2017 14:56:06'!
-setupPlayer: aName color: aColor
-	"Establish a player named aName and colored aColor"
-	| pl |
-	
-	self players add: (pl _ Contractor new
-		color: aColor;
-		marker: (EllipseMorph new
-			color: aColor;
-			morphExtent: 18@10);
-		mgr: self;
-		identity: aName).
-	self token: ContractToken new.
-	self setTokenFor: pl.
-	self when: #deleteOpenWindows send: #delete to: token.
-	self availableOptions do: [:opt | pl options addLast: opt].! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:15:47'!
-space1
-	"Year End"
-	| z |
-	
-	self disableAll: {'Move'}.
-	GamePopUp inform: 'You will spend $1,000 for Christmas gifts.' title: 'Christmas for Employees'.
-	z := 1000 negated.
-	self currentPlayer tally: z.
-	self updatePlayer.
-	self currentPlayer salary.
-	self updatePlayer.
-	self updateHistory.
-	self enableAll: {'End Turn'}.
-	^ z -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:17'!
-space10
-	"Mar week 1"
-	^ (self
-		spacePlain: (self currentPlayer pay: 1000 negated for: #Backhoe)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:45'!
-space11
-	"Mar week 2"
-	^ self spaceTruck: 4000! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:00'!
-space12
-	"Mar week 3"
-	^ (self fund: #LostMiner for: 3000)
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:19'!
-space13
-	"Mar week 4"
-	^ (self spacePlain: 2000 negated) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:08'!
-space14
-	"Apr week 1"
-	^ (self
-		spacePlain: (self currentPlayer pay: 5000 negated for: #Grader)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 21:09'!
-space15
-	"Apr week 2"
-	^ self fund: #BigPhil for: 15000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:13'!
-space16
-	"Apr week 3"
-	^ 0 -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:14'!
-space17
-	"Apr week 4"
-	^ (self spacePlain: 5000 negated) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:02'!
-space18
-	"May week 1"
-	^ self fund: #Westwood for: 8000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:45'!
-space19
-	"May week 2"
-	^ self spaceTruck: 7000! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:06'!
-space2
-	"Jan week 1"
-	| z |
-	
-	self disableAll: {'Move'}.
-	z _ 0.
-	self currentPlayer passedGo
-		ifTrue: [z _ self currentPlayer salary].
-	self updatePlayer.
-	self currentPlayer markets at: #RESIDENTIAL put: 2.
-	self queryWin: won.
-	self triggerEvent: #itemChange.
-	^ z -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:03'!
-space20
-	"May week 3"
-	^ self fund: #BigPhil for: 12000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:15'!
-space21
-	"May week 4"
-	^ (self
-		spacePlain: (self currentPlayer pay: 3000 negated for: #Excavator)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:03'!
-space22
-	"Jun week 1"
-	^ self fund: #Westwood for: 10000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:16'!
-space23
-	"Jun week 2"
-	^ (self spacePlain: 10000 negated) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:18'!
-space24
-	"Jun week 3"
-	^ (self spacePlain: 7000 negated) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:18'!
-space25
-	"Jun week 4"
-	^ (self
-		spacePlain: (self currentPlayer pay: 2000 negated for: #Dozer)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 21:10'!
-space26
-	"Jul week 1"
-	^ self fund: #Stinky for: 3000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:19'!
-space27
-	"Jul week 2"
-	^ (self
-		spacePlain: (self currentPlayer pay: 1000 negated for: #Backhoe)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:20'!
-space28
-	"Jul week 3"
-	^ (self spacePlain: 4000 negated) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:20'!
-space29
-	"Jul week 4"
-	^ (self
-		spacePlain: (self currentPlayer pay: 10000 negated for: #Scraper)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:17'!
-space3
-	"Jan week 2"
-	| z |
-	
-	self disableAll: {'Move'}.
-	z _ 0.
-	self currentPlayer passedGo
-		ifTrue: [z _ self currentPlayer salary].
-	self updatePlayer.
-	self currentPlayer markets at: #COMMERCIAL put: 2.
-	self queryWin: won.
-	self triggerEvent: #itemChange.
-	^ z -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:04'!
-space30
-	"Aug week 1"
-	^ self fund: #Westwood for: 25000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:04'!
-space31
-	"Aug week 2"
-	^ self fund: #BigPhil for: 30000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:21'!
-space32
-	"Aug week 3"
-	^ 0 -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:21'!
-space33
-	"Aug week 4"
-	^ (self
-		spacePlain: (self currentPlayer pay: 15000 negated for: #Scraper)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:46'!
-space34
-	"Sep week 1"
-	^ self spaceTruck: 15000! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:22'!
-space35
-	"Sep week 2"
-	^ (self spacePlain: 10000 negated) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:23'!
-space36
-	"Sep week 3"
-	^ (self spacePlain: 3000 negated) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 21:10'!
-space37
-	"Sep week 4"
-	^ self fund: #LostMiner for: 2000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:46'!
-space38
-	"Sep week 5"
-	^ self spaceTruck: 10000! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:26'!
-space39
-	"Oct week 1"
-	^ 0 -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:25'!
-space4
-	"Jan week 3"
-	| z |
-	
-	self disableAll: {'Move'}.
-	z _ 0.
-	self currentPlayer passedGo
-		ifTrue: [z _ self currentPlayer salary].
-	self updatePlayer.
-	self currentPlayer markets at: #INSTITUTIONAL put: 2.
-	self queryWin: won.
-	self triggerEvent: #itemChange.
-	^ z -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:26'!
-space40
-	"Oct week 2"
-	^ (self
-		spacePlain: (self currentPlayer pay: 5000 negated for: #Excavator)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:05'!
-space41
-	"Oct week 3"
-	^ self fund: #LostMiner for: 5000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:05'!
-space42
-	"Oct week 4"
-	^ self fund: #BigPhil for: 7000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:05'!
-space43
-	"Nov week 1"
-	^ self fund: #Stinky for: 5000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 7/17/2013 08:06'!
-space44
-	"Nov week 2"
-	^ self fund: #BigPhil for: 15000.
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:27'!
-space45
-	"Nov week 3"
-	^ (self
-		spacePlain: (self currentPlayer pay: 7000 negated for: #Grader)) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 12:00:09'!
-space46
-	"Nov week 4"
-	
-	((availableOptions at: #Stinky) holder)
-		ifNotNil: [^ self rollForFranchise]! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 11:59:36'!
-space47
-	"Dec week 1"
-	
-	((availableOptions at: #LostMiner) holder)
-		ifNotNil: [^ self rollForFranchise]! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 11:58:21'!
-space48
-	"Dec week 2"
-	
-	((availableOptions at: #Westwood) holder)
-		ifNotNil: [^ self rollForFranchise]! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/24/2016 11:57:21'!
-space49
-	"Dec week 3"
-		
-	((availableOptions at: #BigPhil) holder)
-		ifNotNil: [^ self rollForFranchise]! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:34'!
-space5
-	"Jan week 4"
-	| z |
-	
-	self disableAll: {'Move'}.
-	z _ 0.
-	self currentPlayer passedGo
-		ifTrue: [z _ self currentPlayer salary].
-	self updatePlayer.
-	self currentPlayer markets at: #MUNICIPAL put: 2.
-	self queryWin: won.
-	self triggerEvent: #itemChange.
-	^ z -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/12/2016 18:40:42'!
-space6
-	"Jan week 5"
-	| z |
-	
-	self disableAll: {'Move'}.
-	z _ 0.
-	self currentPlayer passedGo
-		ifTrue: [z _ self currentPlayer salary].
-	self updatePlayer.
-	self currentPlayer markets at: #'HEAVY HIGHWAY' put: 2.
-	self queryWin: won.
-	self triggerEvent: #itemChange.
-	^ z -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:28'!
-space7
-	"Feb week 1"
-	| x |
-	x := self currentPlayer tally: 5000.
-	self updatePlayer.
-	^ (self spacePlain: x) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:29'!
-space8
-	"Feb week 2"
-	| x |
-	x := self currentPlayer tally: 5000 negated.
-	self updatePlayer.
-	^ (self spacePlain: x) -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 3/19/2017 16:36:07'!
-space9
-	"Feb week 3"
-	self disableAll: {'Move'}.
-	self advanceTo: 21.
-	self updateHistory.
-	self enableAll: {'End Turn'}.
-	^ 0 -> nil! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:16:38'!
-spacePlain: anAmount
-	"A plain, ordinary, unremarkable space"
-	self disableAll: {'Move'}.
-	self updateHistory.
-	self enableAll: {'End Turn'.}.
-	^ anAmount
-! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:17:32'!
-spaceTruck: aRent 
-	| z |
-	
-	z _ 0.
-	self disableAll: {'Move'}.
-	(self currentPlayer assets at: #Truck) quantity > 0
-		ifTrue: [
-			self currentPlayer avoided: aRent for: #Truck.
-			z _ 0 -> nil]
-		ifFalse: [z _ self payRent: aRent for: #Truck].
-	self updateHistory.
-	self enableAll: {'End Turn'}.
-	^ z! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:44:39'!
-spaces
-	"Answer the value of spaces"
-	
-	^ spaces! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 1/11/2017 15:45:06'!
-spaces: anObject
-	"Set the value of spaces"
-	
-	^ spaces _ anObject! !
-
-!Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 12:46:45'!
-statsItem
-	"Answer the value of statsItem"
-
-	statsItem ifNil: [statsItem _ 0]. 	"nil is unacceptable during model initialization"
-	^ statsItem! !
-
-!Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 14:59:59'!
-statsItem: anObject
-	"Set the value of statsItem"
-	
-	(statsItem _ anObject) ifNotNil: [
-		self triggerEvent: #itemChange.
-		self changed: #statsItem]! !
-
-!Contract methodsFor: 'statistics' stamp: 'dhn 1/18/2017 17:26:36'!
-statsList
-	"Answer a list for the status window"
-	
-	^ self class equipmentList , self class franchiseList , {'Yourself'. 'Players'. 'Contingencies'. 'Hints'}! !
-
-!Contract methodsFor: 'statistics' stamp: 'dhn 8/28/2016 14:15:10'!
-statsReport
-	"Answer the status report for the asset listed at statsItem"
-
-	statsItem > 0
-		ifTrue: [^ self statsReport: (self statsList at: statsItem)]
-		ifFalse: [^ '']
-! !
-
-!Contract methodsFor: 'statistics' stamp: 'dhn 8/27/2016 15:03:28'!
-statsReport: aString
-	"Answer the status of an asset named aString, possessed by the current player"
-	| p |
-	
-	p _ currentPlayer assets at: aString ifAbsent: [^ 'No such asset named ', aString].
-	^ String streamContents: [:str |
-		str
-			nextPutAll: p description;
-			nextPut: $:; newLine;
-			nextPutAll: (p reportAsAssetFor: currentPlayer); newLine]! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 15:53:53'!
-testGoal
-	"Answer the value of TestGoal"
-	| g x |
-	
-	TestMode ifTrue: [
-		TestGoal 
-			ifNil: [g _ goal asString]
-			ifNotNil: [g _ TestGoal asString].
-		x _ (FillInTheBlankMorph request: 'Test Goal?' initialAnswer: g).
-		x ~= '' 
-			ifTrue:  [self testGoal: x asNumber]
-			ifFalse: [self testGoal: self goal].
-		^ TestGoal]! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 14:04:35'!
-testGoal: anObject
-	"Set the value of TestGoal"
-	
-	TestGoal _ anObject! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 12:41:40'!
-testMode
-	"Answer the value of testMode"
-	
-	TestMode ifNil: [TestMode _ false].
-	^ TestMode! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 12:42:02'!
-testMode: aBool
-	"Set the value of testMode"
-	
-	TestMode _ aBool! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 13:42:49'!
-updateHistory
-	"Change player's history"
-	
-	latestPlayer = playerIndex 
-		ifTrue: [currentPlayer updateHistory]
-		ifFalse: [
-			latestPlayer _ playerIndex.
-			currentPlayer appendHistory].
-	self triggerEvent: #itemChange! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 9/25/2016 17:51:21'!
-updatePlayer
-	"Ensure that all the statistics are updated"
-
-	self triggerEvent: #itemChange! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 1/11/2017 21:08:33'!
-whatSpaceSays
-	"Perform the method associated with the space where the player is"
-
-	^ self perform: ((spaces at: self currentPlayer position) routine)! !
-
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:12'!
-whom: aSymbol
-	"Answer the owner of aSymbol"
-	| owner |
-	owner := (self availableOptions at: aSymbol) holder.
-	owner ifNotNil: [^ owner identity].
-	^ self class bankName
-! !
-
-!Contract methodsFor: 'accessing' stamp: 'dhn 9/22/2016 20:24:17'!
-windowPosition: aPoint
-	"Answer a staggered position for a window"
-	
-	windowCount _ windowCount + 1.
-	^ aPoint + (windowCount * (20@20))! !
-
-!Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:19:27'!
-wonButtonsState
-	"Set buttons to a state appropriate for the game having been won"
-
-	self disableAll: {'Pay Loan'. 'Purchases'. 'Do Job'. 'Move'}.
-	self updateHistory.
-	self enableAll: {'End Turn'}.
-! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 21:31'!
-alwaysDo: aPosition
-	"Answer true if expenses at aPosition apply."
-	^ #(1 2 3 4 5 6 7 8 9 46 47 48 49 ) includes: aPosition! !
-
-!Contract class methodsFor: 'lists' stamp: 'dhn 7/22/2016 17:43'!
-assetList
-	"Answer a list for the status window"
-	
-	^ Contract equipmentList , Contract franchiseList , {'Yourself'. 'Players'. 'Graphs'. 'Contingencies'}! !
-
-!Contract class methodsFor: 'auction' stamp: 'dhn 7/22/2016 17:42'!
-assetListAuction
-	"Answer the list of assets in order suitable for auction."
-	
-	^ #('Backhoe' 'Dozer' 'Excavator' 'Grader' 'Scraper' 'Truck' 'Stinky' 'LostMiner' 'Westwood' 'BigPhil')! !
-
-!Contract class methodsFor: 'auction' stamp: 'dhn 9/8/2014 13:14'!
-bankName
-	^ 'First Friendly Bank'! !
-
-!Contract class methodsFor: 'auction' stamp: 'dhn 9/19/2016 18:07:00'!
-bidBump
-	"Answer the bid increments"
-	
-	^ 1000 * #(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)! !
-
-!Contract class methodsFor: 'auction' stamp: 'dhn 9/21/2016 14:44:42'!
-bidIncrement
-	"Answer the list for an auction"
-	| col |
-	
-	col _ OrderedCollection new.
-	self bidBump do: [:each | col add: '$', each printStringWithCommas].
-	^ col
-
-	! !
-
-!Contract class methodsFor: 'auction' stamp: 'dhn 9/19/2016 22:09:56'!
-bidSpaces
-	"Answer the positions where competitive bids are required."
-	
-	^ #(16 32 39)! !
-
-!Contract class methodsFor: 'setup' stamp: 'dhn 5/19/2014 10:34'!
-boardColor
-	"Answer the color of the board itself"
-	^Color yellow alpha: 0.7! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 4/29/2012 19:58'!
-ccSpaces
-	"Answer the positions where Contractor Contingencies apply."
-	^ #(14 20 22 23 29 30 33 34 35 38 40 44 45 )! !
-
-!Contract class methodsFor: 'setup' stamp: 'dhn 7/13/2016 15:09'!
-cellColorForGame
-	"Answer the color of the board spaces"
-	
-	^ Color peach lighter! !
-
-!Contract class methodsFor: 'setup' stamp: 'dhn 4/26/2012 10:25'!
-cellsForGame
-	"Answer the number of board spaces game"
-	^7! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 10/2/2016 17:05:54'!
-defaultGoal
-	"Answer the default winning net asset goal"
-	
-	^ 1500000.
-! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 2/17/2017 10:57:42'!
-describeSpaces
-	"Descriptions for the spaces on the board."
-	
-	^ OrderedCollection new
-		add: 'DECEMBER
-Week 4
-
-PAY $1,000 for Christmas gifts to hard-working employees.
-
-Receive $10,000 from outstanding receivables as you pass.';
-
-	add: 'JANUARY
-Week 1
-
-Boomville approves thousands of new home permits. Double all residential construction gross profits this year.';
-
-	add: 'JANUARY
-Week 2
-
-Boomville is selected as the site for a new MegaMall. Double all commercial construction gross profits this year.';
-
-	add: 'JANUARY
-Week 3
-
-Boomville''s explosive growth requires new schools. Double all institutional construction gross profits this year.';
-
-add: 'JANUARY
-Week 4
-
-Boomville levies a big tax increase to pay for roads and utilities. Double all municipal construction gross profits this year.';
-
-	add: 'JANUARY
-Week 5
-
-Boomville approves a new airport. Double all heavy/highway construction gross profits this year.';
-
-	add: 'FEBRUARY
-Week 1
-
-Early warm weather allows you to start construction ahead of schedule. Collect $5,000.';
-
-	add: 'FEBRUARY
-Week 2
-
-
-Sudden blast of winter weather shuts down construction. Pay $5,000.';
-
-	add: 'FEBRUARY
-Week 3
-
-Bout of pneumonia puts you flat on your back for three months. Move to the 4th week in May';
-
-	add: 'MARCH
-Week 1
-
-Extra grading required in new single-family subdivision. Pay fuel bill of $1,000 per backhoe';
-
-	add: 'MARCH
-Week 2
-
-Big job requires you to pay $4,000 to rent a truck.';
-
-	add: 'MARCH
-Week 3
-
-Gravel is needed for house foundations. Pay LOST MINER $3,000.';
-
-	add: 'MARCH
-Week 4
-
-Hire surveyor to lay out tricky steep multi-family site for excavation. Pay $2,000.';
-
-	add: 'APRIL
-Week 1
-
-Federal funding of sewer line requires you to pay prevailing wage. Pay labor costs of $5,000 per grader.
-Contractor Contingency.';
-
-	add: 'APRIL
-Week 2
-
-Street improvements including curbs, sidewalks, and ADA ramps require concrete. Pay BIG PHIL''S CONCRETE $15,000.
-
-Pay Federal Income Taxes $5,000.';
-
-	add: 'APRIL
-Week 3
-
-COMPETITIVE BID
-(Good Luck)';
-
-	add: 'APRIL
-Week 4
-
-Worker accidentally runs over a stack of sewer pipe while excavating a MiniMall. Pay $5,000.';
-
-	add: 'MAY
-Week 1
-
-Mall parking lot requires paving. Pay WESTWOOD ASPHALT $8,000.';
-
-	add: 'MAY
-Week 2
-
-Huge boulders found during excavation require you to rent a truck for $7,000.';
-
-	add: 'MAY
-Week 3
-
-Design of new public library requires retaining walls, sidewalks, curbs, and ramps. Pay BIG PHIL''S CONCRETE $12,000.
-Contractor Contingency.';
-
-	add: 'MAY
-Week 4
-
-Layer of extra-hard rock hampers excavation of new school foundation. Replace bucket on every excavator you own. Pay $3,000.';
-
-	add: 'JUNE
-Week 1
-
-New school requires parking lot. Pay WESTWOOD PAVING $10,000.
-Contractor Contingency.';
-
-	add: 'JUNE
-Week 2
-
-Pay equipment operators $10,000 to excavate foundations for courthouse.
-Contractor Contingency.';
-
-	add: 'JUNE
-Week 3
-
-Extra material and labor costs for finish grading on shopping mall parking lot add up. Pay $7,000.';
-
-	add: 'JUNE
-Week 4
-
-Dozers need service. Pay $2,000 each for oil, filter, grease and hydraulic hoses.';
-
-	add: 'JULY
-Week 1
-
-Windstorm trashes your subdivision site. Pay STINKY''S GARBAGE & LANDFILL $3,000 to pick up the debris.
-
-Pay 10% interest on all outstanding notes.';
-
-	add: 'JULY
-Week 2
-
-Digging through hardpan at new housing site requires extra service to all backhoes. Pay $1,000 each.';
-
-	add: 'JULY
-Week 3
-
-While installing septic system backhoe punches through tank. Pay $4,000 to fix the mess.';
-
-	add: 'JULY
-Week 4
-
-Around-the-clock construction of the new airport wears out self-loading scraper parts. Pay $10,000 per machine to overhaul.
-Contractor Contingency.';
-
-	add: 'AUGUST
-Week 1
-
-Pay WESTWOOD PAVING $25,000 to asphalt a new section of four-lane highway.
-Contractor Contingency.';
-
-	add: 'AUGUST
-Week 2
-
-Pay BIG PHIL''S $30,000 for concrete to build an overpass for a new freeway to the airport.';
-
-	add: 'AUGUST
-Week 3
-
-COMPETITIVE BID
-(Don''t get burned like last time!!!!)';
-
-	add: 'AUGUST
-Week 4
-
-Pay equipment operators $15,000 per scraper for labor and overtime racked up building the new reservoir.
-Contractor Contingency.';
-
-	add: 'SEPTEMBER
-Week 1
-
-Illegal dumping requires you to remove trash. Pay $15,000 to rent a truck.
-Contractor Contingency.';
-
-	add: 'SEPTEMBER
-Week 2
-
-Pay $10,000 for traffic signals, signage and pavement striping to finish new 4-way intersection.
-Contractor Contingency.';
-
-	add: 'SEPTEMBER
-Week 3
-
-Install sanitary sewer system for single-family residence. Pay labor and materials costs of $3,000.';
-
-	add: 'SEPTEMBER
-Week 4
-
-Purchase crushed rock for pipe building. Pay LOST MINER $2,000.
-
-Pay 10% interest on all outstanding notes';
-
-	add: 'SEPTEMBER
-Week 5
-
-Excavation and removal job requires you to pay $10,000 to rent a truck.
-Contractor Contingency.';
-
-	add: 'OCTOBER
-Week 1
-
-COMPETITIVE BID
-(Who needs this job the most??)';
-
-	add: 'OCTOBER
-Week 2
-
-Purchase pipe, valves and fittings for potable water system servicing the new Buttercup Elementary School. Pay $5,000 per excavator.
-Contractor Contingency.';
-
-	add: 'OCTOBER
-Week 3
-
-Unstable soil at new warehouse site requires you to import sand and gravel. Pay LOST MINER $5,000.';
-
-	add: 'OCTOBER
-Week 4
-
-Megabucks Shopping Mall refinishes its sidewalks, ramps and gutters. Pay BIG PHIL''S CONCRETE $7,000.';
-
-	add: 'NOVEMBER
-Week 1
-
-Haul contaminated material from gas station project. Pay STINKY''S GARBAGE & LANDFILL $5,000.';
-
-	add: 'NOVEMBER
-Week 2
-
-Install new fire protection main, hydrants and replace the paving. Pay BIG PHIL''S CONCRETE $15,000.
-Contractor Contingency.';
-
-	add: 'NOVEMBER
-Week 3
-
-Flaggers and concrete barricades are needed for traffic control during road improvement job. Pay $7,000 per grader.
-Contractor Contingency.';
-
-	add: 'NOVEMBER
-Week 4
-
-If owned, pay owner for annual disposal usage $4,000 to $24,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $100,000.';
-
-	add: 'DECEMBER
-Week 1
-
-If owned, pay owner for annual material purchases $6,000 to $36,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $200,000.';
-
-	add: 'DECEMBER
-Week 2
-
-If owned, pay owner for annual material purchases $10,000 to $60,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $300,000.';
-
-	add: 'DECEMBER
-Week 3
-
-If owned, pay owner for annual material purchases $15,000 to $90,000. If you own, bank pays you. If unowned, you may purchase the exclusive right to the revenue stream for $500,000.';
-
-	yourself! !
-
-!Contract class methodsFor: 'lists' stamp: 'dhn 8/18/2013 06:54'!
-equipmentList
-	"Answer a list in the order needed for purchases and status"
-	^ {'Backhoe'. 'Dozer'. 'Excavator'. 'Grader'. 'Scraper'. 'Truck'}! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 9/23/2016 15:53:04'!
-equipmentMarket
-	"Associate asset class with season."
-
-	^ Dictionary new
-		add: #Backhoe -> #RESIDENTIAL;
-		add: #Dozer -> #COMMERCIAL;
-		add: #Excavator -> #INSTITUTIONAL;
-		add: #Grader -> #MUNICIPAL;
-		add: #Scraper -> #'HEAVY HIGHWAY';
-		add: #Stinky -> #STINKY;
-		add: #LostMiner -> #'LOST MINER';
-		add: #Westwood -> #WESTWOOD;
-		add: #BigPhil -> #'BIG PHIL';
-		yourself! !
-
-!Contract class methodsFor: 'lists' stamp: 'dhn 8/18/2013 06:56'!
-franchiseList
-	"Answer a list in the order needed for purchases and status"
-	^ {'Stinky'. 'LostMiner'. 'Westwood'. 'BigPhil'}! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 9/28/2016 16:54:58'!
-franchiseSpaces
-	"Answer the positions which are franchises"
-	
-	^ #(46 47 48 49)! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 20:57'!
-interestDue: aPosition 
-	"Answer true if interest expenses are due at aPosition."
-	^ #(26 37 ) includes: aPosition! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 9/23/2016 13:59:13'!
-jobSeason
-	"Answer a collection of job seasons in order of their board positions."
-	
-	^ OrderedCollection new
-		addAll: #(nil nil nil nil nil nil nil nil nil);
-		addAll: #(#RESIDENTIAL #RESIDENTIAL #RESIDENTIAL #RESIDENTIAL);
-		addAll: #(#MUNICIPAL #MUNICIPAL #MUNICIPAL);
-		addAll: #(#COMMERCIAL #COMMERCIAL #COMMERCIAL);
-		addAll: #(#INSTITUTIONAL #INSTITUTIONAL #INSTITUTIONAL #INSTITUTIONAL);
-		addAll: #(#COMMERCIAL #COMMERCIAL);
-		addAll: #(#RESIDENTIAL #RESIDENTIAL #RESIDENTIAL);
-		addAll: #(#'HEAVY HIGHWAY' #'HEAVY HIGHWAY' #'HEAVY HIGHWAY' #'HEAVY HIGHWAY' #'HEAVY HIGHWAY');
-		addAll: #(#MUNICIPAL #MUNICIPAL);
-		addAll: #(#RESIDENTIAL #RESIDENTIAL);
-		addAll: #(#INSTITUTIONAL #INSTITUTIONAL #INSTITUTIONAL);
-		addAll: #(#COMMERCIAL #COMMERCIAL #COMMERCIAL);
-		addAll: #(#MUNICIPAL #MUNICIPAL);
-		add: #STINKY;
-		add: #'LOST MINER';
-		add: #WESTWOOD;
-		add: #'BIG PHIL';
-		yourself! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 4/29/2012 16:32'!
-paymentIncrement
-	"Answer the payment increment for displaying loan payment choices"
-	^ 10000! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 9/24/2016 12:54:58'!
-requiredEquipment
-	"Associate season with asset class."
-	
-	^ Dictionary new
-		add: #RESIDENTIAL -> #Backhoe;
-		add: #COMMERCIAL -> #Dozer;
-		add: #INSTITUTIONAL -> #Excavator;
-		add: #MUNICIPAL -> #Grader;
-		add: #'HEAVY HIGHWAY' -> #Scraper;
-		add: #STINKY -> #Stinky;
-		add: #'LOST MINER' -> #LostMiner;
-		add: #WESTWOOD -> #Westwood;
-		add: #'BIG PHIL' -> #BigPhil;
-		yourself! !
-
-!Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 20:58'!
-taxDue: aPosition 
-	"Answer true if income tax is due at aPosition."
-	^ aPosition = 15! !
-
 !Contractor methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:45'!
 addOption: anObject
 	anObject notNil ifTrue: [self options addFirst: anObject].
@@ -5525,7 +5528,7 @@ demo: anObject
 
 	demo := anObject! !
 
-!Contractor methodsFor: 'job-related' stamp: 'dhn 10/28/2016 21:08:51'!
+!Contractor methodsFor: 'job-related' stamp: 'dhn 3/23/2017 20:59:56'!
 displayInvoice: details title: aTitle
 	"Display the results of doing the job"
 	| inv |
@@ -5534,8 +5537,8 @@ self halt: 'should not occur'.
 	inv _ JobView openOn: mgr title: aTitle.
 	inv 
 		setWindowColor: self token color;
-		openInWorld: mgr arena path;
-		morphPosition: mgr arena path morphPosition + (280@-620);
+		openInWorld: mgr arena pasteup;
+		morphPosition: mgr arena pasteup morphPosition + (280@-620);
 		morphExtent: 310@180;						
 		details: details! !
 

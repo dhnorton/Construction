@@ -1,7 +1,17 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3063] on 21 March 2017 at 2:28:27 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 8 April 2017 at 10:12:33 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 74!
+!provides: 'Game' 1 91!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
+!classDefinition: #Game category: #'Game-Model'!
+ActiveModel subclass: #Game
+	instanceVariableNames: 'world arena cells spaces goal response players currentPlayer token playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
+	classVariableNames: 'TestGoal TestMode'
+	poolDictionaries: ''
+	category: 'Game-Model'!
+!classDefinition: 'Game class' category: #'Game-Model'!
+Game class
+	instanceVariableNames: ''!
+
 !classDefinition: #OverlayMorph category: #'Game-Graphics'!
 PasteUpMorph subclass: #OverlayMorph
 	instanceVariableNames: ''
@@ -14,7 +24,7 @@ OverlayMorph class
 
 !classDefinition: #Token category: #'Game-Graphics'!
 EllipseMorph subclass: #Token
-	instanceVariableNames: 'labelArea who count die arrow id hop'
+	instanceVariableNames: 'labelArea model who count die arrow id hop'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
@@ -54,7 +64,7 @@ GameCell class
 
 !classDefinition: #GameBoard category: #'Game-Graphics'!
 SystemWindow subclass: #GameBoard
-	instanceVariableNames: 'path board buttonArea gameTitle'
+	instanceVariableNames: 'pasteup board buttonArea gameTitle'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
@@ -162,16 +172,6 @@ Object subclass: #Direction
 Direction class
 	instanceVariableNames: ''!
 
-!classDefinition: #Game category: #'Game-Model'!
-Object subclass: #Game
-	instanceVariableNames: 'arena cells spaces goal response players currentPlayer token playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
-	classVariableNames: 'TestGoal TestMode'
-	poolDictionaries: ''
-	category: 'Game-Model'!
-!classDefinition: 'Game class' category: #'Game-Model'!
-Game class
-	instanceVariableNames: ''!
-
 !classDefinition: #Gamer category: #'Game-Model'!
 Object subclass: #Gamer
 	instanceVariableNames: 'color identity cash debt inFlow outFlow interestPd paidInterest avoidedDebt assets history passedGo years mgr position oldPosition die marker roll totalRoll turns expenseCount'
@@ -202,6 +202,9 @@ Object subclass: #Season
 Season class
 	instanceVariableNames: ''!
 
+
+!Game commentStamp: 'dhn 7/10/2016 12:01' prior: 0!
+Abstract class for a board game model.!
 
 !OverlayMorph commentStamp: '<historical>' prior: 0!
 A place to drag and drop morphs!
@@ -255,9 +258,6 @@ marks - morphs indicating player's presence!
 !Direction commentStamp: 'dhn 7/10/2016 12:00' prior: 0!
 A model for finding the shortest distance around a game board.!
 
-!Game commentStamp: 'dhn 7/10/2016 12:01' prior: 0!
-Abstract class for a board game model.!
-
 !Gamer commentStamp: 'dhn 7/10/2016 12:02' prior: 0!
 A model for a player in a board game.
 !
@@ -271,6 +271,404 @@ A Season is the collection of attributes associated with, for example:
 	a season (Farming Game, Construction Game)
 	a property set (Monopoly)
 !
+
+!Game methodsFor: 'operating' stamp: 'dhn 8/23/2016 21:33:37'!
+addMarkerIDInMarks
+	"(self marks at: self currentPlayer position) at: self playerIndex
+		put: self currentPlayer identity" ! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 3/21/2017 18:50:45'!
+advanceTo: aPosition 
+	"Slide the board under a token, forward to aPosition"
+	
+	self triggerEvent: #advance withArguments: {currentPlayer. aPosition}! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
+arena
+	"Answer the value of arena"
+
+	^ arena! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
+arena: anObject
+	"Set the value of arena"
+
+	arena := anObject! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/16/2011 17:54'!
+buttons
+	"Answer the value of buttons"
+
+	^ buttons! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/16/2011 17:54'!
+buttons: anObject
+	"Set the value of buttons"
+
+	buttons := anObject! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/22/2016 21:02:27'!
+cells
+	"Answer the value of cells"
+
+	^ cells! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/22/2016 21:02:59'!
+cells: anObject
+	"Set the value of cells"
+
+	cells _ anObject! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 1/14/2017 14:43:58'!
+cellsAt: anIndex 
+	"Show the board starting with spaces at: anIndex."
+	| str |
+	
+	1 to: cellCount do: [:k | 
+		(cells at: k) marksPane removeAllMorphs].
+	
+	1 to: cellCount do: [:m | | sp |
+		sp _ spaces atWrap: anIndex + m - 1.
+		str _ String new writeStream.
+		str nextPutAll: sp label; newLine.
+		self testMode
+			ifTrue: [str nextPutAll: sp routine asString; newLine].
+		(cells at: m) textPane
+			model actualContents: str contents.
+		sp marks ifNotEmpty: [
+			(cells at: m) marksPane
+				addAllMorphs: sp marks]]
+! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 10/28/2016 14:54:47'!
+chantBeat
+	"Answer the value of chantBeat"
+
+	chantBeat ifNil: [chantBeat _ 2000].
+	^ chantBeat! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/11/2011 17:00'!
+currentPlayer
+	"Answer the value of currentPlayer"
+
+	^ currentPlayer! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 7/29/2013 14:44'!
+currentPlayer: anObject
+	currentPlayer := anObject! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 8/4/2016 18:47:37'!
+disableAll: aCollection
+	"Disable each button named in aCollection"
+	| btn |
+	
+	aCollection do: [:x |
+		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
+		btn ifNotNil: [btn disableButton]]! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 21:35:01'!
+doSpace
+	"Perform the method associated with the space where the player is"
+
+	^ self perform: ((spaces at: self currentPlayer position) routine)! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 10/9/2011 11:04'!
+drawCard: aDeck discard: aDiscard
+	|card|
+	aDeck isEmpty ifFalse: [.
+		card := aDeck removeFirst.
+		aDiscard addFirst: card.
+		^card
+		]
+	ifTrue: [
+		aDeck addAll: (self scramble: aDiscard).
+		aDiscard removeAll: aDeck.
+		^self drawCard: aDeck discard: aDiscard.
+		].
+! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 8/4/2016 18:47:09'!
+enableAll: aCollection
+	"Enable each button named in aCollection"
+	| btn |
+	
+	aCollection do: [:x |
+		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
+		btn ifNotNil: [btn enableButton]]! !
+
+!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/16/2016 14:38:10'!
+goal
+	"Answer the goal of the game"
+	
+	goal ifNil: [goal _ self class defaultGoal].
+	^ self testMode
+		ifTrue: [TestGoal]
+		ifFalse: [goal]! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 9/22/2016 11:26:34'!
+hardRoll
+	"Answer the value of hardRoll"
+	
+	^ hardRoll! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 9/22/2016 11:27:21'!
+hardRoll: anObject
+	"Set the value of hardRoll"
+	
+	hardRoll _ anObject! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:37:54'!
+hopFor: anObject
+	"Hop token for anObject number of spaces"
+	| roll |
+	
+	token who oldPosition: token who position.
+	roll _ self testMode ifTrue: [self hardRoll] ifFalse: [anObject].
+	token jump: roll.
+	currentPlayer 
+		position: (currentPlayer forwardTo: (roll + currentPlayer position) 
+			around: spaces size).
+	currentPlayer rollStats: roll! !
+
+!Game methodsFor: 'as yet unclassified' stamp: 'dhn 8/2/2014 21:49'!
+initialButtonState
+	"Establish the button state at the start of the game"
+	self subclassResponsibility! !
+
+!Game methodsFor: 'initialize' stamp: 'dhn 2/16/2017 09:36:09'!
+initialize
+
+	players _ OrderedCollection new.
+	cells _ OrderedCollection new! !
+
+!Game methodsFor: 'initialize' stamp: 'dhn 7/11/2013 14:53'!
+markerSize
+	"Answer the size for markers"
+	^ 28! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:25:16'!
+move
+	"Roll the die"
+	| bone |
+	
+	self disableAll: {'Move'}.
+	bone _ Die2 new openInWorld: arena pasteup.
+	bone model: self.
+	currentPlayer die: bone.
+	bone adjustTo: token.
+	bone show: bone class faces shuffled! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 2/28/2017 15:23:48'!
+moveFromX: positionA to: positionB
+	"Determine best direction and move token"
+	| dir |
+	
+	dir _ Direction
+		shortest: positionA
+		to: positionB
+		in: spaces size.
+	dir < 0
+		ifTrue: [currentPlayer token arrowLeft]
+		ifFalse: [currentPlayer token arrowRight].
+	currentPlayer token
+		moveFrom: positionA
+		to: positionB
+		by: dir.
+	currentPlayer token deleteArrow
+! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:37:24'!
+nextPlayer
+	"Begin the next player's turn"
+	
+	self triggerEvent: #deleteOpenWindows.
+	token delete.
+	currentPlayer _ (players atWrap: (playerIndex _ playerIndex + 1)).
+	self triggerEvent: #itemChange.
+	self 
+		positionBoardTo: currentPlayer position;
+		removeMarkers.
+	self triggerEvent: #titleChange: with: currentPlayer.
+	self setTokenFor: world.
+	self testMode
+		ifTrue: [self hardRoll: (6 min: (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6') asNumber)]! !
+
+!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/2/2016 17:01:38'!
+oldGoal
+	^ self class oldGoal asNumber! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 11/4/2011 08:31'!
+outs
+	"Answer the players who are out of the game."
+
+	^ outs ifNil: [OrderedCollection new].! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 11/4/2011 08:29'!
+outs: anObject
+	"Set the value of outs"
+
+	outs := anObject! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:52:14'!
+parseSeasonsAt: anIndex 
+	"Answer associations of point->season, where point defines the range of cells for the season"
+	| col max start sea |
+	
+	col := OrderedCollection new.
+	max _ spaces size.
+	sea _ self seasonAt: anIndex.
+	start _ 0.
+	0 to: cellCount - 1 do: [:n | 	| next |
+		next _ self seasonAt: (self wrapIndex: anIndex + n around: max).
+		sea desc = next desc
+			ifFalse: [
+				col addLast: start + 1 @ n -> sea.
+				start _ n.
+				sea _ next]].
+	col addLast: start + 1 @ cellCount -> sea.
+	^ col! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 10/10/2011 18:14'!
+playerIndex
+	"Answer the value of playerIndex"
+
+	playerIndex ifNil: [playerIndex := 0].
+	^ playerIndex! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 10/10/2011 18:12'!
+playerIndex: anObject
+	"Set the value of playerIndex"
+
+	playerIndex := anObject! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 9/14/2011 22:55'!
+players
+	"Answer the value of players"
+
+	^ players! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 10/27/2016 12:27:51'!
+players: anObject
+	"Set value of players to anObject"
+	
+	players _ anObject! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 10/2/2016 16:48:07'!
+positionBoardTo: anIndex 
+	"Change the location on the board"
+	| assoc |
+	
+	self cellsAt: anIndex.
+	assoc _ self parseSeasonsAt: anIndex.
+	self triggerEvent: #showSeasons: with: assoc! !
+
+!Game methodsFor: 'initialize' stamp: 'dhn 10/2/2016 14:53:22'!
+quitGame
+	"Signal that we are quitting"
+
+	self triggerEvent: #deleteOpenWindows.
+	self triggerEvent: #quitGame! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 1/15/2017 21:59:40'!
+removeMarkers
+	"Remove a player's marker from space and cell"
+	
+	(spaces at: currentPlayer position) markRemFor: currentPlayer.
+	cells first marksPane removeMorph: currentPlayer marker
+! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 7/23/2016 22:14'!
+response
+	"Answer the response"
+
+	{#response. response} print.
+	response ifNil: [response _ ''].
+	^ response
+! !
+
+!Game methodsFor: 'initialize' stamp: 'dhn 9/17/2011 13:19'!
+scramble: aCollection
+	"Try to achieve a better mix."
+	|temp|
+	temp := aCollection shuffled.
+	temp := temp shuffled.
+	^temp shuffled.
+! !
+
+!Game methodsFor: 'initialize' stamp: 'dhn 10/28/2016 15:13:22'!
+setBeat
+	"Set the time between '...going', '...going' "
+	| value x |
+	
+	value _ self chantBeat / 1000.0.
+	x _ (FillInTheBlankMorph request: 'Auctioneer pause time (sec)' initialAnswer: value asString).
+	x ~= '' ifTrue:  [chantBeat _ (x asNumber * 1000.0) asInteger]! !
+
+!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/16/2016 12:07:28'!
+setGoal
+	"Set the goal of the game"
+	| x |
+	
+	goal ifNil: [goal _ self class defaultGoal].
+	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
+	x ~= '' ifTrue:  [goal _ x asNumber]! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 4/8/2017 20:23:55'!
+setTokenFor: aWorld
+	"Place the current player's token on the board"
+	| vadj |
+	
+	self token: ((ContractToken newFor: self) openInWorld: aWorld).
+	token morphExtent: world morphExtent * (0.090@0.080).
+	vadj _ aWorld morphExtent y * 7/10 .
+	token morphPosition: self token morphPosition + (0@vadj).
+	token id contents: currentPlayer identity.
+	token doubled contents: currentPlayer doubledString.
+	token color: currentPlayer color.
+	token who: currentPlayer! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 10/7/2014 12:23'!
+spaceFreq
+	"Answer the value of spaceFreq"
+
+	^ spaceFreq! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 3/18/2017 18:39:37'!
+token
+	"Answer the value of token"
+
+	^ token! !
+
+!Game methodsFor: 'accessing' stamp: 'dhn 3/18/2017 18:39:03'!
+token: anObject
+	"Set the value of token"
+
+	token _ anObject! !
+
+!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/10/2013 22:10'!
+won
+	won ifNil: [won := false].
+	^ won! !
+
+!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/10/2013 22:11'!
+won: aBool
+	won := aBool.! !
+
+!Game methodsFor: 'initialize' stamp: 'dhn 4/3/2017 19:38:36'!
+world: anObject
+	"Set the value of world"
+
+	world _ anObject! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 11/1/2013 18:52'!
+wrapIndex: anIndex around: aLimit 
+	"Answer an index value in the interval [1, aLimit]."
+	anIndex > aLimit
+		ifTrue: ["Use recursion to limit gross excesses."
+			^ self wrapIndex: anIndex - aLimit around: aLimit]
+		ifFalse: [anIndex <= 0
+				ifTrue: [^ aLimit].
+			^ anIndex]! !
 
 !OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
 allowsMorphDrop
@@ -290,6 +688,17 @@ wantsDroppedMorph: aMorph event: evt
 	This method just answers super. It is included here to say it is relevant to D&D behavior."
 
 	^super wantsDroppedMorph: aMorph event: evt! !
+
+!Token methodsFor: 'stepping' stamp: 'dhn 4/8/2017 20:45:09'!
+advance: aPlayer to: aPosition
+	"Slide the board under aPlayer to aPosition"
+	
+	{'before #arrowRight ****************'} print.
+	self arrowRight.
+	self moveFrom: aPlayer position to: aPosition by: 1.
+	{'after #moveFrom:to:by: *****************'} print.
+	self deleteArrow
+! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
@@ -376,7 +785,7 @@ identity: aString
 		emphasis: AbstractFont boldCode)
 			morphPosition: 50@18! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 2/13/2017 11:48:29'!
+!Token methodsFor: 'initialization' stamp: 'dhn 3/22/2017 11:27:16'!
 initialize
 
 	super initialize.
@@ -387,7 +796,7 @@ initialize
 	self setBalloonText: 'A token representing the player. When the Move button is clicked, 
 a die is "rolled" and the token moves that number of spaces.'! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 3/17/2017 14:16:23'!
+!Token methodsFor: 'stepping' stamp: 'dhn 4/8/2017 20:35:06'!
 jump: aCount
 	"Move the receiver in aCount hops"
 	| step limit i horiz |
@@ -402,8 +811,8 @@ jump: aCount
 			ifTrue: [self morphPosition: (self morphPosition translatedBy: horiz@(hop atWrap: i))]
 			ifFalse: [
 				self stopStepping.
-				self moved.
-				self removeActionsForEvent: #morphicStep]].
+				self removeActionsForEvent: #morphicStep.
+				self moved]].
 	self startSteppingStepTime: step. 	
 ! !
 
@@ -418,6 +827,18 @@ labelArea: anObject
 	"Set the value of labelArea"
 
 	labelArea _ anObject! !
+
+!Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 18:47:12'!
+model
+	"Answer the value of model"
+
+	^ model! !
+
+!Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 18:46:25'!
+model: anObject
+	"Set the value of model"
+
+	model _ anObject! !
 
 !Token methodsFor: 'stepping' stamp: 'dhn 2/28/2017 15:26:28'!
 moveFrom: positionA to: positionB
@@ -438,31 +859,33 @@ moveFrom: positionA to: positionB
 	self deleteArrow
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 3/19/2017 16:28:00'!
+!Token methodsFor: 'stepping' stamp: 'dhn 4/8/2017 22:10:06'!
 moveFrom: start to: end by: direction
 	"Animate moves forward or backward."
 	| a b board posns limit i |
 	
 	a _ start.
-	b _ end.
-	board _ who mgr class describeSpaces.
+	b _ end - 1.
+	board _ model class describeSpaces.
 	direction < 0
-		ifTrue: [start < end ifTrue: [	a _ start + board size]]
-		ifFalse: [start > end ifTrue: [b _ end + board size]].
+		ifTrue: [
+			self arrowLeft.
+			start < end ifTrue: [	a _ start + board size]]
+		ifFalse: [
+			self arrowRight.
+			start > end ifTrue: [b _ end + board size]].
 	posns _ (Interval from: a to: b by: direction) asArray.
 	limit _ posns size.
 	i _ 0.
-	self removeActionsForEvent: #morphicStep.
 	self when: #morphicStep evaluate: [ :unused |
 		i _ i + 1.
-		who mgr positionBoardTo: (who mgr wrapIndex: (posns at: i) around: board size).
+		model positionBoardTo: (posns at: i).
 		i < limit 
 			ifFalse: [
 				self stopStepping.
-				"who slidTo: (who mgr wrapIndex: (posns at: i) around: board size)."
-				who position: (who mgr wrapIndex: (posns at: i) around: board size).
-		self removeActionsForEvent: #morphicStep]].
-	self startSteppingStepTime: who class moveInterval
+				self removeActionsForEvent: #morphicStep.
+				self deleteArrow]].
+	self startSteppingStepTime: 400
 ! !
 
 !Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:56'!
@@ -506,6 +929,12 @@ colors
 includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
+
+!Token class methodsFor: 'instance creation' stamp: 'dhn 4/8/2017 20:24:59'!
+newFor: aModel
+	"Establish an instance with model aModel"
+	
+	^ self initializedInstance model: aModel! !
 
 !Token class methodsFor: 'operation' stamp: 'dhn 12/2/2011 22:32'!
 rollCount
@@ -683,11 +1112,11 @@ morphWidth
 	
 	^ Display width! !
 
-!GameBoard methodsFor: 'accessing' stamp: 'dhn 10/18/2016 20:29:28'!
-path
-	"Answer the value of path"
+!GameBoard methodsFor: 'accessing' stamp: 'dhn 3/23/2017 20:54:14'!
+pasteup
+	"Answer the value of pasteup"
 
-	^ path! !
+	^ pasteup! !
 
 !GameBoard class methodsFor: 'as yet unclassified' stamp: 'dhn 7/17/2016 13:51'!
 gameFont
@@ -1740,400 +2169,6 @@ longest: a to: b in: n
 !Direction class methodsFor: 'as yet unclassified' stamp: 'dhn 8/8/2013 09:48'!
 shortest: a to: b in: n 
 	^ (Float twoPi * (b + n - a / n)) sin sign! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 8/23/2016 21:33:37'!
-addMarkerIDInMarks
-	"(self marks at: self currentPlayer position) at: self playerIndex
-		put: self currentPlayer identity" ! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 3/21/2017 14:25:39'!
-advanceTo: aPosition 
-	"Slide the board under a token, forward to aPosition"
-	
-	thisContext printStack: 40.
-	token arrowRight.
-	self halt.
-	token moveFrom: token who position to: aPosition - token who roll by: 1.
-	token deleteArrow
-! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
-arena
-	"Answer the value of arena"
-
-	^ arena! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
-arena: anObject
-	"Set the value of arena"
-
-	arena := anObject! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/16/2011 17:54'!
-buttons
-	"Answer the value of buttons"
-
-	^ buttons! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/16/2011 17:54'!
-buttons: anObject
-	"Set the value of buttons"
-
-	buttons := anObject! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/22/2016 21:02:27'!
-cells
-	"Answer the value of cells"
-
-	^ cells! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/22/2016 21:02:59'!
-cells: anObject
-	"Set the value of cells"
-
-	cells _ anObject! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 1/14/2017 14:43:58'!
-cellsAt: anIndex 
-	"Show the board starting with spaces at: anIndex."
-	| str |
-	
-	1 to: cellCount do: [:k | 
-		(cells at: k) marksPane removeAllMorphs].
-	
-	1 to: cellCount do: [:m | | sp |
-		sp _ spaces atWrap: anIndex + m - 1.
-		str _ String new writeStream.
-		str nextPutAll: sp label; newLine.
-		self testMode
-			ifTrue: [str nextPutAll: sp routine asString; newLine].
-		(cells at: m) textPane
-			model actualContents: str contents.
-		sp marks ifNotEmpty: [
-			(cells at: m) marksPane
-				addAllMorphs: sp marks]]
-! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 10/28/2016 14:54:47'!
-chantBeat
-	"Answer the value of chantBeat"
-
-	chantBeat ifNil: [chantBeat _ 2000].
-	^ chantBeat! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/11/2011 17:00'!
-currentPlayer
-	"Answer the value of currentPlayer"
-
-	^ currentPlayer! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 7/29/2013 14:44'!
-currentPlayer: anObject
-	currentPlayer := anObject! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 8/4/2016 18:47:37'!
-disableAll: aCollection
-	"Disable each button named in aCollection"
-	| btn |
-	
-	aCollection do: [:x |
-		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
-		btn ifNotNil: [btn disableButton]]! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 21:35:01'!
-doSpace
-	"Perform the method associated with the space where the player is"
-
-	^ self perform: ((spaces at: self currentPlayer position) routine)! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 10/9/2011 11:04'!
-drawCard: aDeck discard: aDiscard
-	|card|
-	aDeck isEmpty ifFalse: [.
-		card := aDeck removeFirst.
-		aDiscard addFirst: card.
-		^card
-		]
-	ifTrue: [
-		aDeck addAll: (self scramble: aDiscard).
-		aDiscard removeAll: aDeck.
-		^self drawCard: aDeck discard: aDiscard.
-		].
-! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 8/4/2016 18:47:09'!
-enableAll: aCollection
-	"Enable each button named in aCollection"
-	| btn |
-	
-	aCollection do: [:x |
-		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
-		btn ifNotNil: [btn enableButton]]! !
-
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/16/2016 14:38:10'!
-goal
-	"Answer the goal of the game"
-	
-	goal ifNil: [goal _ self class defaultGoal].
-	^ self testMode
-		ifTrue: [TestGoal]
-		ifFalse: [goal]! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 9/22/2016 11:26:34'!
-hardRoll
-	"Answer the value of hardRoll"
-	
-	^ hardRoll! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 9/22/2016 11:27:21'!
-hardRoll: anObject
-	"Set the value of hardRoll"
-	
-	hardRoll _ anObject! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 14:18:42'!
-hopFor: anObject
-	"Hop token for anObject number of spaces"
-	| roll |
-	
-	token who oldPosition: token who position.
-	roll _ self testMode ifTrue: [self hardRoll] ifFalse: [anObject].
-	token jump: roll.
-	currentPlayer 
-		position: (currentPlayer forwardTo: (roll + currentPlayer position) 
-			around: spaces size).
-	currentPlayer rollStats: roll! !
-
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 8/2/2014 21:49'!
-initialButtonState
-	"Establish the button state at the start of the game"
-	self subclassResponsibility! !
-
-!Game methodsFor: 'initialize' stamp: 'dhn 2/16/2017 09:36:09'!
-initialize
-
-	players _ OrderedCollection new.
-	cells _ OrderedCollection new! !
-
-!Game methodsFor: 'initialize' stamp: 'dhn 7/11/2013 14:53'!
-markerSize
-	"Answer the size for markers"
-	^ 28! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 14:28:22'!
-move
-	"Roll the die"
-	| bone |
-	
-	self disableAll: {'Move'}.
-	bone _ Die2 new openInWorld: arena path.
-	bone model: self.
-	currentPlayer die: bone.
-	bone adjustTo: token.
-	bone show: bone class faces shuffled! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 2/28/2017 15:23:48'!
-moveFromX: positionA to: positionB
-	"Determine best direction and move token"
-	| dir |
-	
-	dir _ Direction
-		shortest: positionA
-		to: positionB
-		in: spaces size.
-	dir < 0
-		ifTrue: [currentPlayer token arrowLeft]
-		ifFalse: [currentPlayer token arrowRight].
-	currentPlayer token
-		moveFrom: positionA
-		to: positionB
-		by: dir.
-	currentPlayer token deleteArrow
-! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 3/19/2017 14:45:02'!
-nextPlayer
-	"Begin the next player's turn"
-	
-	self triggerEvent: #deleteOpenWindows.
-	token delete.
-	currentPlayer _ (players atWrap: (playerIndex _ playerIndex + 1)).
-	self triggerEvent: #itemChange.
-	self 
-		positionBoardTo: currentPlayer position;
-		removeMarkers.
-	self token: ContractToken new.
-	self setTokenFor: currentPlayer.
-	self triggerEvent: #titleChange: with: currentPlayer.
-	self testMode
-		ifTrue: [self hardRoll: (6 min: (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6') asNumber)]! !
-
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/2/2016 17:01:38'!
-oldGoal
-	^ self class oldGoal asNumber! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 11/4/2011 08:31'!
-outs
-	"Answer the players who are out of the game."
-
-	^ outs ifNil: [OrderedCollection new].! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 11/4/2011 08:29'!
-outs: anObject
-	"Set the value of outs"
-
-	outs := anObject! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 1/11/2017 15:52:14'!
-parseSeasonsAt: anIndex 
-	"Answer associations of point->season, where point defines the range of cells for the season"
-	| col max start sea |
-	
-	col := OrderedCollection new.
-	max _ spaces size.
-	sea _ self seasonAt: anIndex.
-	start _ 0.
-	0 to: cellCount - 1 do: [:n | 	| next |
-		next _ self seasonAt: (self wrapIndex: anIndex + n around: max).
-		sea desc = next desc
-			ifFalse: [
-				col addLast: start + 1 @ n -> sea.
-				start _ n.
-				sea _ next]].
-	col addLast: start + 1 @ cellCount -> sea.
-	^ col! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 10/10/2011 18:14'!
-playerIndex
-	"Answer the value of playerIndex"
-
-	playerIndex ifNil: [playerIndex := 0].
-	^ playerIndex! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 10/10/2011 18:12'!
-playerIndex: anObject
-	"Set the value of playerIndex"
-
-	playerIndex := anObject! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/14/2011 22:55'!
-players
-	"Answer the value of players"
-
-	^ players! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 10/27/2016 12:27:51'!
-players: anObject
-	"Set value of players to anObject"
-	
-	players _ anObject! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 10/2/2016 16:48:07'!
-positionBoardTo: anIndex 
-	"Change the location on the board"
-	| assoc |
-	
-	self cellsAt: anIndex.
-	assoc _ self parseSeasonsAt: anIndex.
-	self triggerEvent: #showSeasons: with: assoc! !
-
-!Game methodsFor: 'initialize' stamp: 'dhn 10/2/2016 14:53:22'!
-quitGame
-	"Signal that we are quitting"
-
-	self triggerEvent: #deleteOpenWindows.
-	self triggerEvent: #quitGame! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 1/15/2017 21:59:40'!
-removeMarkers
-	"Remove a player's marker from space and cell"
-	
-	(spaces at: currentPlayer position) markRemFor: currentPlayer.
-	cells first marksPane removeMorph: currentPlayer marker
-! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 7/23/2016 22:14'!
-response
-	"Answer the response"
-
-	{#response. response} print.
-	response ifNil: [response _ ''].
-	^ response
-! !
-
-!Game methodsFor: 'initialize' stamp: 'dhn 9/17/2011 13:19'!
-scramble: aCollection
-	"Try to achieve a better mix."
-	|temp|
-	temp := aCollection shuffled.
-	temp := temp shuffled.
-	^temp shuffled.
-! !
-
-!Game methodsFor: 'initialize' stamp: 'dhn 10/28/2016 15:13:22'!
-setBeat
-	"Set the time between '...going', '...going' "
-	| value x |
-	
-	value _ self chantBeat / 1000.0.
-	x _ (FillInTheBlankMorph request: 'Auctioneer pause time (sec)' initialAnswer: value asString).
-	x ~= '' ifTrue:  [chantBeat _ (x asNumber * 1000.0) asInteger]! !
-
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/16/2016 12:07:28'!
-setGoal
-	"Set the goal of the game"
-	| x |
-	
-	goal ifNil: [goal _ self class defaultGoal].
-	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
-	x ~= '' ifTrue:  [goal _ x asNumber]! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 3/18/2017 19:53:41'!
-setTokenFor: aPlayer
-	"Place the player's token on the board"
-	
-	token id contents: aPlayer identity.
-	token doubled contents: aPlayer doubledString.
-	token color: aPlayer color.
-	self triggerEvent: #showToken.
-	^ token who: aPlayer! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 10/7/2014 12:23'!
-spaceFreq
-	"Answer the value of spaceFreq"
-
-	^ spaceFreq! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 3/18/2017 18:39:37'!
-token
-	"Answer the value of token"
-
-	^ token! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 3/18/2017 18:39:03'!
-token: anObject
-	"Set the value of token"
-
-	token _ anObject! !
-
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/10/2013 22:10'!
-won
-	won ifNil: [won := false].
-	^ won! !
-
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/10/2013 22:11'!
-won: aBool
-	won := aBool.! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 11/1/2013 18:52'!
-wrapIndex: anIndex around: aLimit 
-	"Answer an index value in the interval [1, aLimit]."
-	anIndex > aLimit
-		ifTrue: ["Use recursion to limit gross excesses."
-			^ self wrapIndex: anIndex - aLimit around: aLimit]
-		ifFalse: [anIndex <= 0
-				ifTrue: [^ aLimit].
-			^ anIndex]! !
 
 !Gamer methodsFor: 'accessing' stamp: 'dhn 9/3/2013 21:29'!
 assets
