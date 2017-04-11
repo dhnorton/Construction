@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 8 April 2017 at 10:12:33 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 10 April 2017 at 9:56:08 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 91!
+!provides: 'Game' 1 94!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -458,25 +458,6 @@ move
 	bone adjustTo: token.
 	bone show: bone class faces shuffled! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 2/28/2017 15:23:48'!
-moveFromX: positionA to: positionB
-	"Determine best direction and move token"
-	| dir |
-	
-	dir _ Direction
-		shortest: positionA
-		to: positionB
-		in: spaces size.
-	dir < 0
-		ifTrue: [currentPlayer token arrowLeft]
-		ifFalse: [currentPlayer token arrowRight].
-	currentPlayer token
-		moveFrom: positionA
-		to: positionB
-		by: dir.
-	currentPlayer token deleteArrow
-! !
-
 !Game methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:37:24'!
 nextPlayer
 	"Begin the next player's turn"
@@ -859,13 +840,13 @@ moveFrom: positionA to: positionB
 	self deleteArrow
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 4/8/2017 22:10:06'!
+!Token methodsFor: 'stepping' stamp: 'dhn 4/10/2017 21:48:01'!
 moveFrom: start to: end by: direction
 	"Animate moves forward or backward."
 	| a b board posns limit i |
 	
 	a _ start.
-	b _ end - 1.
+	b _ end.
 	board _ model class describeSpaces.
 	direction < 0
 		ifTrue: [
@@ -875,15 +856,21 @@ moveFrom: start to: end by: direction
 			self arrowRight.
 			start > end ifTrue: [b _ end + board size]].
 	posns _ (Interval from: a to: b by: direction) asArray.
+	{posns} print.
 	limit _ posns size.
-	i _ 0.
+	i _ 1.
 	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
 		model positionBoardTo: (posns at: i).
+		i _ i + 1.
 		i < limit 
 			ifFalse: [
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
+				who position: (posns at: i) + who roll - 1.
+				{who identity. who position. who roll} print.
+				self doubled contents: who doubledString.
+				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
+				(model spaces at: who position) markAddFor: who.
 				self deleteArrow]].
 	self startSteppingStepTime: 400
 ! !

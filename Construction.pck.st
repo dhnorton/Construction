@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 8 April 2017 at 10:13:00 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 10 April 2017 at 9:57:14 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 102!
+!provides: 'Construction' 1 105!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1451,15 +1451,14 @@ space8
 	self updatePlayer.
 	^ (self spacePlain: x) -> nil! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 4/8/2017 22:02:26'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 4/10/2017 21:23:41'!
 space9
 	"Feb week 3"
-	| sp |
 	
 	self disableAll: {'Move'}.
+	self removeMarkers.
 	"slide board so that player appears to advance to 21."
-	sp _ currentPlayer position - currentPlayer roll.
-	token moveFrom: sp to: 21 - currentPlayer roll + 1 by: 1.
+	token moveFrom: currentPlayer oldPosition to: currentPlayer oldPosition + 13 by: 1.
 	self updateHistory.
 	self enableAll: {'End Turn'}.
 	^ 0 -> nil! !
