@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 10 April 2017 at 9:56:08 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 6:12:55 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 94!
+!provides: 'Game' 1 97!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -84,7 +84,7 @@ ListView class
 
 !classDefinition: #Die2 category: #'Game-Graphics'!
 PluggableMorph subclass: #Die2
-	instanceVariableNames: 'layoutMorph row1 row2 row3 dot dash'
+	instanceVariableNames: 'layoutMorph row1 row2 row3 dot dash value'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
@@ -1401,10 +1401,10 @@ show: aCollection
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
 
-!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 14:13:07'!
+!Die2 methodsFor: 'operation' stamp: 'dhn 4/12/2017 18:11:54'!
 show: aCollection event: aSymbol
-	"Display the succession of faces in aCollection, triggering aSymbol at the end"
-	| limit linger t i x |
+	"Display the succession of faces in aCollection; answer the value of the final face"
+	| limit linger t i |
 	
 	limit _ 1600 + (500 atRandom).
 	linger _ limit + 700. 	"to pause before vanishing"
@@ -1414,13 +1414,14 @@ show: aCollection event: aSymbol
 		i _ i + 1.
 		t _ t + delta.
 		t < limit 	"limit on the total time of activity"
-			ifTrue: [x _ self perform: (aCollection atWrap: i)]
+			ifTrue: [value _ self perform: (aCollection atWrap: i)]
 			ifFalse: [
 				t > linger ifTrue: [
 					self stopStepping.
-					model hopFor: x.
 					self removeActionsForEvent: #morphicStep.
-					owner removeMorph: self]]].
+					owner removeMorph: self.
+					model remainder: value.
+					]]].
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
 

@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 10 April 2017 at 9:57:14 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 6:13:23 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 105!
+!provides: 'Construction' 1 107!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1045,9 +1045,9 @@ rollForFranchise
 	bone show: bone combo shuffled event: #franchiseEffect:
 ! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 4/4/2017 15:23:56'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 17:25:24'!
 rollTheDie
-	"Show the die rolling"
+	"Show the die rolling; answer its final value"
 	| bone |
 
 	bone _ currentPlayer die openInWorld: arena pasteup.
@@ -2177,7 +2177,7 @@ describe
 
 	^ ''! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:55:41'!
+!Construction methodsFor: 'windows' stamp: 'dhn 4/12/2017 17:50:03'!
 displayInvoice: details title: aTitle
 	"Display the results of doing the job"
 	| inv |
@@ -2185,7 +2185,7 @@ displayInvoice: details title: aTitle
 	inv _ JobView openOn: model.
 	inv 
 		setLabel: aTitle;
-		setWindowColor: model currentPlayer token color;
+		setWindowColor: model currentPlayer color;
 		openInWorld: pasteup;
 		morphPosition: self windowPosition;
 		morphExtent: 310@180;						
@@ -3491,7 +3491,7 @@ buildMorphicWindow
 		addMorph: self setUpMidRow;
 		addMorph: (buyers _ self setUpBuyers)! !
 
-!AuctionJob methodsFor: 'buttons' stamp: 'dhn 9/21/2016 12:05:16'!
+!AuctionJob methodsFor: 'buttons' stamp: 'dhn 4/12/2017 18:08:03'!
 buyerButtons
 	"Set bidding buttons for players with the required equipment"
 	| col req any |
@@ -3505,7 +3505,7 @@ buyerButtons
 			any do: [:ea |
 				col add: ((BidderButton label: ea identity action: #offer: state: true model: self)
 					morphExtent: 70@30;
-					color: ea token color;
+					color: ea color;
 					setBalloonText: 'bidder')].
 			buyers addAllMorphs: col reversed]! !
 
