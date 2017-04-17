@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 8:27:39 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 17 April 2017 at 11:33:28 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 109!
+!provides: 'Construction' 1 110!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -4509,6 +4509,12 @@ gameTitle: anObject
 
 	gameTitle _ anObject! !
 
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2017 11:16:33'!
+layoutSubmorphs
+
+    super layoutSubmorphs.
+    self board morphExtent: self board owner morphExtent! !
+
 !TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 16:58:57'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
@@ -4778,34 +4784,38 @@ cellsForGame
 	
 	^ 7! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/7/2017 18:12:18'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2017 11:17:49'!
 start
-	| win |
-	
-	win _ self open: Contract new label: 'A Board Game'.
-	
-	win morphExtent: (win owner morphExtent * (1.0@0.8)).
-	win morphPosition: 0@60.
-	win owner someSubmorphPositionOrExtentChanged.
-	win board morphExtent: win board owner morphExtent.
-	{win board morphExtent} print.
-	win board
-		addMorph: win makeTitleArea;
-		addMorph: win makeNumbersArea;
-		addMorph: win makeOthersArea.
-	win gameTitle 
-		contents: 'Construction';
-		color: Color lightBrown.
-	win model buttons: win makeButtonArea.
-	win board
-		addMorph: win makeSeasonsArea;
-		addMorph: win makeCellsArea.
-	win model positionBoardTo: 1.
-	win startButtonSet.
-	win showSeasons: (win model parseSeasonsAt: 1).
+    | win world |
 
-	^ win
-! !
+    "Don't open it yet. First completely build it."
+    win _ self new.
+    win widgetsColor: win windowColor.
+    win model: Contract new; buildMorphicWindow.
+    win setLabel: 'A Board Game'.
+
+    win board
+        addMorph: win makeTitleArea;
+        addMorph: win makeNumbersArea;
+        addMorph: win makeOthersArea.
+    win gameTitle
+        contents: 'Construction';
+        color: Color lightBrown.
+    win model buttons: win makeButtonArea.
+    win board
+        addMorph: win makeSeasonsArea;
+        addMorph: win makeCellsArea.
+    win model positionBoardTo: 1.
+    win startButtonSet.
+    win showSeasons: (win model parseSeasonsAt: 1).
+
+    "Now do open it"
+    world _ Processor activeProcess animatedUI.
+    win morphExtent: (world morphExtent * (1.0@0.8)).
+     world addMorph: win position: 0@60.
+    win someSubmorphPositionOrExtentChanged.
+
+    ^ win! !
 
 !TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 3/4/2017 15:52:28'!
 titleHeight
