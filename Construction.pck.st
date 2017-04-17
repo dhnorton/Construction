@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 17 April 2017 at 11:33:28 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 17 April 2017 at 2:21:42 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 110!
+!provides: 'Construction' 1 111!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -2151,7 +2151,7 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/23/2017 21:17:43'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 4/17/2017 14:05:02'!
 buildMorphicWindow
 
 	model arena: self.
@@ -2162,6 +2162,7 @@ buildMorphicWindow
 		
 	layoutMorph addMorph: pasteup layoutSpec: LayoutSpec useAll.
 	board _ LayoutMorph newColumn name: #board.
+	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
 	pasteup addMorph: board.
 	
 	model when: #quitGame send: #delete to: self.
@@ -2170,6 +2171,7 @@ buildMorphicWindow
 	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
+	model when: #winningBidder send: #winningBidder:bid: to: self withArguments: #(#buyer #bid).
 
 ! !
 
@@ -2283,6 +2285,12 @@ getPlayers
 initialize
 
 	super initialize! !
+
+!Construction methodsFor: 'initialization' stamp: 'dhn 4/17/2017 14:01:11'!
+layoutSubmorphs
+
+    super layoutSubmorphs.
+    self board morphExtent: self board owner morphExtent! !
 
 !Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:03:14'!
 makeAddPlayerButton
@@ -3008,23 +3016,25 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 4/3/2017 19:56:55'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 4/17/2017 14:15:16'!
 start
 	"Start the Construction Game"
-	| win |
+	| win world |
 	
-	win _ self open: Contract new label: 'A Board Game'.
-	
-	win model world: win pasteup.
-	win morphExtent: (win owner morphExtent * (1.0@0.8)).
-	win morphPosition: 0@60.
-	win owner doOneCycleNow.
-	win board morphExtent: win pasteup morphExtent.
+	win _ self new.
+	win 
+		widgetsColor: win windowColor; "standard color for the window frame"
+		color:  (Color r: 0.986 g: 0.986 b: 0.986); "background color"
+		model: Contract new;
+		buildMorphicWindow;
+		setLabel: 'A Board Game'.
+		
 	win board
 		addMorph: win makeTitleArea;
 		addMorph: win makeNumbersArea;
 		addMorph: win makeOthersArea.
-	win gameTitle 
+		
+	win gameTitle
 		contents: 'Construction';
 		color: Color lightBrown.
 	win model buttons: win makeButtonArea.
@@ -3035,7 +3045,12 @@ start
 	win startButtonSet.
 	win showSeasons: (win model parseSeasonsAt: 1).
 	
-	win model when: #winningBidder send: #winningBidder:bid: to: win withArguments: #(#buyer #bid).
+	"Now do open it"
+	world _ Processor activeProcess animatedUI.
+	win morphExtent: (world morphExtent * (1.0@0.8)).
+	world addMorph: win position: 0@60.
+	win model world: world.
+	win someSubmorphPositionOrExtentChanged.
 	
 	^ win
 ! !
@@ -4467,7 +4482,7 @@ board: anObject
 
 	board _ anObject! !
 
-!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 3/5/2017 11:41:43'!
+!TestPasteUp methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2017 13:29:26'!
 buildMorphicWindow
 
 	path _ PasteUpMorph new
@@ -4476,8 +4491,8 @@ buildMorphicWindow
 		
 	layoutMorph addMorph: path layoutSpec: LayoutSpec useAll.
 	board _ LayoutMorph newColumn name: #AREA.
-	path addMorph: board.
-! !
+	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
+	path addMorph: board! !
 
 !TestPasteUp methodsFor: 'accessing' stamp: 'dhn 3/4/2017 15:16:35'!
 buttonArea
@@ -4784,13 +4799,14 @@ cellsForGame
 	
 	^ 7! !
 
-!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2017 11:17:49'!
+!TestPasteUp class methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2017 13:24:58'!
 start
     | win world |
 
     "Don't open it yet. First completely build it."
     win _ self new.
     win widgetsColor: win windowColor.
+	win color:  (Color r: 0.986 g: 0.986 b: 0.986).
     win model: Contract new; buildMorphicWindow.
     win setLabel: 'A Board Game'.
 
