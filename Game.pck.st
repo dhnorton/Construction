@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 6:12:55 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 7:58:21 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 97!
+!provides: 'Game' 1 98!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -1424,6 +1424,12 @@ show: aCollection event: aSymbol
 					]]].
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
+
+!Die2 methodsFor: 'access' stamp: 'dhn 4/12/2017 19:54:34'!
+value
+	"Answer the value"
+	
+	^ value! !
 
 !Die2 class methodsFor: 'reference' stamp: 'dhn 3/13/2017 20:31:58'!
 faces

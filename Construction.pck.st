@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 6:13:23 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 8:27:39 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 107!
+!provides: 'Construction' 1 109!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1035,14 +1035,15 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 3/23/2017 20:59:27'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 19:55:47'!
 rollForFranchise
 	"Show the die rolling"
 	| bone |
 
 	bone _ currentPlayer die openInWorld: arena pasteup.
-	bone referencePosition: currentPlayer token referencePosition - (0@2 * currentPlayer token morphHeight).
-	bone show: bone combo shuffled event: #franchiseEffect:
+	bone referencePosition: token referencePosition - (0@2 * token morphHeight).
+	bone show: bone class faces shuffled event: #franchiseEffect:.
+	self franchiseEffect: bone value
 ! !
 
 !Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 17:25:24'!
@@ -2520,18 +2521,21 @@ quitGame
 			model token ifNotNil: [model token delete].
 			model quitGame]! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 3/23/2017 20:56:03'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 4/12/2017 19:30:21'!
 setupToken: aPlayer
 	"Place the player's token on the board"
+	| w h |
 	
-	aPlayer token id contents: aPlayer identity.
-	aPlayer token doubled contents: aPlayer doubledString.
-	aPlayer token 
+	w _ owner morphExtent x * 0.13.
+	h _ w * 0.5.
+	model token id contents: aPlayer identity.
+	model token doubled contents: aPlayer doubledString.
+	model token 
 		color: aPlayer color;
-		setSize;
-		setPosition.
-	pasteup addMorph: aPlayer token.
-	^ aPlayer token who: aPlayer! !
+		morphExtent: w@h;
+		morphPosition: owner morphExtent * (0.006@0.72).
+	pasteup addMorph: model token.
+	^ model token who: aPlayer! !
 
 !Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:16'!
 showAssetAuction
@@ -2778,11 +2782,10 @@ windowPosition
 	
 	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 3/17/2017 15:27:07'!
+!Construction methodsFor: 'operation' stamp: 'dhn 4/12/2017 20:10:32'!
 winningBidder: aPlayer bid: aBid
 	"Change current player to aPlayer and move to job, if necessary"
 	| space playr |
-self halt.
 	aPlayer = model currentPlayer identity
 		ifTrue: [
 			playr _ model currentPlayer.
@@ -2790,21 +2793,21 @@ self halt.
 			playr canDoJob]
 		ifFalse: [
 			space _ model currentPlayer position.
-			model currentPlayer token delete.
+			model token delete.
 			(model spaces at: model currentPlayer position) markAddFor: model currentPlayer.
 			model currentPlayer: (model players detect: [:pl | pl identity = aPlayer] ifNone: []).
 			playr _ model currentPlayer.
 			gameTitle contents: aPlayer, '''s turn.'.
-			gameTitle color: playr token color.
+			gameTitle color: playr color.
 			playr rollForHarvest.
 			model 
 				updatePlayer; 
 				positionBoardTo: playr position.
-			self setupToken: playr.
-			playr token setPosition.
+			model setTokenFor: owner.
+			model token setPosition.
 			(model spaces at: playr position) markRemFor: playr.
 			"model moveFrom: model currentPlayer position to: space."
-			playr token moveFrom: playr position + 1 to: space.
+			model token moveFrom: playr position + 1 to: space.
 			playr canDoJob].
 	model updateHistory.
 	model enableAll: {'End Turn'. 'Do Job'}.
