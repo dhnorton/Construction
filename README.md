@@ -14,5 +14,6 @@ This program differs from the actual board game as follows:
 - Optional views to assist decision making
 - History of player's progress
 - Computer is banker, auctioneer, and auditor
+- Auditing is continuous
 - Rules enforced consistently
 
