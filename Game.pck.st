@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 12 April 2017 at 7:58:21 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 4 August 2017 at 11:56:14 am'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 98!
+!provides: 'Game' 1 115!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -277,12 +277,6 @@ addMarkerIDInMarks
 	"(self marks at: self currentPlayer position) at: self playerIndex
 		put: self currentPlayer identity" ! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 3/21/2017 18:50:45'!
-advanceTo: aPosition 
-	"Slide the board under a token, forward to aPosition"
-	
-	self triggerEvent: #advance withArguments: {currentPlayer. aPosition}! !
-
 !Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
 arena
 	"Answer the value of arena"
@@ -396,7 +390,7 @@ enableAll: aCollection
 		btn _ self buttons submorphs detect: [:b | b label = x] ifNone: [nil].
 		btn ifNotNil: [btn enableButton]]! !
 
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/16/2016 14:38:10'!
+!Game methodsFor: 'operating' stamp: 'dhn 10/16/2016 14:38:10'!
 goal
 	"Answer the goal of the game"
 	
@@ -430,7 +424,7 @@ hopFor: anObject
 			around: spaces size).
 	currentPlayer rollStats: roll! !
 
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 8/2/2014 21:49'!
+!Game methodsFor: 'initialize' stamp: 'dhn 8/2/2014 21:49'!
 initialButtonState
 	"Establish the button state at the start of the game"
 	self subclassResponsibility! !
@@ -458,23 +452,18 @@ move
 	bone adjustTo: token.
 	bone show: bone class faces shuffled! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:37:24'!
+!Game methodsFor: 'operating' stamp: 'dhn 8/4/2017 11:54:46'!
 nextPlayer
 	"Begin the next player's turn"
+	| x |
 	
-	self triggerEvent: #deleteOpenWindows.
-	token delete.
 	currentPlayer _ (players atWrap: (playerIndex _ playerIndex + 1)).
-	self triggerEvent: #itemChange.
-	self 
-		positionBoardTo: currentPlayer position;
-		removeMarkers.
-	self triggerEvent: #titleChange: with: currentPlayer.
-	self setTokenFor: world.
-	self testMode
-		ifTrue: [self hardRoll: (6 min: (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6') asNumber)]! !
+	self showTokenFor: currentPlayer at: currentPlayer position.
+	self testMode ifTrue: [
+	x _ (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6' onCancel: ['0']) asNumber.
+	self hardRoll: ((1 to: 6) asArray atWrap: x)]! !
 
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/2/2016 17:01:38'!
+!Game methodsFor: 'accessing' stamp: 'dhn 10/2/2016 17:01:38'!
 oldGoal
 	^ self class oldGoal asNumber! !
 
@@ -585,7 +574,7 @@ setBeat
 	x _ (FillInTheBlankMorph request: 'Auctioneer pause time (sec)' initialAnswer: value asString).
 	x ~= '' ifTrue:  [chantBeat _ (x asNumber * 1000.0) asInteger]! !
 
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/16/2016 12:07:28'!
+!Game methodsFor: 'initialize' stamp: 'dhn 10/16/2016 12:07:28'!
 setGoal
 	"Set the goal of the game"
 	| x |
@@ -594,12 +583,14 @@ setGoal
 	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
 	x ~= '' ifTrue:  [goal _ x asNumber]! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 4/8/2017 20:23:55'!
+!Game methodsFor: 'operating' stamp: 'dhn 4/20/2017 16:16:19'!
 setTokenFor: aWorld
 	"Place the current player's token on the board"
 	| vadj |
 	
-	self token: ((ContractToken newFor: self) openInWorld: aWorld).
+	self token: ((ContractToken newFor: self) 
+		openInWorld: aWorld;
+		setBalloonText: 'token for ', currentPlayer identity).
 	token morphExtent: world morphExtent * (0.090@0.080).
 	vadj _ aWorld morphExtent y * 7/10 .
 	token morphPosition: self token morphPosition + (0@vadj).
@@ -607,6 +598,14 @@ setTokenFor: aWorld
 	token doubled contents: currentPlayer doubledString.
 	token color: currentPlayer color.
 	token who: currentPlayer! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 4/20/2017 15:19:06'!
+slideLeftFromRightPosition: aSpace1 to: aSpace2
+	"Position board with aSpace1 right-most and slide left to aSpace2"! !
+
+!Game methodsFor: 'operating' stamp: 'dhn 4/20/2017 15:17:07'!
+slideRightFromLeftPosition: aSpace1 to: aSpace2
+	"Position board with aSpace1 left-most and slide right to aSpace2"! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 10/7/2014 12:23'!
 spaceFreq
@@ -626,12 +625,12 @@ token: anObject
 
 	token _ anObject! !
 
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/10/2013 22:10'!
+!Game methodsFor: 'operating' stamp: 'dhn 10/10/2013 22:10'!
 won
 	won ifNil: [won := false].
 	^ won! !
 
-!Game methodsFor: 'as yet unclassified' stamp: 'dhn 10/10/2013 22:11'!
+!Game methodsFor: 'operating' stamp: 'dhn 10/10/2013 22:11'!
 won: aBool
 	won := aBool.! !
 
@@ -670,30 +669,20 @@ wantsDroppedMorph: aMorph event: evt
 
 	^super wantsDroppedMorph: aMorph event: evt! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 4/8/2017 20:45:09'!
-advance: aPlayer to: aPosition
-	"Slide the board under aPlayer to aPosition"
-	
-	{'before #arrowRight ****************'} print.
-	self arrowRight.
-	self moveFrom: aPlayer position to: aPosition by: 1.
-	{'after #moveFrom:to:by: *****************'} print.
-	self deleteArrow
-! !
-
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
 	"Answer the value of arrow"
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 2/18/2017 18:18:01'!
+!Token methodsFor: 'initialization' stamp: 'dhn 5/14/2017 12:51:14'!
 arrowLeft
+	"Associate an arrow with the sender, pointing to the left"
 
-	arrow _ ArrowMorph leftOn: self.
+	arrow _ ArrowMorph new
+		form: (BitBltCanvas arrowOfDirection: #left size: 40) as8BitColorForm.
 	arrow openInWorld: self.
-	arrow morphPosition: self arrowPosition.
-	self addMorph: arrow
+	arrow morphPosition: self arrowPosition
 
 ! !
 
@@ -703,13 +692,15 @@ arrowPosition
 
 	^ (self morphWidth / 3)@-60! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 2/18/2017 18:18:20'!
+!Token methodsFor: 'initialization' stamp: 'dhn 5/14/2017 12:48:36'!
 arrowRight
+	"Associate an arrow with the sender, pointing to the right"
 
-	arrow _ ArrowMorph rightOn: self.
+	arrow _ ArrowMorph new
+		form: (BitBltCanvas arrowOfDirection: #right size: 40) as8BitColorForm.
+	self addMorph: arrow.
 	arrow openInWorld: self.
-	arrow morphPosition: self arrowPosition.
-	self addMorph: arrow
+	arrow morphPosition: self arrowPosition
 ! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 10/9/2011 20:04'!
@@ -821,8 +812,8 @@ model: anObject
 
 	model _ anObject! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 2/28/2017 15:26:28'!
-moveFrom: positionA to: positionB
+!Token methodsFor: 'stepping' stamp: 'dhn 5/14/2017 11:33:35'!
+move: aPlayer from: positionA to: positionB
 	"Determine best direction and move"
 	| dir |
 	
@@ -830,18 +821,68 @@ moveFrom: positionA to: positionB
 		shortest: positionA
 		to: positionB
 		in: who mgr spaces size.
-	dir < 0
-		ifTrue: [self arrowLeft]
-		ifFalse: [self arrowRight].
-	self
-		moveFrom: positionA
-		to: positionB
-		by: dir.
+	self halt.
+	dir > 0
+		ifTrue: [
+			model showTokenFor: aPlayer at: aPlayer position.
+			self moveRightFrom: positionA to: positionB]
+		ifFalse: [
+			model showTokenFor: aPlayer at: aPlayer position + 6.
+			self moveLeftFrom: positionA - 6 to: positionB - 6].
 	self deleteArrow
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 4/10/2017 21:48:01'!
-moveFrom: start to: end by: direction
+!Token methodsFor: 'stepping' stamp: 'dhn 5/14/2017 12:00:11'!
+moveFrom: positionA to: positionB
+	"Determine best direction and move"
+	| dir pl |
+	
+	pl _ model currentPlayer.
+	dir _ Direction
+		shortest: positionA
+		to: positionB
+		in: who mgr spaces size.
+	self halt.
+	dir > 0
+		ifTrue: [
+			model showTokenFor: pl at: pl position.
+			self moveRightFrom: positionA to: positionB]
+		ifFalse: [
+			model showTokenFor: pl at: pl position + 6.
+			self moveLeftFrom: positionA - 6 to: positionB - 6].
+	self deleteArrow
+! !
+
+!Token methodsFor: 'stepping' stamp: 'dhn 5/13/2017 15:51:36'!
+moveFrom: start to: end by: direction enabling: anArray
+	"Animate moves forward or backward."
+	| a b board posns limit i |
+	
+	a _ start.
+	b _ end.
+	board _ model class describeSpaces.
+	direction < 0
+		ifTrue: [start < end ifTrue: [	a _ start + board size]]
+		ifFalse: [start > end ifTrue: [b _ end + board size]].
+	posns _ (Interval from: a to: b by: direction) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				self deleteArrow.
+				model currentPlayer position: (posns at: i) + model currentPlayer roll.
+				self moved.
+				model enableAll: anArray]].
+	self startSteppingStepTime: 400
+! !
+
+!Token methodsFor: 'stepping' stamp: 'dhn 5/6/2017 15:05:14'!
+moveFromX: start to: end by: direction
 	"Animate moves forward or backward."
 	| a b board posns limit i |
 	
@@ -851,10 +892,12 @@ moveFrom: start to: end by: direction
 	direction < 0
 		ifTrue: [
 			self arrowLeft.
-			start < end ifTrue: [	a _ start + board size]]
+			a _ a - 6.
+			b _ b - 6.
+			a < b ifTrue: [a _ a + board size]]
 		ifFalse: [
 			self arrowRight.
-			start > end ifTrue: [b _ end + board size]].
+			a > b ifTrue: [b _ b + board size]].
 	posns _ (Interval from: a to: b by: direction) asArray.
 	{posns} print.
 	limit _ posns size.
@@ -875,11 +918,66 @@ moveFrom: start to: end by: direction
 	self startSteppingStepTime: 400
 ! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:56'!
-setPosition
-	"Set the location, so that for example, each turn starts with the token at the left-most cell"
+!Token methodsFor: 'stepping' stamp: 'dhn 5/7/2017 16:12:05'!
+moveLeftFrom: start to: end
+	"Animate moves backward."
+	| a b board posns limit i |
 	
-	self morphPosition: owner morphExtent * (0.006@0.72)! !
+	a _ start.
+	b _ end.
+	board _ model class describeSpaces.
+	self arrowLeft.
+	a _ a - 6.
+	b _ b - 6.
+	a < b ifTrue: [a _ a + board size].
+	posns _ (Interval from: a to: b by: -1) asArray.
+	{posns} print.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				self halt.
+				who position: (posns at: i) + who roll - 1.
+				{who identity. who position. who roll} print.
+				self doubled contents: who doubledString.
+				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
+				(model spaces at: who position) markAddFor: who]].
+	self startSteppingStepTime: 400
+! !
+
+!Token methodsFor: 'stepping' stamp: 'dhn 5/13/2017 15:56:21'!
+moveRightFrom: start to: end
+	"Animate moves forward."
+	| a b board posns limit i |
+	
+	a _ start.
+	b _ end.
+	board _ model class describeSpaces.
+	self arrowRight.
+	a > b ifTrue: [b _ b + board size].
+	posns _ (Interval from: a to: b by: 1) asArray.
+	{posns} print.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				who position: (posns at: i).
+				{who identity. who position. who roll} print.
+				self doubled contents: who doubledString.
+				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
+				(model spaces at: who position) markAddFor: who]].
+	self startSteppingStepTime: 400
+! !
 
 !Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:20'!
 setSize
@@ -1377,7 +1475,7 @@ setDots
 		borderWidth: 0;
 		morphExtent: (row1 morphExtent x * scale) asPoint! !
 
-!Die2 methodsFor: 'operation' stamp: 'dhn 3/19/2017 15:36:52'!
+!Die2 methodsFor: 'operation' stamp: 'dhn 5/5/2017 16:15:54'!
 show: aCollection
 	"Display the succession of faces in aCollection on the die, then hop the token"
 	| limit linger t i x |
@@ -1392,6 +1490,7 @@ show: aCollection
 		t < limit 	"limit on the total time of activity"
 			ifTrue: [x _ self perform: (aCollection atWrap: i)]
 			ifFalse: [
+				model testMode ifTrue: [self perform: (self class faces at: (model hardRoll * 2))].
 				t > linger ifTrue: [
 					self stopStepping.
 					model hopFor: x.
@@ -1466,21 +1565,19 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/30/2016 15:26:32'!
+!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 5/14/2017 12:52:40'!
 leftOn: aWorld
 	"Open a right-pointing arrow in aWorld"
 	
 	^ self new
-		form: (BitBltCanvas arrowOfDirection: #left size: 40) as8BitColorForm;
-		openInWorld: aWorld! !
+		form: (BitBltCanvas arrowOfDirection: #left size: 40) as8BitColorForm! !
 
-!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 11/30/2016 15:26:20'!
+!ArrowMorph class methodsFor: 'instance creation' stamp: 'dhn 5/14/2017 12:46:15'!
 rightOn: aWorld
 	"Open a right-pointing arrow in aWorld"
 
 	^ self new
-		form: (BitBltCanvas arrowOfDirection: #right size: 40) as8BitColorForm;
-		openInWorld: aWorld! !
+		form: (BitBltCanvas arrowOfDirection: #right size: 40) as8BitColorForm! !
 
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 12/2/2016 18:11:14'!
 adjustTo: aMorph

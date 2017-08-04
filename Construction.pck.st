@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3075] on 17 April 2017 at 2:21:42 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 4 August 2017 at 11:57:38 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 111!
+!provides: 'Construction' 1 129!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -539,7 +539,7 @@ declareOver: aString
 		title: 'Debt Too High'
 ! !
 
-!Contract methodsFor: 'operating' stamp: 'dhn 8/24/2016 11:10:47'!
+!Contract methodsFor: 'operating' stamp: 'dhn 5/8/2017 14:58:31'!
 declareWinner
 	"Inform that there is a winner"
 
@@ -551,7 +551,7 @@ declareWinner
 				nextPutAll: self goal printStringWithCommas; nextLine;
 				nextPutAll: ' and is the winner of the game.']) 
 		title: 'THE WINNAH!!!!'.
-	arena owner removeMorph: currentPlayer token.
+	arena owner removeMorph: token.
 	self won: true! !
 
 !Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:13:26'!
@@ -569,15 +569,13 @@ doJob
 	self updateHistory.
 	self enableAll: {'End Turn'}! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 10/28/2016 15:07:58'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 5/5/2017 15:54:57'!
 doSettings
 	"Provide a facility for changing settings"
 	| ans |
 	
 	ans _ (PopUpMenu withCaption: 'Settings' chooseFrom: 'Change the goal of the game\Change auctioneer''s beat\Change test mode').
-	ans = 1 ifTrue: [self setGoal].
-	ans = 2 ifTrue: [self setBeat].
-	ans = 3 ifTrue: [self setTestMode]! !
+	ans > 0 ifTrue: [self perform: (#(#setGoal #setBeat #setTestMode) at: ans)]! !
 
 !Contract methodsFor: 'operating' stamp: 'dhn 9/28/2016 10:07:20'!
 doSpace
@@ -756,6 +754,29 @@ jobAuctionList
 	"Answer a list for the job auction window"
 
 	^ self class bidIncrement! !
+
+!Contract methodsFor: 'auction' stamp: 'dhn 5/14/2017 13:08:12'!
+jobWinner: aName bid: aBid
+	"Change current player to aName and move to job, if necessary"
+	| space playr |
+	
+	aName = currentPlayer identity
+		ifTrue: [
+			playr _ currentPlayer.
+			space _ playr position]
+		ifFalse: [
+			(spaces at: currentPlayer position) markAddFor: currentPlayer.
+			space _ currentPlayer position.
+			currentPlayer _ (players detect: [:pl | pl identity = aName] ifNone: []).
+			playr _ currentPlayer.
+			(spaces at: playr position) markRemFor: playr.
+			self setTokenFor: world.
+			token moveFrom: playr position to: space].
+	self updateHistory.
+	self enableAll: {'End Turn'}.
+	playr canDoJob ifTrue: [self enableAll: {'Do Job'}].
+	playr tally: aBid negated.
+	self updatePlayer! !
 
 !Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
 listOfOptions: anObject
@@ -1097,7 +1118,7 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 4/4/2017 10:43:38'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/4/2017 11:32:39'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName and colored aColor"
 	| pl |
@@ -1105,6 +1126,7 @@ setupPlayer: aName color: aColor
 	self players add: (pl _ Contractor new
 		color: aColor;
 		marker: (EllipseMorph new
+			setBalloonText: 'marker for ', aName;
 			color: aColor;
 			morphExtent: 18@10);
 		mgr: self;
@@ -1112,8 +1134,23 @@ setupPlayer: aName color: aColor
 	token ifNotNil: [token delete].
 	currentPlayer _ pl.
 	self setTokenFor: world.
-	self when: #deleteOpenWindows send: #delete to: token.
 	self availableOptions do: [:opt | pl options addLast: opt].! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/4/2017 11:54:12'!
+showTokenFor: aPlayer at: aPosition
+	"Show token at aPosition and change title for aPlayer"
+	
+	"close any open views of the current player"
+	self triggerEvent: #deleteOpenWindows.
+	token delete.
+	
+	"update board view, position board, and set token"
+	self 
+		triggerEvent: #itemChange;
+		triggerEvent: #titleChange: with: aPlayer;
+		positionBoardTo: aPosition;
+		removeMarkers;
+		setTokenFor: world		! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:15:47'!
 space1
@@ -1452,16 +1489,18 @@ space8
 	self updatePlayer.
 	^ (self spacePlain: x) -> nil! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 4/10/2017 21:23:41'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 5/13/2017 15:47:41'!
 space9
 	"Feb week 3"
 	
 	self disableAll: {'Move'}.
 	self removeMarkers.
 	"slide board so that player appears to advance to 21."
-	token moveFrom: currentPlayer oldPosition to: currentPlayer oldPosition + 13 by: 1.
-	self updateHistory.
-	self enableAll: {'End Turn'}.
+	token 
+		arrowRight;
+		moveFrom: currentPlayer oldPosition 
+			to: currentPlayer oldPosition + 12 
+			by: 1 enabling: {'End Turn'}.
 	^ 0 -> nil! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:16:38'!
@@ -2151,7 +2190,7 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 4/17/2017 14:05:02'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 5/6/2017 11:00:16'!
 buildMorphicWindow
 
 	model arena: self.
@@ -2164,6 +2203,7 @@ buildMorphicWindow
 	board _ LayoutMorph newColumn name: #board.
 	board color:  (Color r: 0.986 g: 0.986 b: 0.986).
 	pasteup addMorph: board.
+	model world: pasteup.
 	
 	model when: #quitGame send: #delete to: self.
 	model when: #itemChange send: #displayNumbers to: self.
@@ -2171,8 +2211,6 @@ buildMorphicWindow
 	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
-	model when: #winningBidder send: #winningBidder:bid: to: self withArguments: #(#buyer #bid).
-
 ! !
 
 !Construction methodsFor: 'accessing' stamp: 'dhn 8/2/2016 17:23:31'!
@@ -2790,11 +2828,11 @@ windowPosition
 	
 	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 4/12/2017 20:10:32'!
-winningBidder: aPlayer bid: aBid
-	"Change current player to aPlayer and move to job, if necessary"
+!Construction methodsFor: 'operation' stamp: 'dhn 5/6/2017 11:14:10'!
+winningBidderX: aName bid: aBid
+	"Change current player to aName and move to job, if necessary"
 	| space playr |
-	aPlayer = model currentPlayer identity
+	aName = model currentPlayer identity
 		ifTrue: [
 			playr _ model currentPlayer.
 			space _ playr position.
@@ -2803,18 +2841,17 @@ winningBidder: aPlayer bid: aBid
 			space _ model currentPlayer position.
 			model token delete.
 			(model spaces at: model currentPlayer position) markAddFor: model currentPlayer.
-			model currentPlayer: (model players detect: [:pl | pl identity = aPlayer] ifNone: []).
+			model currentPlayer: (model players detect: [:pl | pl identity = aName] ifNone: []).
 			playr _ model currentPlayer.
-			gameTitle contents: aPlayer, '''s turn.'.
-			gameTitle color: playr color.
+			self titleChange: playr.
 			playr rollForHarvest.
 			model 
 				updatePlayer; 
 				positionBoardTo: playr position.
-			model setTokenFor: owner.
+			model setTokenFor: pasteup.
 			model token setPosition.
 			(model spaces at: playr position) markRemFor: playr.
-			"model moveFrom: model currentPlayer position to: space."
+			self halt.
 			model token moveFrom: playr position + 1 to: space.
 			playr canDoJob].
 	model updateHistory.
@@ -3016,7 +3053,7 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 4/17/2017 14:15:16'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 4/17/2017 15:36:38'!
 start
 	"Start the Construction Game"
 	| win world |
@@ -3049,7 +3086,6 @@ start
 	world _ Processor activeProcess animatedUI.
 	win morphExtent: (world morphExtent * (1.0@0.8)).
 	world addMorph: win position: 0@60.
-	win model world: world.
 	win someSubmorphPositionOrExtentChanged.
 	
 	^ win
@@ -3547,12 +3583,12 @@ details
 	"Not required for job auctions"
 ! !
 
-!AuctionJob methodsFor: 'termination' stamp: 'dhn 11/13/2016 11:00:03'!
+!AuctionJob methodsFor: 'termination' stamp: 'dhn 5/6/2017 11:12:14'!
 endIt
 	
 	model 
 		jobAuctionItem: nil;
-		triggerEvent: #winningBidder withArguments: {currentBidder. currentBid};
+		jobWinner: currentBidder bid: currentBid;
 		enableAll: {'Auction'. 'End Turn'}.
 	self delete
 ! !
