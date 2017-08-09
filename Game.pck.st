@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 4 August 2017 at 11:56:14 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 9 August 2017 at 3:32:34 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 115!
+!provides: 'Game' 1 119!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
-	instanceVariableNames: 'world arena cells spaces goal response players currentPlayer token playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
+	instanceVariableNames: 'world arena cells spaces goal response players currentPlayer token tokenPos playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
 	classVariableNames: 'TestGoal TestMode'
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -452,13 +452,26 @@ move
 	bone adjustTo: token.
 	bone show: bone class faces shuffled! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 8/4/2017 11:54:46'!
+!Game methodsFor: 'operating' stamp: 'dhn 8/9/2017 15:20:27'!
 nextPlayer
 	"Begin the next player's turn"
 	| x |
 	
 	currentPlayer _ (players atWrap: (playerIndex _ playerIndex + 1)).
-	self showTokenFor: currentPlayer at: currentPlayer position.
+	self 
+		triggerEvent: #deleteOpenWindows; 	"close any open views of the current player"
+		triggerEvent: #itemChange; 	"update board view"
+		triggerEvent: #titleChange with: currentPlayer;
+		positionBoardTo: currentPlayer position; 	"position board,"
+		removeMarkers.
+	token openInWorld: world.
+	token morphPosition: tokenPos.
+	{token morphPosition. currentPlayer identity} print.
+	token id contents: currentPlayer identity.
+	token doubled contents: currentPlayer doubledString.
+	token color: currentPlayer color.
+	token who: currentPlayer.
+	token setBalloonText: 'token for ', currentPlayer identity.
 	self testMode ifTrue: [
 	x _ (FillInTheBlankMorph request: 'How many spaces' initialAnswer: '6' onCancel: ['0']) asNumber.
 	self hardRoll: ((1 to: 6) asArray atWrap: x)]! !
@@ -634,6 +647,12 @@ won
 won: aBool
 	won := aBool.! !
 
+!Game methodsFor: 'initialize' stamp: 'dhn 8/6/2017 21:32:46'!
+world
+	"Answer the value of world"
+
+	^ world! !
+
 !Game methodsFor: 'initialize' stamp: 'dhn 4/3/2017 19:38:36'!
 world: anObject
 	"Set the value of world"
@@ -649,6 +668,12 @@ wrapIndex: anIndex around: aLimit
 		ifFalse: [anIndex <= 0
 				ifTrue: [^ aLimit].
 			^ anIndex]! !
+
+!Game class methodsFor: 'accessing' stamp: 'dhn 8/9/2017 14:08:49'!
+vAdjust
+	"Answer the vertical adjustment factor for token position"
+	
+	^ 7/10! !
 
 !OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
 allowsMorphDrop
@@ -675,12 +700,13 @@ arrow
 
 	^ arrow! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 5/14/2017 12:51:14'!
+!Token methodsFor: 'initialization' stamp: 'dhn 8/8/2017 11:31:47'!
 arrowLeft
 	"Associate an arrow with the sender, pointing to the left"
 
 	arrow _ ArrowMorph new
 		form: (BitBltCanvas arrowOfDirection: #left size: 40) as8BitColorForm.
+	self addMorph: arrow.
 	arrow openInWorld: self.
 	arrow morphPosition: self arrowPosition
 
@@ -692,7 +718,7 @@ arrowPosition
 
 	^ (self morphWidth / 3)@-60! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 5/14/2017 12:48:36'!
+!Token methodsFor: 'initialization' stamp: 'dhn 8/8/2017 11:31:24'!
 arrowRight
 	"Associate an arrow with the sender, pointing to the right"
 
@@ -832,24 +858,19 @@ move: aPlayer from: positionA to: positionB
 	self deleteArrow
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 5/14/2017 12:00:11'!
+!Token methodsFor: 'stepping' stamp: 'dhn 8/6/2017 19:01:11'!
 moveFrom: positionA to: positionB
 	"Determine best direction and move"
-	| dir pl |
+	| dir |
 	
-	pl _ model currentPlayer.
 	dir _ Direction
 		shortest: positionA
 		to: positionB
 		in: who mgr spaces size.
 	self halt.
 	dir > 0
-		ifTrue: [
-			model showTokenFor: pl at: pl position.
-			self moveRightFrom: positionA to: positionB]
-		ifFalse: [
-			model showTokenFor: pl at: pl position + 6.
-			self moveLeftFrom: positionA - 6 to: positionB - 6].
+		ifTrue: [self moveRightFrom: positionA to: positionB]
+		ifFalse: [self moveLeftFrom: positionA - 6 to: positionB - 6].
 	self deleteArrow
 ! !
 
@@ -950,7 +971,7 @@ moveLeftFrom: start to: end
 	self startSteppingStepTime: 400
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 5/13/2017 15:56:21'!
+!Token methodsFor: 'stepping' stamp: 'dhn 8/8/2017 12:23:54'!
 moveRightFrom: start to: end
 	"Animate moves forward."
 	| a b board posns limit i |
@@ -961,7 +982,6 @@ moveRightFrom: start to: end
 	self arrowRight.
 	a > b ifTrue: [b _ b + board size].
 	posns _ (Interval from: a to: b by: 1) asArray.
-	{posns} print.
 	limit _ posns size.
 	i _ 0.
 	self when: #morphicStep evaluate: [ :unused |
@@ -972,7 +992,6 @@ moveRightFrom: start to: end
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
 				who position: (posns at: i).
-				{who identity. who position. who roll} print.
 				self doubled contents: who doubledString.
 				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
 				(model spaces at: who position) markAddFor: who]].
