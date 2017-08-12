@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 4 August 2017 at 11:57:38 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 3:15:57 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 129!
+!provides: 'Construction' 1 139!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -496,13 +496,13 @@ availableOptions
 
 	^ availableOptions! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:13:06'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 8/9/2017 21:05:06'!
 decideCompetitive
 	"If one or more players have the equipment, enable Auction"
 	| req any |
 	
 	req _ Contract requiredEquipment
-				at: (Contract jobSeason at: currentPlayer position).
+				at: (Contract jobSeason atWrap: currentPlayer position).
 	any _ players
 				detect: [:a | (a assets at: req) quantity > 0]
 				ifNone: [].
@@ -601,11 +601,11 @@ drawContingency
 		ifTrue: [GamePopUp inform: con description title: 'Contractor Contingency:'].
 	^ con! !
 
-!Contract methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:36:58'!
+!Contract methodsFor: 'operating' stamp: 'dhn 8/9/2017 21:22:42'!
 endTurn
 	"End a player's turn"
 	
-	(spaces at: currentPlayer position) markAddFor: currentPlayer.
+	(spaces atWrap: currentPlayer position) markAddFor: currentPlayer.
 "	self addMarkerIDInMarks; removeAllMarkersInCells."
 	self enableAll: {'Auction'}.
 	currentPlayer cash < 0
@@ -720,7 +720,7 @@ initialButtonState
 	self enableAll: {'Purchase'}.
 	self disableAll: {'End Turn'. 'Do Job'}! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 1/11/2017 20:57:21'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 11:50:14'!
 initialize
 
 	super initialize.
@@ -755,7 +755,7 @@ jobAuctionList
 
 	^ self class bidIncrement! !
 
-!Contract methodsFor: 'auction' stamp: 'dhn 5/14/2017 13:08:12'!
+!Contract methodsFor: 'auction' stamp: 'dhn 8/10/2017 13:21:13'!
 jobWinner: aName bid: aBid
 	"Change current player to aName and move to job, if necessary"
 	| space playr |
@@ -766,11 +766,20 @@ jobWinner: aName bid: aBid
 			space _ playr position]
 		ifFalse: [
 			(spaces at: currentPlayer position) markAddFor: currentPlayer.
+			token delete.
 			space _ currentPlayer position.
 			currentPlayer _ (players detect: [:pl | pl identity = aName] ifNone: []).
 			playr _ currentPlayer.
+			self triggerEvent: #titleChange with: playr.
+			self positionBoardTo: playr position.
 			(spaces at: playr position) markRemFor: playr.
-			self setTokenFor: world.
+			token openInWorld: world.
+			token morphPosition: tokenPos.
+			token id contents: currentPlayer identity.
+			token doubled contents: currentPlayer doubledString.
+			token color: currentPlayer color.
+			token who: currentPlayer.
+			token setBalloonText: 'token for ', currentPlayer identity.
 			token moveFrom: playr position to: space].
 	self updateHistory.
 	self enableAll: {'End Turn'}.
@@ -1056,7 +1065,7 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 19:55:47'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 8/6/2017 19:16:44'!
 rollForFranchise
 	"Show the die rolling"
 	| bone |
@@ -1064,7 +1073,7 @@ rollForFranchise
 	bone _ currentPlayer die openInWorld: arena pasteup.
 	bone referencePosition: token referencePosition - (0@2 * token morphHeight).
 	bone show: bone class faces shuffled event: #franchiseEffect:.
-	self franchiseEffect: bone value
+	self franchiseEffect: currentPlayer roll
 ! !
 
 !Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 17:25:24'!
@@ -1118,7 +1127,22 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/4/2017 11:32:39'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 18:01:30'!
+setUpToken
+	"Answer a token, used throughout the game, for the current player."
+	| tok vadj |
+	
+	tok _ ContractToken newFor: self.
+	tok openInWorld.
+	tok morphExtent: world morphExtent * (0.090@0.080).
+	vadj _ world morphExtent y * self class vAdjust.
+	tok morphPosition: tok morphPosition + (0@vadj).
+	tokenPos _ tok morphPosition.
+	tok delete. 	"not needed until next player"
+	^ tok
+	! !
+
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 11:41:33'!
 setupPlayer: aName color: aColor
 	"Establish a player named aName and colored aColor"
 	| pl |
@@ -1131,26 +1155,27 @@ setupPlayer: aName color: aColor
 			morphExtent: 18@10);
 		mgr: self;
 		identity: aName).
-	token ifNotNil: [token delete].
 	currentPlayer _ pl.
-	self setTokenFor: world.
-	self availableOptions do: [:opt | pl options addLast: opt].! !
+	self availableOptions do: [:opt | pl options addLast: opt]! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/4/2017 11:54:12'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 14:25:38'!
 showTokenFor: aPlayer at: aPosition
 	"Show token at aPosition and change title for aPlayer"
 	
 	"close any open views of the current player"
 	self triggerEvent: #deleteOpenWindows.
-	token delete.
 	
 	"update board view, position board, and set token"
 	self 
 		triggerEvent: #itemChange;
-		triggerEvent: #titleChange: with: aPlayer;
+		triggerEvent: #titleChange with: aPlayer;
 		positionBoardTo: aPosition;
-		removeMarkers;
-		setTokenFor: world		! !
+		removeMarkers.
+	token id contents: currentPlayer identity.
+	token doubled contents: currentPlayer doubledString.
+	token color: currentPlayer color.
+	token who: currentPlayer.
+	token setBalloonText: 'token for ', currentPlayer identity! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:15:47'!
 space1
@@ -1489,18 +1514,15 @@ space8
 	self updatePlayer.
 	^ (self spacePlain: x) -> nil! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 5/13/2017 15:47:41'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 8/12/2017 13:58:29'!
 space9
 	"Feb week 3"
 	
 	self disableAll: {'Move'}.
 	self removeMarkers.
+	
 	"slide board so that player appears to advance to 21."
-	token 
-		arrowRight;
-		moveFrom: currentPlayer oldPosition 
-			to: currentPlayer oldPosition + 12 
-			by: 1 enabling: {'End Turn'}.
+	token sickMove.
 	^ 0 -> nil! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:16:38'!
@@ -2185,12 +2207,35 @@ moved
 			mr updateHistory.
 			mr enableAll: {'End Turn'}]! !
 
+!ContractToken methodsFor: 'operations' stamp: 'dhn 8/12/2017 14:48:45'!
+sickMove
+	"Animate relocation of self when player lands on space 9"
+	| oldPos posns limit i|
+	
+	oldPos _ model currentPlayer oldPosition.
+	self arrowRight.
+	posns _ (Interval from: oldPos to: oldPos + 12 by: 1) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: 21.
+				self doubled contents: model currentPlayer doubledString.
+				model currentPlayer canDoJob ifTrue: [model enableAll: {'Do Job'}]]].
+	self startSteppingStepTime: 400! !
+
 !ContractToken class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:32'!
 includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 5/6/2017 11:00:16'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 8/8/2017 15:20:32'!
 buildMorphicWindow
 
 	model arena: self.
@@ -2207,7 +2252,7 @@ buildMorphicWindow
 	
 	model when: #quitGame send: #delete to: self.
 	model when: #itemChange send: #displayNumbers to: self.
-	model when: #titleChange: send: #titleChange: to: self with: #player.
+	model when: #titleChange send: #titleChange: to: self with: #player.
 	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
 	model when: #showToken send: #showToken to: self.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
@@ -3053,7 +3098,7 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 4/17/2017 15:36:38'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 8/9/2017 13:39:28'!
 start
 	"Start the Construction Game"
 	| win world |
@@ -3087,6 +3132,8 @@ start
 	win morphExtent: (world morphExtent * (1.0@0.8)).
 	world addMorph: win position: 0@60.
 	win someSubmorphPositionOrExtentChanged.
+
+	win model token: win model setUpToken.
 	
 	^ win
 ! !
@@ -5367,12 +5414,12 @@ reportAsAssetFor: aPlayer
 !Others methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2012 12:00'!
 reset! !
 
-!Others methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 16:22:25'!
+!Others methodsFor: 'as yet unclassified' stamp: 'dhn 8/11/2017 21:11:01'!
 spaceOf: aPlayer
 	"Answer a string describing the player's position on the board"
 	| str i1 sub2 i2 sub |
 	
-	str := (owner mgr spaces at: aPlayer position) label.
+	str := (owner mgr spaces atWrap: aPlayer position) label.
 	i1 := str indexOf: Character space ifAbsent: [0].
 	sub2 := str copyFrom: i1 + 1 to: 20.
 	i2 := sub2 indexOf: Character lf ifAbsent: [0].
