@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 9 August 2017 at 3:35:20 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 3:15:57 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 133!
+!provides: 'Construction' 1 139!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -496,13 +496,13 @@ availableOptions
 
 	^ availableOptions! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:13:06'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 8/9/2017 21:05:06'!
 decideCompetitive
 	"If one or more players have the equipment, enable Auction"
 	| req any |
 	
 	req _ Contract requiredEquipment
-				at: (Contract jobSeason at: currentPlayer position).
+				at: (Contract jobSeason atWrap: currentPlayer position).
 	any _ players
 				detect: [:a | (a assets at: req) quantity > 0]
 				ifNone: [].
@@ -601,11 +601,11 @@ drawContingency
 		ifTrue: [GamePopUp inform: con description title: 'Contractor Contingency:'].
 	^ con! !
 
-!Contract methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:36:58'!
+!Contract methodsFor: 'operating' stamp: 'dhn 8/9/2017 21:22:42'!
 endTurn
 	"End a player's turn"
 	
-	(spaces at: currentPlayer position) markAddFor: currentPlayer.
+	(spaces atWrap: currentPlayer position) markAddFor: currentPlayer.
 "	self addMarkerIDInMarks; removeAllMarkersInCells."
 	self enableAll: {'Auction'}.
 	currentPlayer cash < 0
@@ -755,12 +755,11 @@ jobAuctionList
 
 	^ self class bidIncrement! !
 
-!Contract methodsFor: 'auction' stamp: 'dhn 8/9/2017 11:40:36'!
+!Contract methodsFor: 'auction' stamp: 'dhn 8/10/2017 13:21:13'!
 jobWinner: aName bid: aBid
 	"Change current player to aName and move to job, if necessary"
 	| space playr |
 	
-	self halt.
 	aName = currentPlayer identity
 		ifTrue: [
 			playr _ currentPlayer.
@@ -775,6 +774,12 @@ jobWinner: aName bid: aBid
 			self positionBoardTo: playr position.
 			(spaces at: playr position) markRemFor: playr.
 			token openInWorld: world.
+			token morphPosition: tokenPos.
+			token id contents: currentPlayer identity.
+			token doubled contents: currentPlayer doubledString.
+			token color: currentPlayer color.
+			token who: currentPlayer.
+			token setBalloonText: 'token for ', currentPlayer identity.
 			token moveFrom: playr position to: space].
 	self updateHistory.
 	self enableAll: {'End Turn'}.
@@ -1122,7 +1127,7 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 15:18:30'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 18:01:30'!
 setUpToken
 	"Answer a token, used throughout the game, for the current player."
 	| tok vadj |
@@ -1131,7 +1136,6 @@ setUpToken
 	tok openInWorld.
 	tok morphExtent: world morphExtent * (0.090@0.080).
 	vadj _ world morphExtent y * self class vAdjust.
-	self halt.
 	tok morphPosition: tok morphPosition + (0@vadj).
 	tokenPos _ tok morphPosition.
 	tok delete. 	"not needed until next player"
@@ -1510,18 +1514,15 @@ space8
 	self updatePlayer.
 	^ (self spacePlain: x) -> nil! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 5/13/2017 15:47:41'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 8/12/2017 13:58:29'!
 space9
 	"Feb week 3"
 	
 	self disableAll: {'Move'}.
 	self removeMarkers.
+	
 	"slide board so that player appears to advance to 21."
-	token 
-		arrowRight;
-		moveFrom: currentPlayer oldPosition 
-			to: currentPlayer oldPosition + 12 
-			by: 1 enabling: {'End Turn'}.
+	token sickMove.
 	^ 0 -> nil! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:16:38'!
@@ -2205,6 +2206,29 @@ moved
 		ifFalse: [
 			mr updateHistory.
 			mr enableAll: {'End Turn'}]! !
+
+!ContractToken methodsFor: 'operations' stamp: 'dhn 8/12/2017 14:48:45'!
+sickMove
+	"Animate relocation of self when player lands on space 9"
+	| oldPos posns limit i|
+	
+	oldPos _ model currentPlayer oldPosition.
+	self arrowRight.
+	posns _ (Interval from: oldPos to: oldPos + 12 by: 1) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: 21.
+				self doubled contents: model currentPlayer doubledString.
+				model currentPlayer canDoJob ifTrue: [model enableAll: {'Do Job'}]]].
+	self startSteppingStepTime: 400! !
 
 !ContractToken class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:32'!
 includeInNewMorphMenu
@@ -5390,12 +5414,12 @@ reportAsAssetFor: aPlayer
 !Others methodsFor: 'as yet unclassified' stamp: 'dhn 4/17/2012 12:00'!
 reset! !
 
-!Others methodsFor: 'as yet unclassified' stamp: 'dhn 1/18/2017 16:22:25'!
+!Others methodsFor: 'as yet unclassified' stamp: 'dhn 8/11/2017 21:11:01'!
 spaceOf: aPlayer
 	"Answer a string describing the player's position on the board"
 	| str i1 sub2 i2 sub |
 	
-	str := (owner mgr spaces at: aPlayer position) label.
+	str := (owner mgr spaces atWrap: aPlayer position) label.
 	i1 := str indexOf: Character space ifAbsent: [0].
 	sub2 := str copyFrom: i1 + 1 to: 20.
 	i2 := sub2 indexOf: Character lf ifAbsent: [0].

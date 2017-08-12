@@ -15,3 +15,4 @@ This program differs from the actual board game as follows:
 - No limits on equipment quantities
 - History of player's progress
 - Optional views to assist decision making
+- Players automatically informed of doubled state

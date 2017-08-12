@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 9 August 2017 at 3:32:34 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 3:11:49 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 119!
+!provides: 'Game' 1 126!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -452,7 +452,7 @@ move
 	bone adjustTo: token.
 	bone show: bone class faces shuffled! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 8/9/2017 15:20:27'!
+!Game methodsFor: 'operating' stamp: 'dhn 8/9/2017 15:48:42'!
 nextPlayer
 	"Begin the next player's turn"
 	| x |
@@ -466,7 +466,6 @@ nextPlayer
 		removeMarkers.
 	token openInWorld: world.
 	token morphPosition: tokenPos.
-	{token morphPosition. currentPlayer identity} print.
 	token id contents: currentPlayer identity.
 	token doubled contents: currentPlayer doubledString.
 	token color: currentPlayer color.
@@ -552,11 +551,11 @@ quitGame
 	self triggerEvent: #deleteOpenWindows.
 	self triggerEvent: #quitGame! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 1/15/2017 21:59:40'!
+!Game methodsFor: 'operating' stamp: 'dhn 8/9/2017 21:27:12'!
 removeMarkers
 	"Remove a player's marker from space and cell"
 	
-	(spaces at: currentPlayer position) markRemFor: currentPlayer.
+	(spaces atWrap: currentPlayer position) markRemFor: currentPlayer.
 	cells first marksPane removeMorph: currentPlayer marker
 ! !
 
@@ -742,13 +741,6 @@ count: anObject
 
 	count := anObject! !
 
-!Token methodsFor: 'initialization' stamp: 'dhn 2/17/2017 17:53:39'!
-deleteArrow
-	"Delete the arrow"
-	
-	self removeMorph: self submorphs first.
-	arrow delete! !
-
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 die
 	"Answer the value of die"
@@ -838,27 +830,7 @@ model: anObject
 
 	model _ anObject! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 5/14/2017 11:33:35'!
-move: aPlayer from: positionA to: positionB
-	"Determine best direction and move"
-	| dir |
-	
-	dir _ Direction
-		shortest: positionA
-		to: positionB
-		in: who mgr spaces size.
-	self halt.
-	dir > 0
-		ifTrue: [
-			model showTokenFor: aPlayer at: aPlayer position.
-			self moveRightFrom: positionA to: positionB]
-		ifFalse: [
-			model showTokenFor: aPlayer at: aPlayer position + 6.
-			self moveLeftFrom: positionA - 6 to: positionB - 6].
-	self deleteArrow
-! !
-
-!Token methodsFor: 'stepping' stamp: 'dhn 8/6/2017 19:01:11'!
+!Token methodsFor: 'stepping' stamp: 'dhn 8/9/2017 22:06:33'!
 moveFrom: positionA to: positionB
 	"Determine best direction and move"
 	| dir |
@@ -867,14 +839,38 @@ moveFrom: positionA to: positionB
 		shortest: positionA
 		to: positionB
 		in: who mgr spaces size.
-	self halt.
 	dir > 0
-		ifTrue: [self moveRightFrom: positionA to: positionB]
-		ifFalse: [self moveLeftFrom: positionA - 6 to: positionB - 6].
-	self deleteArrow
+		ifTrue: [self arrowRight]
+		ifFalse: [self arrowLeft].
+	self moveFrom: positionA to: positionB by: dir enabling: {}! !
+
+!Token methodsFor: 'stepping' stamp: 'dhn 8/12/2017 10:54:35'!
+moveFrom: start to: end by: direction
+	"Animate moves forward or backward."
+	| a b board posns limit i |
+	
+	a _ start.
+	b _ end.
+	board _ model class describeSpaces.
+	direction < 0
+		ifTrue: [start < end ifTrue: [	a _ start + board size]]
+		ifFalse: [start > end ifTrue: [b _ end + board size]].
+	posns _ (Interval from: a to: b by: direction) asArray.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: (posns at: i)]].
+	self startSteppingStepTime: 400
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 5/13/2017 15:51:36'!
+!Token methodsFor: 'stepping' stamp: 'dhn 8/10/2017 11:55:21'!
 moveFrom: start to: end by: direction enabling: anArray
 	"Animate moves forward or backward."
 	| a b board posns limit i |
@@ -895,9 +891,10 @@ moveFrom: start to: end by: direction enabling: anArray
 			ifFalse: [
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
-				self deleteArrow.
-				model currentPlayer position: (posns at: i) + model currentPlayer roll.
-				self moved.
+				arrow delete.
+				model currentPlayer position: (posns at: i).
+				self doubled contents: model currentPlayer doubledString.
+				model currentPlayer canDoJob ifTrue: [model enableAll: {'Do Job'}].
 				model enableAll: anArray]].
 	self startSteppingStepTime: 400
 ! !
