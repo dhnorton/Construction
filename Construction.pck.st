@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 3:15:57 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 5:25:39 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 139!
+!provides: 'Construction' 1 140!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1065,16 +1065,14 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 8/6/2017 19:16:44'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 8/12/2017 17:03:20'!
 rollForFranchise
 	"Show the die rolling"
 	| bone |
 
 	bone _ currentPlayer die openInWorld: arena pasteup.
 	bone referencePosition: token referencePosition - (0@2 * token morphHeight).
-	bone show: bone class faces shuffled event: #franchiseEffect:.
-	self franchiseEffect: currentPlayer roll
-! !
+	bone showEffect: bone class faces shuffled! !
 
 !Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 17:25:24'!
 rollTheDie
