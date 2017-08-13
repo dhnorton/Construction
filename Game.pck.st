@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 4:26:56 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 6:53:11 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 131!
+!provides: 'Game' 1 132!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -10,16 +10,6 @@ ActiveModel subclass: #Game
 	category: 'Game-Model'!
 !classDefinition: 'Game class' category: #'Game-Model'!
 Game class
-	instanceVariableNames: ''!
-
-!classDefinition: #OverlayMorph category: #'Game-Graphics'!
-PasteUpMorph subclass: #OverlayMorph
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Game-Graphics'!
-!classDefinition: 'OverlayMorph class' category: #'Game-Graphics'!
-OverlayMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #Token category: #'Game-Graphics'!
@@ -195,9 +185,6 @@ Season class
 
 !Game commentStamp: 'dhn 7/10/2016 12:01' prior: 0!
 Abstract class for a board game model.!
-
-!OverlayMorph commentStamp: '<historical>' prior: 0!
-A place to drag and drop morphs!
 
 !Token commentStamp: 'dhn 7/10/2016 11:44' prior: 0!
 A player's piece on the game board.!
@@ -660,25 +647,6 @@ vAdjust
 	"Answer the vertical adjustment factor for token position"
 	
 	^ 7/10! !
-
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:47'!
-allowsMorphDrop
-	"Answer whether we accept dropping morphs. Redefined to answer true."
-
-	^ true! !
-
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
-allowsSubmorphDrag
-	"Answer whether our morphs can just be grabbed with the hand, instead of requiring the use of the halo. Redefined to answer true."
-
-	^ true! !
-
-!OverlayMorph methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:47:48'!
-wantsDroppedMorph: aMorph event: evt
-	"Return true if the receiver wishes to accept the given morph, which is being dropped by a hand in response to the given event. Note that for a successful drop operation both parties need to agree. The symmetric check is done automatically via aMorph wantsToBeDroppedInto: self.
-	This method just answers super. It is included here to say it is relevant to D&D behavior."
-
-	^super wantsDroppedMorph: aMorph event: evt! !
 
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
