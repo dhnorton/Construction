@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 7:52:20 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 4:27:59 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 141!
+!provides: 'Construction' 1 142!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -2646,7 +2646,7 @@ showAssetAuction
 		morphPosition: self windowPosition;
 		morphExtent: 450@300! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 1/6/2017 11:36:37'!
+!Construction methodsFor: 'windows' stamp: 'dhn 8/13/2017 11:38:31'!
 showHistory
 	"Open a graph of players' history"
 	| graphs |
@@ -2654,7 +2654,7 @@ showHistory
 	graphs _ HistoryView openOn: model title: 'History'.
  	graphs legend 
 		morphExtent: 100@80;
-		morphPosition: owner morphExtent * (0.05@0.030).
+		morphPosition: owner morphExtent * (0.025@0.015).
 	graphs plotter 
 		players: model players;
 		plotData.

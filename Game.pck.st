@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 7:52:24 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 4:26:56 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 130!
+!provides: 'Game' 1 131!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -1432,7 +1432,7 @@ show: aCollection event: aSymbol
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
 
-!DieMorph methodsFor: 'operation' stamp: 'dhn 8/12/2017 17:03:03'!
+!DieMorph methodsFor: 'operation' stamp: 'dhn 8/13/2017 15:05:19'!
 showEffect: aCollection
 	"Display the succession of faces in aCollection; answer the value of the final face"
 	| limit linger t i |
@@ -1451,9 +1451,7 @@ showEffect: aCollection
 					self stopStepping.
 					self removeActionsForEvent: #morphicStep.
 					owner removeMorph: self.
-					model 
-						remainder: value;
-						franchiseEffect: model currentPlayer roll]]].
+					model franchiseEffect: value]]].
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
 
