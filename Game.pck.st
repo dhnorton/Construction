@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 6:10:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 7:52:24 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 129!
+!provides: 'Game' 1 130!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -886,102 +886,6 @@ moveFrom: start to: end by: direction enabling: anArray
 	self startSteppingStepTime: 400
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 5/6/2017 15:05:14'!
-moveFromX: start to: end by: direction
-	"Animate moves forward or backward."
-	| a b board posns limit i |
-	
-	a _ start.
-	b _ end.
-	board _ model class describeSpaces.
-	direction < 0
-		ifTrue: [
-			self arrowLeft.
-			a _ a - 6.
-			b _ b - 6.
-			a < b ifTrue: [a _ a + board size]]
-		ifFalse: [
-			self arrowRight.
-			a > b ifTrue: [b _ b + board size]].
-	posns _ (Interval from: a to: b by: direction) asArray.
-	{posns} print.
-	limit _ posns size.
-	i _ 1.
-	self when: #morphicStep evaluate: [ :unused |
-		model positionBoardTo: (posns at: i).
-		i _ i + 1.
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				who position: (posns at: i) + who roll - 1.
-				{who identity. who position. who roll} print.
-				self doubled contents: who doubledString.
-				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
-				(model spaces at: who position) markAddFor: who.
-				self deleteArrow]].
-	self startSteppingStepTime: 400
-! !
-
-!Token methodsFor: 'stepping' stamp: 'dhn 5/7/2017 16:12:05'!
-moveLeftFrom: start to: end
-	"Animate moves backward."
-	| a b board posns limit i |
-	
-	a _ start.
-	b _ end.
-	board _ model class describeSpaces.
-	self arrowLeft.
-	a _ a - 6.
-	b _ b - 6.
-	a < b ifTrue: [a _ a + board size].
-	posns _ (Interval from: a to: b by: -1) asArray.
-	{posns} print.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				self halt.
-				who position: (posns at: i) + who roll - 1.
-				{who identity. who position. who roll} print.
-				self doubled contents: who doubledString.
-				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
-				(model spaces at: who position) markAddFor: who]].
-	self startSteppingStepTime: 400
-! !
-
-!Token methodsFor: 'stepping' stamp: 'dhn 8/8/2017 12:23:54'!
-moveRightFrom: start to: end
-	"Animate moves forward."
-	| a b board posns limit i |
-	
-	a _ start.
-	b _ end.
-	board _ model class describeSpaces.
-	self arrowRight.
-	a > b ifTrue: [b _ b + board size].
-	posns _ (Interval from: a to: b by: 1) asArray.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				who position: (posns at: i).
-				self doubled contents: who doubledString.
-				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
-				(model spaces at: who position) markAddFor: who]].
-	self startSteppingStepTime: 400
-! !
-
 !Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:20'!
 setSize
 	"Set the extent of the receiver"
@@ -1425,18 +1329,19 @@ face6b
 	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
 	^ 6! !
 
-!DieMorph methodsFor: 'initialization' stamp: 'dhn 3/19/2017 14:07:19'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 8/12/2017 18:19:34'!
 initialize
-	| sep |
+
 	super initialize.
-	self color: Color white.
-	self morphExtent: 45@50.
+	self 
+		color: Color white;
+		borderWidth: 1;
+		morphExtent: 45@50.
 	layoutMorph _ LayoutMorph newColumn
 		color: Color transparent;
 		name: #layout.
 	self addMorph: layoutMorph.
 	
-	sep _ 0.09@0.
 	row1 _ LayoutMorph newRow
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
 		color: Color transparent;
