@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 3:11:49 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 7:52:24 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 126!
+!provides: 'Game' 1 130!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -82,14 +82,14 @@ SystemWindow subclass: #ListView
 ListView class
 	instanceVariableNames: ''!
 
-!classDefinition: #Die2 category: #'Game-Graphics'!
-PluggableMorph subclass: #Die2
+!classDefinition: #DieMorph category: #'Game-Graphics'!
+PluggableMorph subclass: #DieMorph
 	instanceVariableNames: 'layoutMorph row1 row2 row3 dot dash value'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Game-Graphics'!
-!classDefinition: 'Die2 class' category: #'Game-Graphics'!
-Die2 class
+!classDefinition: 'DieMorph class' category: #'Game-Graphics'!
+DieMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #ArrowMorph category: #'Game-Graphics'!
@@ -100,16 +100,6 @@ BorderedRectMorph subclass: #ArrowMorph
 	category: 'Game-Graphics'!
 !classDefinition: 'ArrowMorph class' category: #'Game-Graphics'!
 ArrowMorph class
-	instanceVariableNames: ''!
-
-!classDefinition: #DieMorph category: #'Game-Graphics'!
-BorderedRectMorph subclass: #DieMorph
-	instanceVariableNames: 'dt wo layoutMorph'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Game-Graphics'!
-!classDefinition: 'DieMorph class' category: #'Game-Graphics'!
-DieMorph class
 	instanceVariableNames: ''!
 
 !classDefinition: #CellView category: #'Game-Graphics'!
@@ -227,14 +217,11 @@ Abstract class for views of a board game.!
 !ListView commentStamp: 'dhn 7/10/2016 17:20' prior: 0!
 An abstract class for game windows.!
 
-!Die2 commentStamp: '<historical>' prior: 0!
+!DieMorph commentStamp: '<historical>' prior: 0!
 An experiment with PluggableMorph as a die.!
 
 !ArrowMorph commentStamp: '<historical>' prior: 0!
 Enable a form to be opened on a world.!
-
-!DieMorph commentStamp: 'dhn 8/20/2016 11:10:40' prior: 0!
-One half of a pair of dice: a die.!
 
 !PlotGraphMorph commentStamp: 'dhn 9/28/2016 20:24:06' prior: 0!
 Plot players' progress.!
@@ -440,13 +427,13 @@ markerSize
 	"Answer the size for markers"
 	^ 28! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 4/4/2017 14:25:16'!
+!Game methodsFor: 'operating' stamp: 'dhn 8/12/2017 18:05:34'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
-	bone _ Die2 new openInWorld: arena pasteup.
+	bone _ DieMorph new openInWorld: arena pasteup.
 	bone model: self.
 	currentPlayer die: bone.
 	bone adjustTo: token.
@@ -899,102 +886,6 @@ moveFrom: start to: end by: direction enabling: anArray
 	self startSteppingStepTime: 400
 ! !
 
-!Token methodsFor: 'stepping' stamp: 'dhn 5/6/2017 15:05:14'!
-moveFromX: start to: end by: direction
-	"Animate moves forward or backward."
-	| a b board posns limit i |
-	
-	a _ start.
-	b _ end.
-	board _ model class describeSpaces.
-	direction < 0
-		ifTrue: [
-			self arrowLeft.
-			a _ a - 6.
-			b _ b - 6.
-			a < b ifTrue: [a _ a + board size]]
-		ifFalse: [
-			self arrowRight.
-			a > b ifTrue: [b _ b + board size]].
-	posns _ (Interval from: a to: b by: direction) asArray.
-	{posns} print.
-	limit _ posns size.
-	i _ 1.
-	self when: #morphicStep evaluate: [ :unused |
-		model positionBoardTo: (posns at: i).
-		i _ i + 1.
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				who position: (posns at: i) + who roll - 1.
-				{who identity. who position. who roll} print.
-				self doubled contents: who doubledString.
-				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
-				(model spaces at: who position) markAddFor: who.
-				self deleteArrow]].
-	self startSteppingStepTime: 400
-! !
-
-!Token methodsFor: 'stepping' stamp: 'dhn 5/7/2017 16:12:05'!
-moveLeftFrom: start to: end
-	"Animate moves backward."
-	| a b board posns limit i |
-	
-	a _ start.
-	b _ end.
-	board _ model class describeSpaces.
-	self arrowLeft.
-	a _ a - 6.
-	b _ b - 6.
-	a < b ifTrue: [a _ a + board size].
-	posns _ (Interval from: a to: b by: -1) asArray.
-	{posns} print.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				self halt.
-				who position: (posns at: i) + who roll - 1.
-				{who identity. who position. who roll} print.
-				self doubled contents: who doubledString.
-				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
-				(model spaces at: who position) markAddFor: who]].
-	self startSteppingStepTime: 400
-! !
-
-!Token methodsFor: 'stepping' stamp: 'dhn 8/8/2017 12:23:54'!
-moveRightFrom: start to: end
-	"Animate moves forward."
-	| a b board posns limit i |
-	
-	a _ start.
-	b _ end.
-	board _ model class describeSpaces.
-	self arrowRight.
-	a > b ifTrue: [b _ b + board size].
-	posns _ (Interval from: a to: b by: 1) asArray.
-	limit _ posns size.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :unused |
-		i _ i + 1.
-		model positionBoardTo: (posns at: i).
-		i < limit 
-			ifFalse: [
-				self stopStepping.
-				self removeActionsForEvent: #morphicStep.
-				who position: (posns at: i).
-				self doubled contents: who doubledString.
-				who canDoJob ifTrue: [model enableAll: {'Do Job'}].
-				(model spaces at: who position) markAddFor: who]].
-	self startSteppingStepTime: 400
-! !
-
 !Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:20'!
 setSize
 	"Set the extent of the receiver"
@@ -1323,7 +1214,7 @@ text1: aString
 	text1 := aString.
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/18/2017 22:56:44'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/18/2017 22:56:44'!
 adjustTo: aMorph
 	"Set position and dot size based on anObject"
 	| s |
@@ -1332,7 +1223,7 @@ adjustTo: aMorph
 	self morphExtent: s@s.
 	self referencePosition: aMorph referencePosition - (0@2 * aMorph morphHeight)! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 16:53:48'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 16:53:48'!
 clearDots
 	"remove dots from rows"
 	
@@ -1341,7 +1232,7 @@ clearDots
 	row3 removeAllMorphs
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:19:51'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:19:51'!
 face1
 	"Set the die to 1"
 	
@@ -1352,7 +1243,7 @@ face1
 	^ 1
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:21:57'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:21:57'!
 face2
 	"Set the die to 2, left"
 	
@@ -1363,7 +1254,7 @@ face2
 	^ 2
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 21:03:24'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 21:03:24'!
 face2b
 	"Set the die to 2, right"
 	
@@ -1374,7 +1265,7 @@ face2b
 	^ 2
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:30:47'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:30:47'!
 face3
 	"Set the die to 3, left"
 	
@@ -1385,7 +1276,7 @@ face3
 	^ 3
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:26:17'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:26:17'!
 face3b
 	"Set the die to 3, right"
 	
@@ -1396,7 +1287,7 @@ face3b
 	^ 3
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:15:50'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:15:50'!
 face4
 	"Set the die to 4"
 	
@@ -1407,7 +1298,7 @@ face4
 	^ 4
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:31:36'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:31:36'!
 face5
 	"Set the die to 5"
 	
@@ -1418,7 +1309,7 @@ face5
 	^ 5
 ! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/19/2017 14:33:01'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/19/2017 14:33:01'!
 face6
 	"Set the die to 6, horizontal"
 	
@@ -1428,7 +1319,7 @@ face6
 	row3 addAllMorphs: {dot copy. dot copy. dot copy}.
 	^ 6! !
 
-!Die2 methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:16:41'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 17:16:41'!
 face6b
 	"Set the die to 6, vertical"
 	
@@ -1438,18 +1329,19 @@ face6b
 	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
 	^ 6! !
 
-!Die2 methodsFor: 'initialization' stamp: 'dhn 3/19/2017 14:07:19'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 8/12/2017 18:19:34'!
 initialize
-	| sep |
+
 	super initialize.
-	self color: Color white.
-	self morphExtent: 45@50.
+	self 
+		color: Color white;
+		borderWidth: 1;
+		morphExtent: 45@50.
 	layoutMorph _ LayoutMorph newColumn
 		color: Color transparent;
 		name: #layout.
 	self addMorph: layoutMorph.
 	
-	sep _ 0.09@0.
 	row1 _ LayoutMorph newRow
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
 		color: Color transparent;
@@ -1469,14 +1361,14 @@ initialize
 		
 	layoutMorph addAllMorphs: {row3. row2. row1}! !
 
-!Die2 methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:11:56'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:11:56'!
 layoutSubmorphs
 
 	layoutMorph 
 		morphExtent: self morphExtent * 0.8;
 		morphPosition: self morphExtent * 0.1! !
 
-!Die2 methodsFor: 'initialization' stamp: 'dhn 3/14/2017 20:31:59'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 3/14/2017 20:31:59'!
 setDots
 	"Initialize the dot and anti-dot"
 	| scale |
@@ -1491,7 +1383,7 @@ setDots
 		borderWidth: 0;
 		morphExtent: (row1 morphExtent x * scale) asPoint! !
 
-!Die2 methodsFor: 'operation' stamp: 'dhn 5/5/2017 16:15:54'!
+!DieMorph methodsFor: 'operation' stamp: 'dhn 5/5/2017 16:15:54'!
 show: aCollection
 	"Display the succession of faces in aCollection on the die, then hop the token"
 	| limit linger t i x |
@@ -1516,7 +1408,7 @@ show: aCollection
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
 
-!Die2 methodsFor: 'operation' stamp: 'dhn 4/12/2017 18:11:54'!
+!DieMorph methodsFor: 'operation' stamp: 'dhn 4/12/2017 18:11:54'!
 show: aCollection event: aSymbol
 	"Display the succession of faces in aCollection; answer the value of the final face"
 	| limit linger t i |
@@ -1540,13 +1432,38 @@ show: aCollection event: aSymbol
 	self startSteppingStepTime: 85. 	"time of each step in the activity"
 ! !
 
-!Die2 methodsFor: 'access' stamp: 'dhn 4/12/2017 19:54:34'!
+!DieMorph methodsFor: 'operation' stamp: 'dhn 8/12/2017 17:03:03'!
+showEffect: aCollection
+	"Display the succession of faces in aCollection; answer the value of the final face"
+	| limit linger t i |
+	
+	limit _ 1600 + (500 atRandom).
+	linger _ limit + 700. 	"to pause before vanishing"
+	t _ 0.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		t _ t + delta.
+		t < limit 	"limit on the total time of activity"
+			ifTrue: [value _ self perform: (aCollection atWrap: i)]
+			ifFalse: [
+				t > linger ifTrue: [
+					self stopStepping.
+					self removeActionsForEvent: #morphicStep.
+					owner removeMorph: self.
+					model 
+						remainder: value;
+						franchiseEffect: model currentPlayer roll]]].
+	self startSteppingStepTime: 85. 	"time of each step in the activity"
+! !
+
+!DieMorph methodsFor: 'access' stamp: 'dhn 4/12/2017 19:54:34'!
 value
 	"Answer the value"
 	
 	^ value! !
 
-!Die2 class methodsFor: 'reference' stamp: 'dhn 3/13/2017 20:31:58'!
+!DieMorph class methodsFor: 'reference' stamp: 'dhn 3/13/2017 20:31:58'!
 faces
 	"Answer the possible faces, in both orientations"
 	
@@ -1594,255 +1511,6 @@ rightOn: aWorld
 
 	^ self new
 		form: (BitBltCanvas arrowOfDirection: #right size: 40) as8BitColorForm! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 12/2/2016 18:11:14'!
-adjustTo: aMorph
-	"Set position and dot size based on anObject"
-	| s |
-	
-	s _ aMorph morphExtent x * 50 / 132.
-	self morphExtent: s@s.
-	self referencePosition: aMorph referencePosition - (0@2 * aMorph morphHeight).
-	
-	dt _ (Form dotOfSize: aMorph morphExtent x * 10 / 132).	"a black dot"
-	wo _ dt copy.
-	wo bits atAllPut: 0.	"a white dot"
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 12/8/2016 19:50:48'!
-combo
-	"Answer an array of all faces at both orientations"
-	
-	^ #(
-		#face1 #face1
-		#face2 #face2b
-		#face3 #face3b
-		#face4 #face4
-		#face5 #face5
-		#face6 #face6b
-	)! !
-
-!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:37:01'!
-dt
-	"Answer the value of dt"
-	
-	^ dt! !
-
-!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:39:03'!
-dt: anObject
-	"Set the value of dt"
-	
-	dt _ anObject! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:10:58'!
-face1
-	"The receiver shows 1"
-
-	self whiteOut.
-	dt displayAt: self morphPositionInWorld + (25@25).
-	^ 1
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:11:13'!
-face2
-	"The receiver shows 2"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (12@12).
-	dt displayAt: posn + (38@38).
-	^ 2
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:11:23'!
-face2b
-	"The receiver shows 2"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (38@12).
-	dt displayAt: posn + (12@38).
-	^ 2
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:11:31'!
-face3
-	"The receiver shows 3"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (12@12).
-	dt displayAt: posn + (25@25).
-	dt displayAt: posn + (38@38).
-	^ 3
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:11:38'!
-face3b
-	"The receiver shows 3"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (38@12).
-	dt displayAt: posn + (25@25).
-	dt displayAt: posn + (12@38).
-	^ 3
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:11:46'!
-face4
-	"The receiver shows 4"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (12@12).
-	dt displayAt: posn + (38@12).
-	dt displayAt: posn + (12@38).
-	dt displayAt: posn + (38@38).
-	^ 4
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:11:54'!
-face5
-	"The receiver shows 5"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (12@12).
-	dt displayAt: posn + (38@12).
-	dt displayAt: posn + (25@25).
-	dt displayAt: posn + (12@38).
-	dt displayAt: posn + (38@38).
-	^ 5
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:12:03'!
-face6
-	"The receiver shows 6"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (12@12).
-	dt displayAt: posn + (25@12).
-	dt displayAt: posn + (38@12).
-	dt displayAt: posn + (12@38).
-	dt displayAt: posn + (25@38).
-	dt displayAt: posn + (38@38).
-	^ 6
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/22/2016 11:12:12'!
-face6b
-	"The receiver shows 6"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	self whiteOut.
-	dt displayAt: posn + (12@12).
-	dt displayAt: posn + (12@25).
-	dt displayAt: posn + (12@38).
-	dt displayAt: posn + (38@12).
-	dt displayAt: posn + (38@25).
-	dt displayAt: posn + (38@38).
-	^ 6
-! !
-
-!DieMorph methodsFor: 'initialization' stamp: 'dhn 3/18/2017 22:40:12'!
-initialize
-
-	super initialize.
-	dt _ Form dotOfSize: 10. 	"a black dot"
-	wo _ dt copy.
-	wo bits atAllPut: 0. 		"a white dot"
-	self 
-		color: Color white;
-		morphExtent: 50@50.
-		
-	self when: #rolled send: #hopFor: to: self owner owner owner model with: #roll
-
-	! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/18/2017 22:29:48'!
-show: aCollection event: aSymbol
-	"Display the succession of faces in aCollection, triggering aSymbol at the end"
-	| limit linger t i x |
-	
-	self halt.
-	limit _ 1600 + (500 atRandom).
-	linger _ limit + 700. 	"to pause before vanishing"
-	t _ 0.
-	i _ 0.
-	self when: #morphicStep evaluate: [ :delta |
-		i _ i + 1.
-		t _ t + delta.
-		t < limit 	"limit on the total time of activity"
-			ifTrue: [x _ self perform: (aCollection atWrap: i)]
-			ifFalse: [
-				t > linger ifTrue: [
-					self stopStepping.
-					self triggerEvent: aSymbol with: x.
-					self removeActionsForEvent: #morphicStep.
-					owner removeMorph: self]]].
-	self startSteppingStepTime: 85. 	"time of each step in the activity"
-! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/19/2016 10:14:56'!
-showAllDieDots
-	"Display all possible dots on the die"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	dt displayAt: posn + (12@12).
-	dt displayAt: posn + (25@12).
-	dt displayAt: posn + (38@12).
-	dt displayAt: posn + (12@25).
-	dt displayAt: posn + (25@25).
-	dt displayAt: posn + (38@25).
-	dt displayAt: posn + (12@38).
-	dt displayAt: posn + (25@38).
-	dt displayAt: posn + (38@38).
-	! !
-
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/19/2016 10:53:35'!
-whiteOut
-	"Erase all possible dots on the die"
-	| posn |
-
-	posn _ self morphPositionInWorld.
-	wo displayAt: posn + (12@12).
-	wo displayAt: posn + (25@12).
-	wo displayAt: posn + (38@12).
-	wo displayAt: posn + (12@25).
-	wo displayAt: posn + (25@25).
-	wo displayAt: posn + (38@25).
-	wo displayAt: posn + (12@38).
-	wo displayAt: posn + (25@38).
-	wo displayAt: posn + (38@38).
-	! !
-
-!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:37:44'!
-wo
-	"Answer the value of wo"
-	
-	^ wo! !
-
-!DieMorph methodsFor: 'accessing' stamp: 'dhn 12/2/2016 17:38:34'!
-wo: anObject
-	"Set the value of wo"
-	
-	wo _ anObject! !
-
-!DieMorph class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:54'!
-includeInNewMorphMenu
-	"Not to be instantiated from the menu"
-	^ false! !
 
 !CellView methodsFor: 'accessing' stamp: 'dhn 1/14/2017 13:17:39'!
 marksPane

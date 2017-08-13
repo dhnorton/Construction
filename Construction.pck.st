@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 3:15:57 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 12 August 2017 at 7:52:20 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 139!
+!provides: 'Construction' 1 141!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1065,16 +1065,14 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 8/6/2017 19:16:44'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 8/12/2017 17:03:20'!
 rollForFranchise
 	"Show the die rolling"
 	| bone |
 
 	bone _ currentPlayer die openInWorld: arena pasteup.
 	bone referencePosition: token referencePosition - (0@2 * token morphHeight).
-	bone show: bone class faces shuffled event: #franchiseEffect:.
-	self franchiseEffect: currentPlayer roll
-! !
+	bone showEffect: bone class faces shuffled! !
 
 !Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 17:25:24'!
 rollTheDie
@@ -2872,37 +2870,6 @@ windowPosition
 	"Answer the position for a window"
 	
 	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
-
-!Construction methodsFor: 'operation' stamp: 'dhn 5/6/2017 11:14:10'!
-winningBidderX: aName bid: aBid
-	"Change current player to aName and move to job, if necessary"
-	| space playr |
-	aName = model currentPlayer identity
-		ifTrue: [
-			playr _ model currentPlayer.
-			space _ playr position.
-			playr canDoJob]
-		ifFalse: [
-			space _ model currentPlayer position.
-			model token delete.
-			(model spaces at: model currentPlayer position) markAddFor: model currentPlayer.
-			model currentPlayer: (model players detect: [:pl | pl identity = aName] ifNone: []).
-			playr _ model currentPlayer.
-			self titleChange: playr.
-			playr rollForHarvest.
-			model 
-				updatePlayer; 
-				positionBoardTo: playr position.
-			model setTokenFor: pasteup.
-			model token setPosition.
-			(model spaces at: playr position) markRemFor: playr.
-			self halt.
-			model token moveFrom: playr position + 1 to: space.
-			playr canDoJob].
-	model updateHistory.
-	model enableAll: {'End Turn'. 'Do Job'}.
-	playr tally: aBid negated.
-	model updatePlayer! !
 
 !Construction class methodsFor: 'instance creation' stamp: 'dhn 7/19/2016 15:54'!
 cellColor
