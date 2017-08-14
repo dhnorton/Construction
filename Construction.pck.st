@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 7:58:38 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 1:07:21 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 144!
+!provides: 'Construction' 1 145!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -349,8 +349,8 @@ A Construction Game window which makes it possible for players to bid on competi
 !HistoryView commentStamp: 'dhn 9/28/2016 18:57:15' prior: 0!
 A Construction Game window which plots players' progress toward the goal of the game.!
 
-!JobView commentStamp: 'dhn 9/12/2016 22:28:48' prior: 0!
-A Construction Game window which shows the job invoice.!
+!JobView commentStamp: '<historical>' prior: 0!
+A Construction Game window which shows the job invoice, an itemized list of the expense and income resulting from doing the job.!
 
 !LoanView commentStamp: 'dhn 9/14/2016 10:34:25' prior: 0!
 A Construction Game window which makes it possible for contractors to reduce debt.!
@@ -358,8 +358,8 @@ A Construction Game window which makes it possible for contractors to reduce deb
 !OptionsView commentStamp: 'dhn 8/26/2016 16:48:51' prior: 0!
 A Construction Game window which makes it possible for contractors to make purchases.!
 
-!StatsView commentStamp: 'dhn 8/27/2016 12:08:26' prior: 0!
-A Construction Game window which shows player statistics.!
+!StatsView commentStamp: '<historical>' prior: 0!
+A Construction Game window which shows statistics about the player's assets, the player, and others.!
 
 !ConAsset commentStamp: 'dhn 8/22/2016 15:38:32' prior: 0!
 An asset in the Construction Game.!
@@ -367,8 +367,8 @@ An asset in the Construction Game.!
 !Contingencies commentStamp: 'dhn 8/22/2016 15:36:37' prior: 0!
 A description for a contingency which has been drawn in the Construction Game.!
 
-!Franchise commentStamp: 'dhn 8/22/2016 15:43:47' prior: 0!
-The abstract class for a franchise asset.!
+!Franchise commentStamp: '<historical>' prior: 0!
+The abstract class for a franchise. In effect, a franchise is the monopoly of an asset since it can have only one owner.!
 
 !BigPhil commentStamp: 'dhn 8/22/2016 15:52:14' prior: 0!
 The monopoly for concrete.!
@@ -391,8 +391,8 @@ The abstract class for machines, as opposed to franchises.!
 !Backhoe commentStamp: 'dhn 8/22/2016 15:41:44' prior: 0!
 The backhoe asset.!
 
-!Dozer commentStamp: 'dhn 8/22/2016 15:42:29' prior: 0!
-The 'dozer asset.!
+!Dozer commentStamp: '<historical>' prior: 0!
+The bulldozer asset.!
 
 !Excavator commentStamp: 'dhn 8/22/2016 15:42:50' prior: 0!
 The excavator asset.!
@@ -416,14 +416,11 @@ The current player.!
 A player in the Construction Game.
 !
 
-!Contingency commentStamp: 'dhn 8/22/2016 15:34:08' prior: 0!
-A contingency in Construction Game.!
+!Contingency commentStamp: '<historical>' prior: 0!
+A contingency in Construction Game. Contingencies can be positive or negative for the outcome of a job.!
 
-!Announcement commentStamp: 'dhn 9/11/2014 16:18' prior: 0!
-An Announcement is a class which is detected by name, resulting in the early display of its description in the drawContingency method.
-
-Instance Variables
-!
+!Announcement commentStamp: '<historical>' prior: 0!
+An Announcement is a class which is detected by name, resulting in the early display of its description in the drawContingency method.!
 
 !Contract methodsFor: 'auction' stamp: 'dhn 9/15/2016 18:18:14'!
 assetAuctionItem
@@ -662,24 +659,26 @@ franchiseEffect: anObject
 	self enableAll: {'End Turn'}.
 	^ z! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:14:07'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 8/14/2017 10:49:26'!
 fund: aSymbol for: anAmount 
+	"Credit the franchise owner aSymbol with anAmount"
 	| owner user whom z |
-	owner := (self availableOptions at: aSymbol) holder.
-	user := self currentPlayer.
+	
+	owner _ (self availableOptions at: aSymbol) holder.
+	user _ self currentPlayer.
 	owner = user
 		ifTrue: [user avoided: anAmount for: aSymbol.
-			z := 0]
+			z _ 0]
 		ifFalse: [owner isNil
-				ifTrue: [whom := 'First Friendly Bank']
-				ifFalse: [whom := owner identity.
+				ifTrue: [whom _ 'First Friendly Bank']
+				ifFalse: [whom _ owner identity.
 					owner tally: anAmount.
 					(owner assets at: aSymbol)
 						recordGross: anAmount].
 			(user assets at: aSymbol)
 				recordCost: anAmount
 				for: currentPlayer.
-			z := anAmount negated].
+			z _ anAmount negated].
 	self updatePlayer.
 	self updateHistory.
 	self enableAll: {'End Turn'}.
@@ -997,7 +996,7 @@ remainder: roll
 	self updatePlayer.
 	^ income! !
 
-!Contract methodsFor: 'operating' stamp: 'dhn 10/2/2016 19:08:30'!
+!Contract methodsFor: 'operating' stamp: 'dhn 8/14/2017 11:07:02'!
 removeFromGame
 	"Remove a player from the game"
 	
@@ -1016,7 +1015,9 @@ limit and is out of the game'
 				triggerEvent: #setupToken: with: currentPlayer;
 				enableAll: {'Move'}].
 	1 = players size
-		ifTrue: [nil inform: self players first identity , ' has won the game by default.'.
+		ifTrue: [
+			nil inform: self players first identity , ' has won the game by default.'
+				title: 'THE WINNAH!!'.
 			self disableAll: {'Pay Loan'. 'Purchases'. 'Do Job'. 'Move'}.
 			self won: true]! !
 
@@ -1182,10 +1183,10 @@ space11
 	"Mar week 2"
 	^ self spaceTruck: 4000! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 15:00'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 8/14/2017 10:46:48'!
 space12
 	"Mar week 3"
-	^ (self fund: #LostMiner for: 3000)
+	^ self fund: #LostMiner for: 3000
 ! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:19'!
@@ -2185,7 +2186,7 @@ moved
 			mr updateHistory.
 			mr enableAll: {'End Turn'}]! !
 
-!ContractToken methodsFor: 'operations' stamp: 'dhn 8/12/2017 14:48:45'!
+!ContractToken methodsFor: 'operations' stamp: 'dhn 8/14/2017 11:53:01'!
 sickMove
 	"Animate relocation of self when player lands on space 9"
 	| oldPos posns limit i|
@@ -2206,7 +2207,7 @@ sickMove
 				model currentPlayer position: 21.
 				self doubled contents: model currentPlayer doubledString.
 				model currentPlayer canDoJob ifTrue: [model enableAll: {'Do Job'}]]].
-	self startSteppingStepTime: 400! !
+	self startSteppingStepTime: 500! !
 
 !ContractToken class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 11:57:32'!
 includeInNewMorphMenu
@@ -3045,7 +3046,7 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 8/13/2017 19:46:47'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 8/14/2017 11:49:36'!
 start
 	"Start the Construction Game"
 	| win world |
@@ -3076,7 +3077,7 @@ start
 	
 	"Now do open it"
 	world _ Processor activeProcess animatedUI.
-	win morphExtent: (world morphExtent * (0.8@0.8)).
+	win morphExtent: (world morphExtent * (0.99@0.8)).
 	world addMorph: win position: 0@60.
 	win someSubmorphPositionOrExtentChanged.
 

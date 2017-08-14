@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 7:57:53 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 1:05:53 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 133!
+!provides: 'Game' 1 134!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -189,11 +189,11 @@ Abstract class for a board game model.!
 !Token commentStamp: 'dhn 7/10/2016 11:44' prior: 0!
 A player's piece on the game board.!
 
-!GameButtonMorph commentStamp: 'dhn 9/3/2013 20:13' prior: 0!
-A GameButtonMorph can be disabled and enabled.!
+!GameButtonMorph commentStamp: '<historical>' prior: 0!
+A button morph which can be disabled and enabled.!
 
-!BidderButton commentStamp: 'dhn 9/17/2016 22:07:21' prior: 0!
-A button to enable players to offer bids. Differs from super in that action is performed with a passed parameter.!
+!BidderButton commentStamp: 'dhn 8/14/2017 11:27:04' prior: 0!
+A button to enable players to offer bids. This class provides polymorphism which differs from super in that the action is performed with a passed parameter.!
 
 !GameCell commentStamp: 'dhn 8/2/2016 16:49:15' prior: 0!
 A description of the board space represented by a cell.!
@@ -205,19 +205,22 @@ Abstract class for views of a board game.!
 An abstract class for game windows.!
 
 !DieMorph commentStamp: '<historical>' prior: 0!
-An experiment with PluggableMorph as a die.!
+A die (one half of a pair of dice).!
 
 !ArrowMorph commentStamp: '<historical>' prior: 0!
 Enable a form to be opened on a world.!
 
+!CellView commentStamp: 'dhn 8/14/2017 11:23:23' prior: 0!
+Define the layout for a cell on the game board. A cell is the lower portion of a space on the board.!
+
 !PlotGraphMorph commentStamp: 'dhn 9/28/2016 20:24:06' prior: 0!
 Plot players' progress.!
 
-!GamePopUp commentStamp: 'dhn 8/24/2016 10:29:53' prior: 0!
+!GamePopUp commentStamp: '<historical>' prior: 0!
 Modal dialog, providing syntax identical to a Squeak class:
 
 UserDialogBoxMorph inform: 'An informative string.' title: 'Title'.
-UserDialogBoxMorph inform: 'An informative string.'.!
+!
 
 !Asset commentStamp: 'dhn 7/10/2016 11:58' prior: 0!
 Abstract class for an asset model.!
@@ -977,10 +980,10 @@ performAction
 	actionSelector ifNotNil: [
 		model perform: actionSelector with: label]! !
 
-!GameCell methodsFor: 'accessing' stamp: 'dhn 1/14/2017 20:05:49'!
+!GameCell methodsFor: 'accessing' stamp: 'dhn 8/14/2017 10:59:26'!
 describe
+	"Answer the default cell content which is needed during initialization"
 
-	{owner. model} print.
 	model actualContents ifNil: [model actualContents: ''].
 	^ model actualContents! !
 
@@ -1643,16 +1646,6 @@ ticLength
 	"Answer the length of tic marks"
 	
 	^ 0.2! !
-
-!GamePopUp class methodsFor: 'dialogs' stamp: 'dhn 8/24/2016 10:28:17'!
-inform: aMessage
-	"Display a modal dialog containing aMessage"
-	"Can be dismissed by clicking anywhere below the title"
-	
-	self 
-		confirm: 'Note:'
-		trueChoice: aMessage
-		falseChoice: 'OK'! !
 
 !GamePopUp class methodsFor: 'dialogs' stamp: 'dhn 8/24/2016 10:10:56'!
 inform: aMessage title: aTitle
