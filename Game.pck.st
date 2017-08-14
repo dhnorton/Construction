@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 6:53:11 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 7:57:53 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 132!
+!provides: 'Game' 1 133!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -568,30 +568,6 @@ setGoal
 	goal ifNil: [goal _ self class defaultGoal].
 	x _ (FillInTheBlankMorph request: 'Net assets to win the game?' initialAnswer: goal asString).
 	x ~= '' ifTrue:  [goal _ x asNumber]! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 4/20/2017 16:16:19'!
-setTokenFor: aWorld
-	"Place the current player's token on the board"
-	| vadj |
-	
-	self token: ((ContractToken newFor: self) 
-		openInWorld: aWorld;
-		setBalloonText: 'token for ', currentPlayer identity).
-	token morphExtent: world morphExtent * (0.090@0.080).
-	vadj _ aWorld morphExtent y * 7/10 .
-	token morphPosition: self token morphPosition + (0@vadj).
-	token id contents: currentPlayer identity.
-	token doubled contents: currentPlayer doubledString.
-	token color: currentPlayer color.
-	token who: currentPlayer! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 4/20/2017 15:19:06'!
-slideLeftFromRightPosition: aSpace1 to: aSpace2
-	"Position board with aSpace1 right-most and slide left to aSpace2"! !
-
-!Game methodsFor: 'operating' stamp: 'dhn 4/20/2017 15:17:07'!
-slideRightFromLeftPosition: aSpace1 to: aSpace2
-	"Position board with aSpace1 left-most and slide right to aSpace2"! !
 
 !Game methodsFor: 'accessing' stamp: 'dhn 10/7/2014 12:23'!
 spaceFreq
@@ -2000,15 +1976,6 @@ forwardTo: anIndex around: aLimit
 			^self forwardTo: anIndex - aLimit around: aLimit
 			].! !
 
-!Gamer methodsFor: 'movement' stamp: 'dhn 1/11/2017 15:52:40'!
-goTo: aPosition
-	|pos|
-	self position: aPosition.
-	pos := aPosition - self roll.
-	(pos < 1) ifTrue: [pos := pos + self mgr spaces size].
-	self mgr positionBoardTo: pos.
-! !
-
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/25/2012 20:18'!
 history
 	"Answer the value of history"
@@ -2172,13 +2139,6 @@ rollStats: aRoll
 	self totalRoll: aRoll + self totalRoll. 
 	self turns: 1 + self turns. 
 	self mgr triggerEvent: #itemChange! !
-
-!Gamer methodsFor: 'movement' stamp: 'dhn 2/17/2017 15:51:17'!
-slidTo: aPosition
-	"Account for being relocated to aPosition"
-
-	position _ aPosition.
-	self token doubled contents: self doubledString! !
 
 !Gamer methodsFor: 'statistics' stamp: 'dhn 4/26/2012 17:52'!
 tally: anAmount

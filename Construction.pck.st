@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 6:53:27 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 13 August 2017 at 7:58:38 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 143!
+!provides: 'Construction' 1 144!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -382,8 +382,8 @@ The land fill monopoly.!
 !Westwood commentStamp: 'dhn 8/22/2016 15:54:20' prior: 0!
 The asphalt paving monopoly.!
 
-!Hints commentStamp: '<historical>' prior: 0!
-A description for a contingency which has been drawn in the Construction Game.!
+!Hints commentStamp: 'dhn 8/13/2017 19:24:04' prior: 0!
+Suggestions for playing the Construction game.!
 
 !Iron commentStamp: 'dhn 8/22/2016 15:45:14' prior: 0!
 The abstract class for machines, as opposed to franchises.!
@@ -3045,7 +3045,7 @@ season
 		yourself
 		! !
 
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 8/9/2017 13:39:28'!
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 8/13/2017 19:46:47'!
 start
 	"Start the Construction Game"
 	| win world |
@@ -3076,7 +3076,7 @@ start
 	
 	"Now do open it"
 	world _ Processor activeProcess animatedUI.
-	win morphExtent: (world morphExtent * (1.0@0.8)).
+	win morphExtent: (world morphExtent * (0.8@0.8)).
 	world addMorph: win position: 0@60.
 	win someSubmorphPositionOrExtentChanged.
 
