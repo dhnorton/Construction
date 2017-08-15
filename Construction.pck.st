@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 11:34:42 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 15 August 2017 at 9:31:48 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 147!
+!provides: 'Construction' 1 148!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1065,14 +1065,13 @@ rollTheDie
 	bone show: bone class faces shuffled event: #jobDone
 ! !
 
-!Contract methodsFor: 'accessing' stamp: 'dhn 8/14/2017 21:58:11'!
+!Contract methodsFor: 'accessing' stamp: 'dhn 8/15/2017 09:25:11'!
 seasonAt: aPosition
 	"Answer the season at aPosition"
-	| pos y |
+	| pos |
 	
 	pos _ (1 to: spaces size) atWrap: aPosition.
-	y _ Construction season select: [:a | a range x <= pos].
-	^ y last ! !
+	^ self class season detect: [:a | (a range x <= pos) and: [a range y >= pos]]! !
 
 !Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 14:37:44'!
 setTestMode
@@ -2098,6 +2097,37 @@ requiredEquipment
 		add: #'BIG PHIL' -> #BigPhil;
 		yourself! !
 
+!Contract class methodsFor: 'lists' stamp: 'dhn 8/15/2017 09:13:04'!
+season
+	"Answer  Seasons in order of their starting board positions."
+	
+	^ OrderedCollection new
+		add: (Season new desc: 'YEAR END'; color: Color lightBlue; range: 1 @ 1);
+		add: (Season new desc: 'Residential'; color: Color yellow; range: 2 @ 2);
+		add: (Season new desc: 'Commercial'; color: Color green; range: 3 @ 3);
+		add: (Season new desc: 'Institutional'; color: Color red; range: 4 @ 4);
+		add: (Season new desc: 'Municipal'; color: Color brown; range: 5 @ 5; textColor: true);
+		add: (Season new desc: 'Heavy Highway'; color: Color gray; range: 6 @ 6; textColor: true);
+		add: (Season new desc: ''; color: Color white; range: 7 @ 9);
+		add: (Season new desc: 'RESIDENTIAL'; color: Color yellow; range: 10 @ 13);
+		add: (Season new desc: 'MUNICIPAL'; color: Color brown; range: 14 @ 16; textColor: true);
+		add: (Season new desc: 'COMMERCIAL'; color: Color green; range: 17 @ 19);
+		add: (Season new desc: 'INSTITUTIONAL'; color: Color red; range: 20 @ 23);
+		add: (Season new desc: 'COMMERCIAL'; color: Color green; range: 24 @ 25);
+		add: (Season new desc: 'RESIDENTIAL'; color: Color yellow; range: 26 @ 28);
+		add: (Season new desc: 'HEAVY HIGHWAY'; color: Color gray; range: 29 @ 33; textColor: true);
+		add: (Season new desc: 'MUNICIPAL'; color: Color brown; range: 34 @ 35; textColor: true);
+		add: (Season new desc: 'RESIDENTIAL'; color: Color yellow; range: 36 @ 37);
+		add: (Season new desc: 'INSTITUTIONAL'; color: Color red; range: 38 @ 40);
+		add: (Season new desc: 'COMMERCIAL'; color: Color green; range: 41 @ 43);
+		add: (Season new desc: 'MUNICIPAL'; color: Color brown; range: 44 @ 45; textColor: true);
+		add: (Season new desc: 'STINKY''S'; color: Color yellow; range: 46 @ 46);
+		add: (Season new desc: 'LOST MINER'; color: Color green; range: 47 @ 47);
+		add: (Season new desc: 'WESTWOOD'; color: Color brown; range: 48 @ 48; textColor: true);
+		add: (Season new desc: 'BIG PHIL''S'; color: Color gray; range: 49 @ 49; textColor: true);
+		yourself
+		! !
+
 !Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 20:58'!
 taxDue: aPosition 
 	"Answer true if income tax is due at aPosition."
@@ -3017,37 +3047,6 @@ optionsDesc
 		add: #Westwood->Westwood new;
 		add: #BigPhil->BigPhil new;
 		yourself! !
-
-!Construction class methodsFor: 'database' stamp: 'dhn 8/3/2016 16:00:04'!
-season
-	"Answer  Seasons in order of their starting board positions."
-	
-	^ OrderedCollection new
-		add: (Season new desc: 'YEAR END'; color: Color lightBlue; range: 1 @ 1);
-		add: (Season new desc: 'Residential'; color: Color yellow; range: 2 @ 2);
-		add: (Season new desc: 'Commercial'; color: Color green; range: 3 @ 3);
-		add: (Season new desc: 'Institutional'; color: Color red; range: 4 @ 4);
-		add: (Season new desc: 'Municipal'; color: Color brown; range: 5 @ 5; textColor: true);
-		add: (Season new desc: 'Heavy Highway'; color: Color gray; range: 6 @ 6; textColor: true);
-		add: (Season new desc: ''; color: Color white; range: 7 @ 9);
-		add: (Season new desc: 'RESIDENTIAL'; color: Color yellow; range: 10 @ 13);
-		add: (Season new desc: 'MUNICIPAL'; color: Color brown; range: 14 @ 16; textColor: true);
-		add: (Season new desc: 'COMMERCIAL'; color: Color green; range: 17 @ 19);
-		add: (Season new desc: 'INSTITUTIONAL'; color: Color red; range: 20 @ 23);
-		add: (Season new desc: 'COMMERCIAL'; color: Color green; range: 24 @ 25);
-		add: (Season new desc: 'RESIDENTIAL'; color: Color yellow; range: 26 @ 28);
-		add: (Season new desc: 'HEAVY HIGHWAY'; color: Color gray; range: 29 @ 33; textColor: true);
-		add: (Season new desc: 'MUNICIPAL'; color: Color brown; range: 34 @ 35; textColor: true);
-		add: (Season new desc: 'RESIDENTIAL'; color: Color yellow; range: 36 @ 37);
-		add: (Season new desc: 'INSTITUTIONAL'; color: Color red; range: 38 @ 40);
-		add: (Season new desc: 'COMMERCIAL'; color: Color green; range: 41 @ 43);
-		add: (Season new desc: 'MUNICIPAL'; color: Color brown; range: 44 @ 45; textColor: true);
-		add: (Season new desc: 'STINKY''S'; color: Color yellow; range: 46 @ 46);
-		add: (Season new desc: 'LOST MINER'; color: Color green; range: 47 @ 47);
-		add: (Season new desc: 'WESTWOOD'; color: Color brown; range: 48 @ 48; textColor: true);
-		add: (Season new desc: 'BIG PHIL''S'; color: Color gray; range: 49 @ 49; textColor: true);
-		yourself
-		! !
 
 !Construction class methodsFor: 'instance creation' stamp: 'dhn 8/14/2017 11:49:36'!
 start
