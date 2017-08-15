@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 9:59:40 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 11:34:42 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 146!
+!provides: 'Construction' 1 147!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -978,13 +978,13 @@ queryWin: aBool
 			self updateHistory.
 			self enableAll: {'End Turn'}]! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 10/2/2016 16:01:34'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 8/14/2017 23:22:39'!
 remainder: roll
 	"Do the rest of the job calculations"
 	| machine income |
 	
 	machine _ Construction ironMap
-		at: (Contract jobSeason at: self currentPlayer position).
+		at: (Contract jobSeason atWrap: self currentPlayer position).
 	currentPlayer jobRoll: roll + currentPlayer jobRoll.
 	currentPlayer jobCount: 1 + currentPlayer jobCount.
 	income _ 0.
@@ -1636,11 +1636,11 @@ updatePlayer
 
 	self triggerEvent: #itemChange! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 1/11/2017 21:08:33'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 8/14/2017 23:21:54'!
 whatSpaceSays
 	"Perform the method associated with the space where the player is"
 
-	^ self perform: ((spaces at: self currentPlayer position) routine)! !
+	^ self perform: ((spaces atWrap: self currentPlayer position) routine)! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 9/8/2014 13:12'!
 whom: aSymbol
