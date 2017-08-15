@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 1:07:21 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 9:59:40 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 145!
+!provides: 'Construction' 1 146!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1065,10 +1065,13 @@ rollTheDie
 	bone show: bone class faces shuffled event: #jobDone
 ! !
 
-!Contract methodsFor: 'accessing' stamp: 'dhn 10/2/2016 16:01:41'!
+!Contract methodsFor: 'accessing' stamp: 'dhn 8/14/2017 21:58:11'!
 seasonAt: aPosition
-	| y |
-	y := Construction season select: [:a | a range x <= aPosition].
+	"Answer the season at aPosition"
+	| pos y |
+	
+	pos _ (1 to: spaces size) atWrap: aPosition.
+	y _ Construction season select: [:a | a range x <= pos].
 	^ y last ! !
 
 !Contract methodsFor: 'initialize-release' stamp: 'dhn 10/16/2016 14:37:44'!
