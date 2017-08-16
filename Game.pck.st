@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 16 August 2017 at 5:54:17 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 16 August 2017 at 6:33:24 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 135!
+!provides: 'Game' 1 136!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -522,15 +522,6 @@ removeMarkers
 	
 	(spaces atWrap: currentPlayer position) markRemFor: currentPlayer.
 	cells first marksPane removeMorph: currentPlayer marker
-! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 7/23/2016 22:14'!
-response
-	"Answer the response"
-
-	{#response. response} print.
-	response ifNil: [response _ ''].
-	^ response
 ! !
 
 !Game methodsFor: 'initialize' stamp: 'dhn 9/17/2011 13:19'!
