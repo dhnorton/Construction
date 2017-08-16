@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 15 August 2017 at 9:31:48 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 16 August 2017 at 5:55:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 148!
+!provides: 'Construction' 1 149!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -516,7 +516,7 @@ declareOver: aString
 		title: 'Debt Too High'
 ! !
 
-!Contract methodsFor: 'operating' stamp: 'dhn 5/8/2017 14:58:31'!
+!Contract methodsFor: 'operating' stamp: 'dhn 8/16/2017 16:43:51'!
 declareWinner
 	"Inform that there is a winner"
 
@@ -528,7 +528,7 @@ declareWinner
 				nextPutAll: self goal printStringWithCommas; nextLine;
 				nextPutAll: ' and is the winner of the game.']) 
 		title: 'THE WINNAH!!!!'.
-	arena owner removeMorph: token.
+	token delete.
 	self won: true! !
 
 !Contract methodsFor: 'operating' stamp: 'dhn 10/1/2016 11:13:26'!
@@ -1046,21 +1046,21 @@ reviewOption
 		for: option listName asSymbol
 		amount: 1! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 8/12/2017 17:03:20'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 8/16/2017 16:38:56'!
 rollForFranchise
 	"Show the die rolling"
 	| bone |
 
-	bone _ currentPlayer die openInWorld: arena pasteup.
+	bone _ currentPlayer die openInWorld: world.
 	bone referencePosition: token referencePosition - (0@2 * token morphHeight).
 	bone showEffect: bone class faces shuffled! !
 
-!Contract methodsFor: 'harvesting' stamp: 'dhn 4/12/2017 17:25:24'!
+!Contract methodsFor: 'harvesting' stamp: 'dhn 8/16/2017 16:39:51'!
 rollTheDie
 	"Show the die rolling; answer its final value"
 	| bone |
 
-	bone _ currentPlayer die openInWorld: arena pasteup.
+	bone _ currentPlayer die openInWorld: world.
 	bone referencePosition: token referencePosition - (0@2 * token morphHeight).
 	bone show: bone class faces shuffled event: #jobDone
 ! !
@@ -2247,10 +2247,8 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 8/8/2017 15:20:32'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 8/16/2017 16:57:15'!
 buildMorphicWindow
-
-	model arena: self.
 
 	pasteup _ PasteUpMorph new
 		name: #pasteup;
@@ -2617,12 +2615,10 @@ playButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'termination' stamp: 'dhn 3/19/2017 14:17:42'!
+!Construction methodsFor: 'termination' stamp: 'dhn 8/16/2017 16:46:05'!
 quitGame
 	(self confirm: 'Are you sure you want to quit ', Construction asString, '?')
-		ifTrue: [
-			model token ifNotNil: [model token delete].
-			model quitGame]! !
+		ifTrue: [model quitGame]! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 4/12/2017 19:30:21'!
 setupToken: aPlayer
@@ -4859,20 +4855,6 @@ demo: anObject
 	"Set the value of demo"
 
 	demo := anObject! !
-
-!Contractor methodsFor: 'job-related' stamp: 'dhn 3/23/2017 20:59:56'!
-displayInvoice: details title: aTitle
-	"Display the results of doing the job"
-	| inv |
-	
-self halt: 'should not occur'.
-	inv _ JobView openOn: mgr title: aTitle.
-	inv 
-		setWindowColor: self token color;
-		openInWorld: mgr arena pasteup;
-		morphPosition: mgr arena pasteup morphPosition + (280@-620);
-		morphExtent: 310@180;						
-		details: details! !
 
 !Contractor methodsFor: 'space-related' stamp: 'dhn 3/18/2017 20:52:27'!
 doubledString

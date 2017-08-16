@@ -1,10 +1,10 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 14 August 2017 at 1:05:53 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 16 August 2017 at 5:54:17 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 134!
+!provides: 'Game' 1 135!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
-	instanceVariableNames: 'world arena cells spaces goal response players currentPlayer token tokenPos playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
+	instanceVariableNames: 'world cells spaces goal response players currentPlayer token tokenPos playerIndex buttons outs cellCount hardRoll won spaceFreq chantBeat'
 	classVariableNames: 'TestGoal TestMode'
 	poolDictionaries: ''
 	category: 'Game-Model'!
@@ -254,18 +254,6 @@ addMarkerIDInMarks
 	"(self marks at: self currentPlayer position) at: self playerIndex
 		put: self currentPlayer identity" ! !
 
-!Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
-arena
-	"Answer the value of arena"
-
-	^ arena! !
-
-!Game methodsFor: 'accessing' stamp: 'dhn 9/10/2011 15:14'!
-arena: anObject
-	"Set the value of arena"
-
-	arena := anObject! !
-
 !Game methodsFor: 'accessing' stamp: 'dhn 9/16/2011 17:54'!
 buttons
 	"Answer the value of buttons"
@@ -417,13 +405,13 @@ markerSize
 	"Answer the size for markers"
 	^ 28! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 8/12/2017 18:05:34'!
+!Game methodsFor: 'operating' stamp: 'dhn 8/16/2017 16:40:35'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
-	bone _ DieMorph new openInWorld: arena pasteup.
+	bone _ DieMorph new openInWorld: world.
 	bone model: self.
 	currentPlayer die: bone.
 	bone adjustTo: token.
