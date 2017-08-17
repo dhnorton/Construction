@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 16 August 2017 at 6:33:24 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 17 August 2017 at 3:37:58 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 136!
+!provides: 'Game' 1 138!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -600,12 +600,6 @@ wrapIndex: anIndex around: aLimit
 				ifTrue: [^ aLimit].
 			^ anIndex]! !
 
-!Game class methodsFor: 'accessing' stamp: 'dhn 8/9/2017 14:08:49'!
-vAdjust
-	"Answer the vertical adjustment factor for token position"
-	
-	^ 7/10! !
-
 !Token methodsFor: 'accessing' stamp: 'dhn 9/24/2016 15:44:32'!
 arrow
 	"Answer the value of arrow"
@@ -811,6 +805,15 @@ moveFrom: start to: end by: direction enabling: anArray
 				model enableAll: anArray]].
 	self startSteppingStepTime: 400
 ! !
+
+!Token methodsFor: 'initialization' stamp: 'dhn 8/17/2017 13:22:03'!
+posAdjust
+	"Answer the position"
+	| ver hor |
+	
+	ver _ model world morphExtent y * 8 / 10.
+	hor _ model world morphExtent x * 0.025.
+	^ hor@ver! !
 
 !Token methodsFor: 'initialization' stamp: 'dhn 3/21/2017 14:17:20'!
 setSize
@@ -1140,14 +1143,16 @@ text1: aString
 	text1 := aString.
 ! !
 
-!DieMorph methodsFor: 'drawing' stamp: 'dhn 3/18/2017 22:56:44'!
+!DieMorph methodsFor: 'drawing' stamp: 'dhn 8/17/2017 12:12:48'!
 adjustTo: aMorph
 	"Set position and dot size based on anObject"
 	| s |
 	
 	s _ aMorph morphExtent x * 50 / 132.
-	self morphExtent: s@s.
-	self referencePosition: aMorph referencePosition - (0@2 * aMorph morphHeight)! !
+	self 
+		morphExtent: s@s;
+		setDots;
+		referencePosition: aMorph referencePosition - (0@2 * aMorph morphHeight)! !
 
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 3/13/2017 16:53:48'!
 clearDots
@@ -1255,7 +1260,7 @@ face6b
 	row3 addAllMorphs: {dot copy. dash copy. dot copy}.
 	^ 6! !
 
-!DieMorph methodsFor: 'initialization' stamp: 'dhn 8/12/2017 18:19:34'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 8/17/2017 15:21:37'!
 initialize
 
 	super initialize.
@@ -1272,42 +1277,45 @@ initialize
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
 		color: Color transparent;
 		padding: #center;
+		separation: 2;
 		name: #row1.
 	row2 _ LayoutMorph newRow
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
 		color: Color transparent;
 		padding: #center;
+		separation: 2;
 		name: #row2.
 	row3 _ LayoutMorph newRow
 		layoutSpec: (LayoutSpec proportionalWidth: 1.0 proportionalHeight: 1/3);
 		color: Color transparent;
 		padding: #center;
+		separation: 2;
 		name: #row3.
 	self setDots.
 		
 	layoutMorph addAllMorphs: {row3. row2. row1}! !
 
-!DieMorph methodsFor: 'initialization' stamp: 'dhn 3/13/2017 20:11:56'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 8/17/2017 12:24:00'!
 layoutSubmorphs
 
 	layoutMorph 
-		morphExtent: self morphExtent * 0.8;
+		morphExtent: self morphExtent * 0.85;
 		morphPosition: self morphExtent * 0.1! !
 
-!DieMorph methodsFor: 'initialization' stamp: 'dhn 3/14/2017 20:31:59'!
+!DieMorph methodsFor: 'initialization' stamp: 'dhn 8/17/2017 12:21:53'!
 setDots
 	"Initialize the dot and anti-dot"
 	| scale |
 	
-	scale _ 0.25.
+	scale _ self morphExtent * 0.20.
 	dot _ EllipseMorph new
 		color: Color black;
 		borderWidth: 0;
-		morphExtent: (row1 morphExtent x * scale) asPoint.
+		morphExtent: scale.
 	dash _ EllipseMorph new
 		color: Color transparent;
 		borderWidth: 0;
-		morphExtent: (row1 morphExtent x * scale) asPoint! !
+		morphExtent: scale! !
 
 !DieMorph methodsFor: 'operation' stamp: 'dhn 5/5/2017 16:15:54'!
 show: aCollection

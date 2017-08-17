@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 16 August 2017 at 5:55:50 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 17 August 2017 at 3:39:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 149!
+!provides: 'Construction' 1 151!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1108,16 +1108,15 @@ setUpSpaces
 			routine: ('space', ix asString) asSymbol)].
 	^ col! !
 
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 18:01:30'!
+!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/17/2017 13:18:47'!
 setUpToken
 	"Answer a token, used throughout the game, for the current player."
-	| tok vadj |
+	| tok |
 	
 	tok _ ContractToken newFor: self.
-	tok openInWorld.
+	tok openInWorld: world.
 	tok morphExtent: world morphExtent * (0.090@0.080).
-	vadj _ world morphExtent y * self class vAdjust.
-	tok morphPosition: tok morphPosition + (0@vadj).
+	tok morphPosition: tok posAdjust.
 	tokenPos _ tok morphPosition.
 	tok delete. 	"not needed until next player"
 	^ tok
@@ -1138,25 +1137,6 @@ setupPlayer: aName color: aColor
 		identity: aName).
 	currentPlayer _ pl.
 	self availableOptions do: [:opt | pl options addLast: opt]! !
-
-!Contract methodsFor: 'initialize-release' stamp: 'dhn 8/9/2017 14:25:38'!
-showTokenFor: aPlayer at: aPosition
-	"Show token at aPosition and change title for aPlayer"
-	
-	"close any open views of the current player"
-	self triggerEvent: #deleteOpenWindows.
-	
-	"update board view, position board, and set token"
-	self 
-		triggerEvent: #itemChange;
-		triggerEvent: #titleChange with: aPlayer;
-		positionBoardTo: aPosition;
-		removeMarkers.
-	token id contents: currentPlayer identity.
-	token doubled contents: currentPlayer doubledString.
-	token color: currentPlayer color.
-	token who: currentPlayer.
-	token setBalloonText: 'token for ', currentPlayer identity! !
 
 !Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:15:47'!
 space1
