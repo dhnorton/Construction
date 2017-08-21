@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 17 August 2017 at 3:37:58 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 21 August 2017 at 1:05:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Game' 1 138!
+!provides: 'Game' 1 153!
 !requires: 'Morphic-Widgets-Extras' 1 11 nil!
 !classDefinition: #Game category: #'Game-Model'!
 ActiveModel subclass: #Game
@@ -70,6 +70,16 @@ SystemWindow subclass: #ListView
 	category: 'Game-Graphics'!
 !classDefinition: 'ListView class' category: #'Game-Graphics'!
 ListView class
+	instanceVariableNames: ''!
+
+!classDefinition: #Die4 category: #'Game-Graphics'!
+PluggableMorph subclass: #Die4
+	instanceVariableNames: 'dot value'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Game-Graphics'!
+!classDefinition: 'Die4 class' category: #'Game-Graphics'!
+Die4 class
 	instanceVariableNames: ''!
 
 !classDefinition: #DieMorph category: #'Game-Graphics'!
@@ -203,6 +213,9 @@ Abstract class for views of a board game.!
 
 !ListView commentStamp: 'dhn 7/10/2016 17:20' prior: 0!
 An abstract class for game windows.!
+
+!Die4 commentStamp: '<historical>' prior: 0!
+A die (one half of a pair of dice).!
 
 !DieMorph commentStamp: '<historical>' prior: 0!
 A die (one half of a pair of dice).!
@@ -405,13 +418,13 @@ markerSize
 	"Answer the size for markers"
 	^ 28! !
 
-!Game methodsFor: 'operating' stamp: 'dhn 8/16/2017 16:40:35'!
+!Game methodsFor: 'operating' stamp: 'dhn 8/21/2017 11:06:03'!
 move
 	"Roll the die"
 	| bone |
 	
 	self disableAll: {'Move'}.
-	bone _ DieMorph new openInWorld: world.
+	bone _ Die4 new openInWorld: world.
 	bone model: self.
 	currentPlayer die: bone.
 	bone adjustTo: token.
@@ -1142,6 +1155,268 @@ text1
 text1: aString 
 	text1 := aString.
 ! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 11:13:10'!
+adjustTo: aMorph
+	"Set position based on anObject"
+	| s |
+	
+	s _ aMorph morphExtent x * 50 / 132.
+	self 
+		morphExtent: s@s;
+		setDots;
+		referencePosition: aMorph referencePosition - (0@2 * aMorph morphHeight)! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:40:34'!
+bottom
+	"Answer the displacement which will locate an ellipse near the bottom"
+	
+	^ self morphExtent y * 0.65
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:10:28'!
+center
+	"Answer the horizontal displacement which will center an ellipse"
+	
+	^ self morphExtent x * 0.38
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:12:02'!
+face1
+	"Set the die to 1"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self center@self center).
+	^ 1
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:50:31'!
+face2
+	"Set the die to 2, left"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self right@self top).
+	self addMorph: (dot copy morphPosition: self left@self bottom).
+	^ 2
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:50:22'!
+face2b
+	"Set the die to 2, right"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self left@self top).
+	self addMorph: (dot copy morphPosition: self right@self bottom).
+	^ 2! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:50:06'!
+face3
+	"Set the die to 3, left"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self right@self top).
+	self addMorph: (dot copy morphPosition: self center@self center).
+	self addMorph: (dot copy morphPosition: self left@self bottom).
+	^ 3! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:49:48'!
+face3b
+	"Set the die to 3, right"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self left@self top).
+	self addMorph: (dot copy morphPosition: self center@self center).
+	self addMorph: (dot copy morphPosition: self right@self bottom).
+	^ 3
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:54:25'!
+face4
+	"Set the die to 4"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self left@self top).
+	self addMorph: (dot copy morphPosition: self right@self top).
+	self addMorph: (dot copy morphPosition: self left@self bottom).
+	self addMorph: (dot copy morphPosition: self right@self bottom).
+	^ 4
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:53:16'!
+face5
+	"Set the die to 5"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self left@self top).
+	self addMorph: (dot copy morphPosition: self right@self top).
+	self addMorph: (dot copy morphPosition: self center@self center).
+	self addMorph: (dot copy morphPosition: self left@self bottom).
+	self addMorph: (dot copy morphPosition: self right@self bottom).
+	^ 5
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 10:29:08'!
+face6
+	"Set the die to 6, horizontal"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self left@self top).
+	self addMorph: (dot copy morphPosition: self center@self top).
+	self addMorph: (dot copy morphPosition: self right@self top).
+	self addMorph: (dot copy morphPosition: self left@self bottom).
+	self addMorph: (dot copy morphPosition: self center@self bottom).
+	self addMorph: (dot copy morphPosition: self right@self bottom).
+	^ 6
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 10:31:36'!
+face6b
+	"Set the die to 6, vertical"
+	
+	self removeAllMorphs.
+	self addMorph: (dot copy morphPosition: self left@self top).
+	self addMorph: (dot copy morphPosition: self left@self center).
+	self addMorph: (dot copy morphPosition: self left@self bottom).
+	self addMorph: (dot copy morphPosition: self right@self top).
+	self addMorph: (dot copy morphPosition: self right@self center).
+	self addMorph: (dot copy morphPosition: self right@self bottom).
+	^ 6
+! !
+
+!Die4 methodsFor: 'initialization' stamp: 'dhn 8/21/2017 11:17:03'!
+initialize
+
+	super initialize.
+	self 
+		borderWidth: 2;
+		color: Color lightGreen! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:35:08'!
+left
+	"Answer the displacement which will locate an ellipse near the left edge"
+	
+	^ self morphExtent x * 0.10
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:42:26'!
+right
+	"Answer the displacement which will locate an ellipse near the right edge"
+	
+	^ self morphExtent x * 0.65
+! !
+
+!Die4 methodsFor: 'initialization' stamp: 'dhn 8/21/2017 11:27:25'!
+setDots
+	"Initialize the dot"
+	
+	dot _ EllipseMorph new
+		color: Color black;
+		borderWidth: 0;
+		morphExtent: self morphExtent * 0.24! !
+
+!Die4 methodsFor: 'operation' stamp: 'dhn 8/21/2017 10:45:21'!
+show: aCollection
+	"Display the succession of faces in aCollection on the die, then hop the token"
+	| limit linger t i x |
+	
+	limit _ 1600 + (500 atRandom).
+	linger _ limit + 700. 	"to pause before vanishing"
+	t _ 0.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		t _ t + delta.
+		t < limit 	"limit on the total time of activity"
+			ifTrue: [x _ self perform: (aCollection atWrap: i)]
+			ifFalse: [
+				model testMode ifTrue: [self perform: (self class faces at: (model hardRoll * 2))].
+				t > linger ifTrue: [
+					self stopStepping.
+					model hopFor: x.
+					model currentPlayer roll: x.
+					self removeActionsForEvent: #morphicStep.
+					owner removeMorph: self]]].
+	self startSteppingStepTime: 85. 	"time of each step in the activity"
+! !
+
+!Die4 methodsFor: 'operation' stamp: 'dhn 8/21/2017 10:49:21'!
+show: aCollection event: aSymbol
+	"Display the succession of faces in aCollection; answer the value of the final face"
+	| limit linger t i |
+	
+	limit _ 1600 + (500 atRandom).
+	linger _ limit + 700. 	"to pause before vanishing"
+	t _ 0.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		t _ t + delta.
+		t < limit 	"limit on the total time of activity"
+			ifTrue: [value _ self perform: (aCollection atWrap: i)]
+			ifFalse: [
+				t > linger ifTrue: [
+					self stopStepping.
+					self removeActionsForEvent: #morphicStep.
+					owner removeMorph: self.
+					model remainder: value.
+					]]].
+	self startSteppingStepTime: 85. 	"time of each step in the activity"
+! !
+
+!Die4 methodsFor: 'operation' stamp: 'dhn 8/21/2017 10:51:07'!
+showEffect: aCollection
+	"Display the succession of faces in aCollection; answer the value of the final face"
+	| limit linger t i |
+	
+	limit _ 1600 + (500 atRandom).
+	linger _ limit + 700. 	"to pause before vanishing"
+	t _ 0.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :delta |
+		i _ i + 1.
+		t _ t + delta.
+		t < limit 	"limit on the total time of activity"
+			ifTrue: [value _ self perform: (aCollection atWrap: i)]
+			ifFalse: [
+				t > linger ifTrue: [
+					self stopStepping.
+					self removeActionsForEvent: #morphicStep.
+					owner removeMorph: self.
+					model franchiseEffect: value]]].
+	self startSteppingStepTime: 85. 	"time of each step in the activity"
+! !
+
+!Die4 methodsFor: 'drawing' stamp: 'dhn 8/21/2017 09:36:06'!
+top
+	"Answer the displacement which will locate an ellipse near the top"
+	
+	^ self morphExtent y * 0.10
+! !
+
+!Die4 methodsFor: 'access' stamp: 'dhn 8/21/2017 10:49:57'!
+value
+	"Answer the value"
+	
+	^ value! !
+
+!Die4 class methodsFor: 'reference' stamp: 'dhn 8/21/2017 08:47:44'!
+faces
+	"Answer the possible faces, in both orientations"
+	
+	^ #(
+		#face1 	#face1
+		#face2 	#face2b
+		#face3 	#face3b
+		#face4 	#face4
+		#face5 	#face5
+		#face6 	#face6b
+		)! !
+
+!Die4 class methodsFor: 'instance creation' stamp: 'dhn 8/21/2017 11:16:12'!
+new: aSize
+	"Answer an instance of this class with aSize@aSize extent"
+	
+	^ self new morphExtent: aSize@aSize! !
 
 !DieMorph methodsFor: 'drawing' stamp: 'dhn 8/17/2017 12:12:48'!
 adjustTo: aMorph
