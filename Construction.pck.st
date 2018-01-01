@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3129] on 17 August 2017 at 3:39:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 1 January 2018 at 11:00:40 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 151!
+!provides: 'Construction' 1 152!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -2227,10 +2227,10 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 8/16/2017 16:57:15'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/1/2018 10:27:10'!
 buildMorphicWindow
 
-	pasteup _ PasteUpMorph new
+	pasteup _ GamePasteUp new
 		name: #pasteup;
 		color: Color transparent.
 		
