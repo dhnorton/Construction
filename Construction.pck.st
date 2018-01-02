@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 1 January 2018 at 9:42:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 1 January 2018 at 11:00:40 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 154!
+!provides: 'Construction' 1 152!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -2253,7 +2253,7 @@ describe
 
 	^ ''! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 1/1/2018 21:38:56'!
+!Construction methodsFor: 'windows' stamp: 'dhn 4/12/2017 17:50:03'!
 displayInvoice: details title: aTitle
 	"Display the results of doing the job"
 	| inv |
@@ -2262,7 +2262,7 @@ displayInvoice: details title: aTitle
 	inv 
 		setLabel: aTitle;
 		setWindowColor: model currentPlayer color;
-		openInWorld;
+		openInWorld: pasteup;
 		morphPosition: self windowPosition;
 		morphExtent: 310@180;						
 		details: details! !
@@ -2616,7 +2616,7 @@ setupToken: aPlayer
 	pasteup addMorph: model token.
 	^ model token who: aPlayer! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 1/1/2018 21:38:16'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:16'!
 showAssetAuction
 	"Open an asset auction window"
 	| pl win purpose |
@@ -2627,7 +2627,7 @@ showAssetAuction
 	purpose _ pl identity, '''s Assets'.
 	win _ AuctionAsset openOn: model.			
 	win buyers color: Color lightBrown.
-	win openInWorld.
+	win openInWorld: pasteup.
 	win 
 		setLabel: 'Auction of ', purpose;
 		startButtons;
@@ -2675,14 +2675,14 @@ showJobAuctionAt: aPosition
 		morphExtent: 450@300;
 		openInHand! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 1/1/2018 21:37:46'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:39'!
 showLoan
 	"Show window for reducing debt"
 	| pl win |
 		
 	pl _ model currentPlayer.
 	win _ LoanView openOn: model.
-	win openInWorld.
+	win openInWorld: pasteup.
 	win
 		setLabel: pl identity, '''s Debt';
 		setWindowColor: pl color;
@@ -2692,7 +2692,7 @@ showLoan
 				
 	model disableAll: {'Pay Loan'}! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 1/1/2018 21:37:32'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:49'!
 showOpts
 	"Show window for buying assets"
 	| pl win |
@@ -2701,7 +2701,7 @@ showOpts
 	pl options notEmpty
 		ifTrue: [
 			win _ OptionsView openOn: model.
-			win openInWorld.
+			win openInWorld: pasteup.
 			win
 				setLabel: pl identity, '''s Shopping';
 				setWindowColor: pl color;
@@ -2743,14 +2743,14 @@ showSeasons: associations
 			set add: txt].
 	^ set! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 1/1/2018 21:30:50'!
+!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:57:30'!
 showStats
 	"Open a window on a player's statistics"
 	| pl win |
 		
 	pl _ model currentPlayer.
 	win _ StatsView openOn: model.
-	win openInWorld.
+	win openInWorld: pasteup.
 	win
 		setLabel: pl identity, '''s Statistics';
 		setWindowColor: pl color;
@@ -3064,8 +3064,19 @@ start
 	^ win
 ! !
 
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/1/2018 20:43:32'!
-justDroppedIntoX: newOwnerMorph event: anEvent 
+!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:22'!
+aboutToBeGrabbedBy: aHand
+	"The receiver is being grabbed by a hand.
+	Perform necessary adjustments (if any) and return the actual morph
+	that should be added to the hand.
+	Answer nil to reject the drag."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^self "Grab me"! !
+
+!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:32'!
+justDroppedInto: newOwnerMorph event: anEvent 
 	"This message is sent to a dropped morph after it has been dropped on -- and been accepted by -- a drop-sensitive morph"
 	"This message is sent to the dragged morph, not to the owner.
 	It is included here just for reference."
@@ -3084,13 +3095,12 @@ removeWindowMenu
 	
 	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
 
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/1/2018 11:14:02'!
+!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:54:11'!
 wantsToBeDroppedInto: aMorph
 	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
 	"This message is sent to the dragged morph, not to the owner.
 	It is included here just for reference."
 
-	{aMorph} print.
 	^true! !
 
 !ConstructionView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:16:56'!
