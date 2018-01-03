@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 3:26:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 3:35:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 156!
+!provides: 'Construction' 1 157!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -3069,14 +3069,6 @@ initialize
 
 	super initialize.
 	self setProperty: #'handlesMouseDown:' toValue: true! !
-
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:32'!
-justDroppedInto: newOwnerMorph event: anEvent 
-	"This message is sent to a dropped morph after it has been dropped on -- and been accepted by -- a drop-sensitive morph"
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."
-
-	^super justDroppedInto: newOwnerMorph event: anEvent ! !
 
 !ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/2/2018 17:50:18'!
 justGrabbedFrom: formerOwner
