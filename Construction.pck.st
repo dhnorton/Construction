@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 3:15:51 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 3:26:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 155!
+!provides: 'Construction' 1 156!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -3063,17 +3063,6 @@ start
 	
 	^ win
 ! !
-
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:22'!
-aboutToBeGrabbedBy: aHand
-	"The receiver is being grabbed by a hand.
-	Perform necessary adjustments (if any) and return the actual morph
-	that should be added to the hand.
-	Answer nil to reject the drag."
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."
-
-	^self "Grab me"! !
 
 !ConstructionView methodsFor: 'initialization' stamp: 'dhn 1/2/2018 21:37:34'!
 initialize
