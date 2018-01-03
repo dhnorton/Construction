@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 2 January 2018 at 9:44:59 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 1:40:17 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 153!
+!provides: 'Construction' 1 154!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -3074,15 +3074,6 @@ aboutToBeGrabbedBy: aHand
 	It is included here just for reference."
 
 	^self "Grab me"! !
-
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/2/2018 17:47:27'!
-aboutToGrab: submorph
-	"submorph is being grabbed by a hand.
-	Perform necessary adjustments (if any) and return the actual morph
-	that should be added to the hand.
-	Answer nil to reject the drag."
-
-	^submorph "Grab it"! !
 
 !ConstructionView methodsFor: 'initialization' stamp: 'dhn 1/2/2018 21:37:34'!
 initialize
