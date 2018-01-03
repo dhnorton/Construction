@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 1 January 2018 at 11:00:40 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 2 January 2018 at 9:44:59 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 152!
+!provides: 'Construction' 1 153!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -3075,6 +3075,21 @@ aboutToBeGrabbedBy: aHand
 
 	^self "Grab me"! !
 
+!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/2/2018 17:47:27'!
+aboutToGrab: submorph
+	"submorph is being grabbed by a hand.
+	Perform necessary adjustments (if any) and return the actual morph
+	that should be added to the hand.
+	Answer nil to reject the drag."
+
+	^submorph "Grab it"! !
+
+!ConstructionView methodsFor: 'initialization' stamp: 'dhn 1/2/2018 21:37:34'!
+initialize
+
+	super initialize.
+	self setProperty: #'handlesMouseDown:' toValue: true! !
+
 !ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:32'!
 justDroppedInto: newOwnerMorph event: anEvent 
 	"This message is sent to a dropped morph after it has been dropped on -- and been accepted by -- a drop-sensitive morph"
@@ -3083,11 +3098,12 @@ justDroppedInto: newOwnerMorph event: anEvent
 
 	^super justDroppedInto: newOwnerMorph event: anEvent ! !
 
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:53:43'!
+!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/2/2018 17:50:18'!
 justGrabbedFrom: formerOwner
 	"The receiver was just grabbed from its former owner and is now attached to the hand."
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."! !
+	"This message is sent to the dragged morph, not to the owner."
+	
+	^ true! !
 
 !ConstructionView methodsFor: 'initialization' stamp: 'dhn 10/19/2016 20:22:17'!
 removeWindowMenu
@@ -4118,6 +4134,11 @@ endIt
 		statsItem: nil;
 		enableAll: {'Stats'}.
 	self delete! !
+
+!StatsView methodsFor: 'initialization' stamp: 'dhn 1/2/2018 21:36:09'!
+initialize
+
+	super initialize! !
 
 !ConAsset methodsFor: 'as yet unclassified' stamp: 'dhn 4/15/2012 13:21'!
 assetValue
