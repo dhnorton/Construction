@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 1:40:17 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 3:15:51 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 154!
+!provides: 'Construction' 1 155!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -4125,11 +4125,6 @@ endIt
 		statsItem: nil;
 		enableAll: {'Stats'}.
 	self delete! !
-
-!StatsView methodsFor: 'initialization' stamp: 'dhn 1/2/2018 21:36:09'!
-initialize
-
-	super initialize! !
 
 !ConAsset methodsFor: 'as yet unclassified' stamp: 'dhn 4/15/2012 13:21'!
 assetValue
