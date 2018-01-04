@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 3:44:47 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 4 January 2018 at 5:35:14 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 158!
+!provides: 'Construction' 1 162!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -10,6 +10,16 @@ Game subclass: #Contract
 	category: 'Construction-Model'!
 !classDefinition: 'Contract class' category: #'Construction-Model'!
 Contract class
+	instanceVariableNames: ''!
+
+!classDefinition: #ConstructionPasteUp category: #'Construction-Graphics'!
+PasteUpMorph subclass: #ConstructionPasteUp
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Construction-Graphics'!
+!classDefinition: 'ConstructionPasteUp class' category: #'Construction-Graphics'!
+ConstructionPasteUp class
 	instanceVariableNames: ''!
 
 !classDefinition: #ContractToken category: #'Construction-Graphics'!
@@ -325,6 +335,9 @@ Announcement class
 
 !Contract commentStamp: 'dhn 8/22/2016 15:31:27' prior: 0!
 The model for the board of Construction Game.!
+
+!ConstructionPasteUp commentStamp: '<historical>' prior: 0!
+Provide a way to make the pasteup immobile.!
 
 !ContractToken commentStamp: 'dhn 8/22/2016 17:58:41' prior: 0!
 The game piece for a contractor - a player in Construction Game.!
@@ -2113,6 +2126,21 @@ taxDue: aPosition
 	"Answer true if income tax is due at aPosition."
 	^ aPosition = 15! !
 
+!ConstructionPasteUp methodsFor: 'dropping/grabbing' stamp: 'dhn 1/4/2018 17:34:29'!
+aboutToGrab: submorph
+	"submorph is being grabbed by a hand.
+	Perform necessary adjustments (if any) and return the actual morph
+	that should be added to the hand.
+	Answer nil to reject the drag."
+
+	^ nil! !
+
+!ConstructionPasteUp methodsFor: 'dropping/grabbing' stamp: 'dhn 1/3/2018 22:43:40'!
+wantsDroppedMorph: aMorph event: evt
+	"Return true if the receiver wishes to accept the given morph, which is being dropped by a hand in response to the given event. Note that for a successful drop operation both parties need to agree. The symmetric check is done automatically via aMorph wantsToBeDroppedInto: self."
+
+	^ aMorph class inheritsFrom: ConstructionView! !
+
 !ContractToken methodsFor: 'accessing' stamp: 'dhn 9/24/2016 16:20:38'!
 doubled
 	"Answer the value of doubled"
@@ -2227,10 +2255,10 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 1/1/2018 10:27:10'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 1/4/2018 17:18:15'!
 buildMorphicWindow
 
-	pasteup _ GamePasteUp new
+	pasteup _ ConstructionPasteUp new
 		name: #pasteup;
 		color: Color transparent.
 		
@@ -3076,13 +3104,13 @@ removeWindowMenu
 	
 	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
 
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:54:11'!
+!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/4/2018 17:25:27'!
 wantsToBeDroppedInto: aMorph
 	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
-	"This message is sent to the dragged morph, not to the owner.
-	It is included here just for reference."
+	"This message is sent to the dragged morph, not to the owner."
 
-	^true! !
+	"^ aMorph class = ConstructionPasteUp"
+	^ true! !
 
 !ConstructionView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:16:56'!
 open: aModel label: aString
