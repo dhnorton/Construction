@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 4:15:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 3 January 2018 at 3:44:47 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 159!
+!provides: 'Construction' 1 158!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -3075,6 +3075,14 @@ removeWindowMenu
 	"Remove the button in the title bar which brings up the window menu"
 	
 	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
+
+!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 11/7/2016 20:54:11'!
+wantsToBeDroppedInto: aMorph
+	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
+	"This message is sent to the dragged morph, not to the owner.
+	It is included here just for reference."
+
+	^true! !
 
 !ConstructionView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:16:56'!
 open: aModel label: aString
