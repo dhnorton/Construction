@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 4 January 2018 at 6:27:38 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 5 January 2018 at 11:53:13 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 159!
+!provides: 'Construction' 1 160!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -2365,21 +2365,21 @@ layoutSubmorphs
     super layoutSubmorphs.
     self board morphExtent: self board owner morphExtent! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:03:14'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 10:59:17'!
 makeAddPlayerButton
 	"Answer the 'Players' button"
 
 	^ (GameButtonMorph label: 'Players' action: #getPlayers state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Use this button to enter names of two to six players;
 entering an empty name or cancel will start the game'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 11/8/2016 16:16:26'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:00:45'!
 makeAuctionButton
 	"Answer the 'Auction' button"
 	
 	^ (GameButtonMorph label: 'Auction' action: #showAssetAuction state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.08 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Start an auction for assets'! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 3/6/2017 12:19:48'!
@@ -2441,36 +2441,36 @@ makeCellsArea
 		
 ! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 3/17/2017 11:37:36'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:00:56'!
 makeDoJobButton
 	"Answer the 'Do Job' button"
 	
 	^ (GameButtonMorph label: 'Do Job' action: #doJob state: false model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.07 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Do the job for the market indicated above the space.'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:57:27'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:01:10'!
 makeEndTurnButton
 	"Answer the 'End Turn' button"
 	
 	^ (GameButtonMorph label: 'End Turn' action: #endTurn state: false model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.08 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Let the next player have a turn. Not enabled as long as Move is enabled.'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 17:00:19'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:01:22'!
 makeHistoryButton
 	"Answer the 'History' button"
 	
 	^ (GameButtonMorph label: 'History' action: #showHistory state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.08 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Show a graph of players'' progress'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:51:35'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:01:35'!
 makeMoveButton
 	"Answer the 'Move' button"
 	
 	^ (GameButtonMorph label: 'Move' action: #move state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Move the player from one to six spaces, based on the "roll" of a die.'! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 11/8/2016 16:54:11'!
@@ -2504,28 +2504,28 @@ makeOthersArea
 		name: #others;
 		padding: #center! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 17:02:54'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:01:47'!
 makePayLoanButton
 	"Answer the 'Pay Loan' button"
 	
 	^ (GameButtonMorph label: 'Pay Loan' action: #showLoan state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Transfer cash to pay off debt.'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 17:01:21'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:02:00'!
 makePurchasesButton
 	"Answer the 'Purchases' button"
 	
 	^ (GameButtonMorph label: 'Purchase' action: #showOpts state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Buy equipment and franchises.'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 10/18/2016 16:50:50'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:02:10'!
 makeQuitGameButton
 	"Answer the 'Quit' button"
 	
 	^ (GameButtonMorph label: 'Quit' action: #quitGame state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Completely ends the game. Nothing is saved.';
 		color: (Color orange alpha: 0.9)! !
 
@@ -2542,28 +2542,28 @@ makeSeasonsArea
 			color: Color lightGreen;
 			name: #seasons! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:03:34'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:02:20'!
 makeSettingsButton
 	"Answer the 'Settings' button"
 	
 	^ (GameButtonMorph label: 'Settings' action: #doSettings state: true model: model)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.09 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Change some of the game parameters'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 17:59:37'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:02:31'!
 makeShowStatsButton
 	"Answer the 'Stats' button"
 	
 	^ (GameButtonMorph label: 'Stats' action: #showStats state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Lots of information here'! !
 
-!Construction methodsFor: 'buttons' stamp: 'dhn 1/18/2017 16:05:41'!
+!Construction methodsFor: 'buttons' stamp: 'dhn 1/5/2018 11:02:42'!
 makeTourButton
 	"Answer the 'Tour' button"
 	
 	^ (GameButtonMorph label: 'Tour' action: #doTour state: true model: self)
-		layoutSpec: (LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8);
+		layoutSpec: self class buttonLayoutSpec;
 		setBalloonText: 'Cause the board to move around so you can see what is in all the spaces.'! !
 
 !Construction methodsFor: 'accessing' stamp: 'dhn 9/10/2016 19:45:38'!
@@ -2860,6 +2860,12 @@ windowPosition
 	"Answer the position for a window"
 	
 	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
+
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 1/5/2018 10:57:53'!
+buttonLayoutSpec
+	"Answer the LayoutSpec for game buttons"
+
+	^ LayoutSpec proportionalWidth: 0.06 proportionalHeight: 0.8! !
 
 !Construction class methodsFor: 'instance creation' stamp: 'dhn 7/19/2016 15:54'!
 cellColor
