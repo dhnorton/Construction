@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 5 January 2018 at 11:53:13 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3231] on 6 January 2018 at 2:19:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 160!
+!provides: 'Construction' 1 161!
 !requires: 'Game' 1 0 nil!
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
@@ -1138,17 +1138,21 @@ setupPlayer: aName color: aColor
 	currentPlayer _ pl.
 	self availableOptions do: [:opt | pl options addLast: opt]! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 10/1/2016 11:15:47'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 1/6/2018 14:18:43'!
 space1
 	"Year End"
 	| z |
 	
 	self disableAll: {'Move'}.
-	GamePopUp inform: 'You will spend $1,000 for Christmas gifts.' title: 'Christmas for Employees'.
-	z := 1000 negated.
-	self currentPlayer tally: z.
+	GamePopUp inform: Contract taleAtChristmas title: 'Christmas for Employees'.
+	z _ 1000 negated.
+	currentPlayer tally: z.
 	self updatePlayer.
-	self currentPlayer salary.
+	z _ 10000.
+	currentPlayer 
+		tally: z;
+		reset.
+	currentPlayer	history addLast: currentPlayer netAssets.
 	self updatePlayer.
 	self updateHistory.
 	self enableAll: {'End Turn'}.
@@ -2107,6 +2111,14 @@ season
 		add: (Season new desc: 'BIG PHIL''S'; color: Color gray; range: 49 @ 49; textColor: true);
 		yourself
 		! !
+
+!Contract class methodsFor: 'operation' stamp: 'dhn 1/6/2018 13:55:09'!
+taleAtChristmas
+	"Answer the popup text for space 1"
+
+	^ 'You will spend $1,000 for Christmas gifts, 
+and you have collected outstanding receivables 
+in the amount of $10,000.'! !
 
 !Contract class methodsFor: 'operation' stamp: 'dhn 9/8/2014 20:58'!
 taxDue: aPosition 
