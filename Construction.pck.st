@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3257] on 23 January 2018 at 5:31:29 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3257] on 23 January 2018 at 8:56:18 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 162!
+!provides: 'Construction' 1 163!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -4761,35 +4761,29 @@ emergencyLoan
 	^ 0
 ! !
 
-!Contractor methodsFor: 'accessing' stamp: 'dhn 8/11/2013 07:58'!
+!Contractor methodsFor: 'accessing' stamp: 'dhn 1/23/2018 20:00:12'!
 jobCount
-	jobCount ifNil: [jobCount := 0].
+	"Answer the value of job count"
+	
 	^ jobCount! !
-
-!Contractor methodsFor: 'accessing' stamp: 'dhn 8/11/2013 07:59'!
-jobCount: aNumber
-	jobCount := aNumber
-! !
 
 !Contractor methodsFor: 'accessing' stamp: 'dhn 8/11/2013 09:44'!
 jobDone
 	jobDone ifNil: [jobDone := false].
 	^ jobDone! !
 
-!Contractor methodsFor: 'accessing' stamp: 'dhn 8/11/2013 09:44'!
+!Contractor methodsFor: 'accessing' stamp: 'dhn 1/23/2018 20:02:45'!
 jobDone: aBool
-	jobDone := aBool
+	"Set the value of jobDone"
+	
+	jobDone _ aBool
 ! !
 
-!Contractor methodsFor: 'accessing' stamp: 'dhn 8/11/2013 08:12'!
+!Contractor methodsFor: 'accessing' stamp: 'dhn 1/23/2018 20:03:47'!
 jobRoll
-	jobRoll ifNil: [jobRoll := 0].
-	^ jobRoll! !
+	"Answer the value of jobRoll"
 
-!Contractor methodsFor: 'accessing' stamp: 'dhn 8/11/2013 08:12'!
-jobRoll: aNumber
-	jobRoll := aNumber
-! !
+	^ jobRoll! !
 
 !Contractor methodsFor: 'accessing' stamp: 'dhn 4/28/2012 11:08'!
 markets
@@ -4797,23 +4791,11 @@ markets
 
 	^ markets! !
 
-!Contractor methodsFor: 'accessing' stamp: 'dhn 4/29/2012 20:53'!
-markets: anObject
-	"Set the value of markets"
-
-	markets := anObject! !
-
 !Contractor methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:46'!
 options
 	"Answer the value of options"
 
 	^ options! !
-
-!Contractor methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:46'!
-options: anOrderedCollection
-	"Set the value of options"
-
-	options := anOrderedCollection! !
 
 !Contractor methodsFor: 'accessing' stamp: 'dhn 5/4/2012 19:41'!
 priceFactor
@@ -4839,24 +4821,11 @@ shutDown
 shutDown: aBoolean
 	shutDown := aBoolean.! !
 
-!Contractor methodsFor: 'accessing' stamp: 'dhn 4/30/2012 15:47'!
-spaceEffect
-	"Answer the value of spaceEffect"
-
-	^ spaceEffect! !
-
 !Contractor methodsFor: 'accessing' stamp: 'dhn 7/14/2013 10:43'!
 spaceEffect: anObject
 	"Set the value of spaceEffect"
 	spaceEffect := anObject.
 ! !
-
-!Contractor methodsFor: 'accessing' stamp: 'dhn 5/2/2012 11:18'!
-split
-	"Answer the value of split"
-	split
-		ifNil: [split := false].
-	^ split! !
 
 !Contractor methodsFor: 'accessing' stamp: 'dhn 5/2/2012 11:12'!
 split: anObject
