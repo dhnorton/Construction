@@ -16,5 +16,7 @@ This program differs from the actual board game as follows:
 - Players automatically informed of doubled state
 - Computer is banker, auctioneer, and auditor
 - Auditing is continuous
-- Rules enforced consistently
+- Rules enforced consistently by computer
 
+## Verification ##
+Tested on Cuis 3329. After installing, run "Construction start" to start the game.
