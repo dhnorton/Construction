@@ -1,7 +1,11 @@
 # Cuis-Smalltalk-contractor
-Simulation of the Construction board game, a Euro-style game for 2 to 6 players, which is similar to Monopoly. Players operate an earth-moving business with two backhoes, one bulldozer, $100,000 cash, and a $100,000 line of credit. As they move around the board, players try to succeed at jobs, which require particular equipment, and be the first to amass $1,500,000 in net assets (default).
+Simulation of the Construction board game, a Euro-style game for 2 to 6 players, which is similar to Monopoly. Players operate an earth-moving business with two backhoes, one bulldozer, $100,000 cash, and a $100,000 line of credit. As they move around the board, players try to succeed at jobs which require particular equipment, and be the first to amass $1,500,000 in net assets (default).
 
-http://farmgame.com/product/the-construction-game/
+Install the package Construction.pck.st, then (cmd-do) the following:
+
+Construction start.
+
+Reference: http://farmgame.com/product/the-construction-game/
 
 As the game progresses the outcome is often increasingly unpredictable and come-from-behind victories can occur at the end.
 
@@ -16,7 +20,7 @@ This program differs from the actual board game as follows:
 - Players automatically informed of doubled state
 - Computer is banker, auctioneer, and auditor
 - Auditing is continuous
-- Rules enforced consistently by computer
+- Rules enforced consistently
 
-## Verification ##
-Tested on Cuis 3329. After installing, run "Construction start" to start the game.
+Tested in Cuis 5.0  rev 3374 on 7/21/2018
+
