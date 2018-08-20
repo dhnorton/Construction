@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3257] on 23 January 2018 at 8:56:18 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3427] on 19 August 2018 at 10:29:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 163!
+!provides: 'Construction' 1 165!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -3316,7 +3316,7 @@ details
 				self showChant.
 				beginButton disableButton]]! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:53:27'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/19/2018 21:04:37'!
 offer: aName
 	"Record a bid by aName"
 	
@@ -3328,9 +3328,10 @@ offer: aName
 				str
 					nextPut: $$;
 					nextPutAll: self currentBid printStringWithCommas;
-					nextPutAll: ' was bid.'; newLine]).
+					nextPutAll: ' was bid by '; 
+					nextPutAll: currentBidder; newLine]).
 			self showChant.
-			self going: 0.
+			going _ 0.
 			buyers submorphsDo: [:ea | ea enableButton].
 			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
 		ifFalse: [
@@ -3620,7 +3621,7 @@ jobSold
 	self showChant
 ! !
 
-!AuctionJob methodsFor: 'operation' stamp: 'dhn 11/10/2016 21:30:35'!
+!AuctionJob methodsFor: 'operation' stamp: 'dhn 8/19/2018 21:23:10'!
 offer: aName
 	"Record a bid by aName"
 	
@@ -3632,9 +3633,10 @@ offer: aName
 				str
 					nextPut: $$;
 					nextPutAll: self currentBid printStringWithCommas;
-					nextPutAll: ' was bid.'; newLine]).
+					nextPutAll: ' was bid by '; 
+					nextPutAll: currentBidder; newLine]).
 			self showChant.
-			self going: 0.
+			going _ 0.
 			buyers submorphsDo: [:ea | ea enableButton].
 			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
 		ifFalse: [
