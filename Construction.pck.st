@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3427] on 19 August 2018 at 10:29:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3427] on 20 August 2018 at 2:46:12 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 165!
+!provides: 'Construction' 1 166!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -3166,13 +3166,31 @@ going: anObject
 	going _ anObject
 ! !
 
-!AuctionView methodsFor: 'operation' stamp: 'dhn 9/18/2016 16:16:04'!
+!AuctionView methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:37:55'!
+offer: anObject by: aName
+	"State that an offer referred to by anObject was made by aName"
+
+	self currentBid: self currentBid + (model class bidBump at: anObject).
+	currentBidder _ aName.
+	self chant addFirst: (String streamContents: [:str |
+		str
+			nextPut: $$;
+			nextPutAll: self currentBid printStringWithCommas;
+			nextPutAll: ' was bid by '; 
+			nextPutAll: currentBidder; newLine]).
+	self showChant.
+	going _ 0.
+	buyers submorphsDo: [:ea | ea enableButton].
+	(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton
+! !
+
+!AuctionView methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:37:01'!
 showChant
 	"Write the auction 'transcript' to the text pane"
 	| record |
 
 	record _ String new writeStream.
-	chant do: [:ea | record nextPutAll: ea].
+	self chant do: [:ea | record nextPutAll: ea].
 	textPane model actualContents: record contents! !
 
 !AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 12:12:29'!
@@ -3180,6 +3198,12 @@ buyers
 	"Answer the value of buyers"
 	
 	^ buyers! !
+
+!AuctionView methodsFor: 'access' stamp: 'dhn 8/20/2018 14:40:22'!
+chant
+	"Answer the value of chant"
+	
+	^ chant ifNil: [chant _ OrderedCollection new]! !
 
 !AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 15:38:10'!
 currentBid
@@ -3316,24 +3340,12 @@ details
 				self showChant.
 				beginButton disableButton]]! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/19/2018 21:04:37'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:27:48'!
 offer: aName
 	"Record a bid by aName"
 	
 	model assetAuctionItem > 0 
-		ifTrue: [
-			currentBid _ currentBid + (model class bidBump at: model assetAuctionItem).
-			currentBidder _ aName.
-			chant addFirst: (String streamContents: [:str |
-				str
-					nextPut: $$;
-					nextPutAll: self currentBid printStringWithCommas;
-					nextPutAll: ' was bid by '; 
-					nextPutAll: currentBidder; newLine]).
-			self showChant.
-			going _ 0.
-			buyers submorphsDo: [:ea | ea enableButton].
-			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
+		ifTrue: [self offer: model assetAuctionItem by: aName]
 		ifFalse: [
 			buyers submorphsDo: [:ea | ea enableButton].
 			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton]! !
@@ -3378,9 +3390,9 @@ buildMorphicWindow
 		addMorph: self setUpMidRow;
 		addMorph: (buyers _ self setUpBuyers)! !
 
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 9/17/2016 11:30:44'!
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 8/20/2018 14:13:31'!
 setUpMidRow
-	"Answer the layout for the middle row of the Job Auction window"
+	"Answer the layout for the middle row of the Asset Auction window"
 	| list row leftPane headingArea |
 	
 	list _ (PluggableListMorph
@@ -3594,13 +3606,6 @@ buyerButtons
 					setBalloonText: 'bidder')].
 			buyers addAllMorphs: col reversed]! !
 
-!AuctionJob methodsFor: 'operation' stamp: 'dhn 9/20/2016 15:53:48'!
-chant
-	"Answer the value of chant"
-	
-	chant ifNil: [chant _ OrderedCollection new].
-	^ chant! !
-
 !AuctionJob methodsFor: 'operation' stamp: 'dhn 9/26/2016 21:33:07'!
 details
 	"Not required for job auctions"
@@ -3621,24 +3626,12 @@ jobSold
 	self showChant
 ! !
 
-!AuctionJob methodsFor: 'operation' stamp: 'dhn 8/19/2018 21:23:10'!
+!AuctionJob methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:26:34'!
 offer: aName
 	"Record a bid by aName"
 	
 	model jobAuctionItem > 0 
-		ifTrue: [
-			self currentBid: self currentBid + (model class bidBump at: model jobAuctionItem).
-			currentBidder _ aName.
-			self chant addFirst: (String streamContents: [:str |
-				str
-					nextPut: $$;
-					nextPutAll: self currentBid printStringWithCommas;
-					nextPutAll: ' was bid by '; 
-					nextPutAll: currentBidder; newLine]).
-			self showChant.
-			going _ 0.
-			buyers submorphsDo: [:ea | ea enableButton].
-			(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton]
+		ifTrue: [self offer: model jobAuctionItem by: aName]
 		ifFalse: [
 			buyers submorphsDo: [:ea | ea enableButton].
 			(buyers findDeepSubmorphThat: [:mm | mm label = currentBidder] ifAbsent: [^ self]) disableButton].
