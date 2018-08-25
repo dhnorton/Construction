@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3427] on 20 August 2018 at 2:46:12 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 25 August 2018 at 2:40:54 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 166!
+!provides: 'Construction' 1 167!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -36,26 +36,6 @@ GameBoard subclass: #Construction
 Construction class
 	instanceVariableNames: ''!
 
-!classDefinition: #ConstructionView category: #'Construction-Graphics'!
-SystemWindow subclass: #ConstructionView
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Construction-Graphics'!
-!classDefinition: 'ConstructionView class' category: #'Construction-Graphics'!
-ConstructionView class
-	instanceVariableNames: ''!
-
-!classDefinition: #AuctionView category: #'Construction-Graphics'!
-ConstructionView subclass: #AuctionView
-	instanceVariableNames: 'textPane heading chant buyers cancelButton endButton beginButton buttonsArea currentBid currentBidder begun going'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Construction-Graphics'!
-!classDefinition: 'AuctionView class' category: #'Construction-Graphics'!
-AuctionView class
-	instanceVariableNames: ''!
-
 !classDefinition: #AuctionAsset category: #'Construction-Graphics'!
 AuctionView subclass: #AuctionAsset
 	instanceVariableNames: 'asset'
@@ -77,7 +57,7 @@ AuctionJob class
 	instanceVariableNames: ''!
 
 !classDefinition: #HistoryView category: #'Construction-Graphics'!
-ConstructionView subclass: #HistoryView
+GameView subclass: #HistoryView
 	instanceVariableNames: 'plotter legend'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -87,7 +67,7 @@ HistoryView class
 	instanceVariableNames: ''!
 
 !classDefinition: #JobView category: #'Construction-Graphics'!
-ConstructionView subclass: #JobView
+GameView subclass: #JobView
 	instanceVariableNames: 'textPane'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -97,7 +77,7 @@ JobView class
 	instanceVariableNames: ''!
 
 !classDefinition: #LoanView category: #'Construction-Graphics'!
-ConstructionView subclass: #LoanView
+GameView subclass: #LoanView
 	instanceVariableNames: 'textPane cancelButton payButton buttonArea'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -107,7 +87,7 @@ LoanView class
 	instanceVariableNames: ''!
 
 !classDefinition: #OptionsView category: #'Construction-Graphics'!
-ConstructionView subclass: #OptionsView
+GameView subclass: #OptionsView
 	instanceVariableNames: 'textPane cancelButton buyButton buttonArea'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -117,7 +97,7 @@ OptionsView class
 	instanceVariableNames: ''!
 
 !classDefinition: #StatsView category: #'Construction-Graphics'!
-ConstructionView subclass: #StatsView
+GameView subclass: #StatsView
 	instanceVariableNames: 'textPane'
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -333,16 +313,14 @@ The model for the board of Construction Game.!
 !ContractToken commentStamp: 'dhn 8/22/2016 17:58:41' prior: 0!
 The game piece for a contractor - a player in Construction Game.!
 
-!Construction commentStamp: 'dhn 8/26/2016 19:24:32' prior: 0!
-Manage the visual effects of the Construction Game.
+!Construction commentStamp: 'dhn 8/25/2018 14:02:59' prior: 0!
+Manage the visual effects of the Construction Game. To start the game, do the following:
+
+Construction start.
+
+Reference:
 
 http://farmgame.com/product/the-construction-game/!
-
-!ConstructionView commentStamp: '<historical>' prior: 0!
-Abstract class for Construction views!
-
-!AuctionView commentStamp: '<historical>' prior: 0!
-An abstract class for auctions.!
 
 !AuctionAsset commentStamp: '<historical>' prior: 0!
 A Construction Game window which makes it possible for players to raise cash by selling assets.!
@@ -3084,200 +3062,6 @@ how
 	"
 	Construction start.
 	"! !
-
-!ConstructionView methodsFor: 'initialization' stamp: 'dhn 10/19/2016 20:22:17'!
-removeWindowMenu
-	"Remove the button in the title bar which brings up the window menu"
-	
-	(self findDeepSubmorphThat: [:s | s balloonText = 'window menu'] ifAbsent: [^ nil]) delete! !
-
-!ConstructionView methodsFor: 'dropping/grabbing' stamp: 'dhn 1/4/2018 18:26:41'!
-wantsToBeDroppedInto: aMorph
-	"Return true if it's okay to drop the receiver into aMorph. This check is symmetric to #wantsDroppedMorph:event: to give both parties a chance of figuring out whether they like each other."
-	"This message is sent to the dragged morph, not to the owner."
-
-	^true! !
-
-!ConstructionView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:16:56'!
-open: aModel label: aString
-	"Answer a view on aModel"
-	|  window |
-	
-	window _ self new.
-	window
-		model: aModel;
-		buildMorphicWindow.
-	aString ifNotNil: [ window setLabel: aString ].
-	^ window! !
-
-!ConstructionView class methodsFor: 'class initialization' stamp: 'dhn 10/19/2016 20:17:15'!
-openOn: aModel
-	"Answer an instance of this class on aModel"
-	| win |
-
-	win _ self open: aModel label: 'Statistics'.
-	win removeWindowMenu.
-			
-	aModel when: #itemChange send: #details to: win.
-	aModel when: #deleteOpenWindows send: #endIt to: win.
-	
-	^ win
-! !
-
-!ConstructionView class methodsFor: 'class initialization' stamp: 'dhn 11/7/2016 21:19:58'!
-viewPosition
-	"Answer the basic position for instances of this class"
-	
-	^ 200@-50! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 10/29/2016 19:56:18'!
-beat: aSymbol
-	"Produce the auctioneer's chant; perform aSymbol when limit is exceeded"
-	| limit |
-	
-	limit _ 4.
-	self when: #morphicStep evaluate: [ :delta |
-		self going: self going + 1.
-		self going <= limit 
-			ifTrue: [
-				self going > 1 ifTrue: [
-					chant addFirst: (String streamContents: [:str |
-					str
-						nextPutAll: '...going ';
-						nextPutAll: (self class degree: self going); newLine]).
-				self showChant]]
-			ifFalse: [
-				self stopStepping.
-				self perform: aSymbol.
-				self removeActionsForEvent: #morphicStep]].
-	self startSteppingStepTime: model chantBeat. 	"time between chants"! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:31:27'!
-going
-	"Answer the value of going"
-	
-	going ifNil: [going _ 0].
-	^ going! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 10/27/2016 16:33:12'!
-going: anObject
-	"Set the value of going"
-	
-	going _ anObject
-! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:37:55'!
-offer: anObject by: aName
-	"State that an offer referred to by anObject was made by aName"
-
-	self currentBid: self currentBid + (model class bidBump at: anObject).
-	currentBidder _ aName.
-	self chant addFirst: (String streamContents: [:str |
-		str
-			nextPut: $$;
-			nextPutAll: self currentBid printStringWithCommas;
-			nextPutAll: ' was bid by '; 
-			nextPutAll: currentBidder; newLine]).
-	self showChant.
-	going _ 0.
-	buyers submorphsDo: [:ea | ea enableButton].
-	(buyers findDeepSubmorphThat: [:mm | mm label = aName] ifAbsent: []) disableButton
-! !
-
-!AuctionView methodsFor: 'operation' stamp: 'dhn 8/20/2018 14:37:01'!
-showChant
-	"Write the auction 'transcript' to the text pane"
-	| record |
-
-	record _ String new writeStream.
-	self chant do: [:ea | record nextPutAll: ea].
-	textPane model actualContents: record contents! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 12:12:29'!
-buyers
-	"Answer the value of buyers"
-	
-	^ buyers! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 8/20/2018 14:40:22'!
-chant
-	"Answer the value of chant"
-	
-	^ chant ifNil: [chant _ OrderedCollection new]! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 15:38:10'!
-currentBid
-	"Answer the value of currentBid"
-	
-	currentBid ifNil: [currentBid _ 0].
-	^ currentBid! !
-
-!AuctionView methodsFor: 'access' stamp: 'dhn 9/17/2016 20:53:45'!
-currentBid: anObject
-	"Set the value of currentBid"
-	
-	currentBid _ anObject! !
-
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 10/27/2016 19:53:59'!
-initialize
-
-	super initialize.
-	begun _ false! !
-
-!AuctionView methodsFor: 'initialization' stamp: 'dhn 9/17/2016 12:46:07'!
-setUpBuyers
-	"Answer the layout for the buyers buttons"
-	
-	^ (LayoutMorph newRow)
-		name: #buyers;
-		padding: #center;
-		layoutSpec: (LayoutSpec 
-			proportionalWidth: 1.0
-			proportionalHeight: 0.15
-			minorDirectionPadding: #center)! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/16/2016 11:36:50'!
-makeBeginButton
-	"Answer the 'Begin Auction' button"
-	
-	beginButton _ GameButtonMorph label: 'Begin' action: #beginAuction state: false model: self.
-	beginButton 
-		morphExtent: 70@20;
-		setBalloonText: 'Assemble the bidders and begin the auction'.
-	^ beginButton! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/17/2016 12:38:21'!
-makeCancelButton
-	"Answer the 'Cancel' button"
-
-	^ (cancelButton _ GameButtonMorph label: 'Cancel' action: #endIt state: true model: self)
-		morphExtent: 70@20;
-		setBalloonText: 'Forget about continuing the auction.'! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 9/19/2016 14:32:20'!
-makeEndButton
-	"Answer the 'End' button"
-	
-	endButton _ GameButtonMorph label: 'End' action: #endIt state: false model: self.
-	endButton 
-		morphExtent: 70@20;
-		setBalloonText: 'End the auction.'.
-	^ endButton! !
-
-!AuctionView methodsFor: 'buttons' stamp: 'dhn 11/13/2016 13:55:05'!
-soldEndButtons
-	"Replace buttons with the End button"
-	
-	buttonsArea
-		removeAllMorphs;
-		addMorph: self makeEndButton;
-		padding: #center! !
-
-!AuctionView class methodsFor: 'data base' stamp: 'dhn 10/29/2016 19:47:56'!
-degree: anIndex
-	"Translate anIndex to auctioneer's chant verbage "
-	
-	^ #(nil 'once' 'twice' 'three times') at: anIndex! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 11/10/2016 21:24:23'!
 assetSold
