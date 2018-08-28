@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 27 August 2018 at 10:43:59 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 6:18:57 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 168!
+!provides: 'Construction' 1 169!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -3029,10 +3029,10 @@ how
 	Construction start.
 	"! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 11/10/2016 21:24:23'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/28/2018 18:12:13'!
 assetSold
 	"Record the sale; enable End button"
-	| seller purchase recipient |
+	| purchase recipient |
 	
 	cancelButton disableButton.
 	endButton enableButton.
