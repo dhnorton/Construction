@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 6:18:57 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 6:30:19 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 169!
+!provides: 'Construction' 1 170!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -3140,12 +3140,12 @@ buildMorphicWindow
 		addMorph: self setUpMidRow;
 		addMorph: (buyers _ self setUpBuyers)! !
 
-!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 8/20/2018 14:13:31'!
+!AuctionAsset methodsFor: 'initialization' stamp: 'dhn 8/28/2018 18:27:08'!
 setUpMidRow
 	"Answer the layout for the middle row of the Asset Auction window"
-	| list row leftPane headingArea |
+	| listMorph row leftPane headingArea |
 	
-	list _ (PluggableListMorph
+	listMorph _ (PluggableListMorph
 		model: model
 		listGetter: #assetAuctionList
 		indexGetter: #assetAuctionItem
@@ -3175,7 +3175,7 @@ setUpMidRow
 	leftPane _ (LayoutMorph newColumn)
 		name: 'left pane';
 		addMorph: headingArea;
-		addMorph: list.
+		addMorph: listMorph.
 
 	textPane _ (TextModelMorph
 		withModel: (TextModel withText: '')) 	"note the different model specification"
@@ -3276,12 +3276,12 @@ buildMorphicWindow
 		addMorph: self setUpMidRow;
 		addMorph: (buyers _ self setUpBuyers)! !
 
-!AuctionJob methodsFor: 'initialization' stamp: 'dhn 9/19/2016 22:25:24'!
+!AuctionJob methodsFor: 'initialization' stamp: 'dhn 8/28/2018 18:26:41'!
 setUpMidRow
 	"Answer the layout for the middle row of the Job Auction window"
-	| list row leftPane headingArea |
+	| listMorph row leftPane headingArea |
 	
-	list _ (PluggableListMorph
+	listMorph _ (PluggableListMorph
 		model: model
 		listGetter: #jobAuctionList
 		indexGetter: #jobAuctionItem
@@ -3311,7 +3311,7 @@ setUpMidRow
 	leftPane _ (LayoutMorph newColumn)
 		name: 'left pane';
 		addMorph: headingArea;
-		addMorph: list.
+		addMorph: listMorph.
 
 	textPane _ (TextModelMorph
 		withModel: (TextModel withText: '')) 	"note the different model specification"
