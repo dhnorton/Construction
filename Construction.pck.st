@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 28 August 2018 at 6:30:19 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 2:28:45 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 170!
+!provides: 'Construction' 1 171!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -2502,7 +2502,7 @@ displayInvoice: details title: aTitle
 		morphExtent: 310@180;						
 		details: details! !
 
-!Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:16'!
+!Construction methodsFor: 'windows' stamp: 'dhn 8/29/2018 14:26:30'!
 showAssetAuction
 	"Open an asset auction window"
 	| pl win purpose |
@@ -2516,9 +2516,9 @@ showAssetAuction
 	win openInWorld: pasteup.
 	win 
 		setLabel: 'Auction of ', purpose;
-		startButtons;
 		color: (Color r: 0.986 g: 0.986 b: 0.986);
 		setWindowColor: pl color;
+		startButtons;
 		morphPosition: self windowPosition;
 		morphExtent: 450@300! !
 
