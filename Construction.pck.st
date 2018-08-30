@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 29 August 2018 at 2:28:45 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3418] on 30 August 2018 at 4:17:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 171!
+!provides: 'Construction' 1 173!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -2054,23 +2054,6 @@ assetListAuction
 bankName
 	^ 'First Friendly Bank'! !
 
-!Contract class methodsFor: 'auction' stamp: 'dhn 9/19/2016 18:07:00'!
-bidBump
-	"Answer the bid increments"
-	
-	^ 1000 * #(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)! !
-
-!Contract class methodsFor: 'auction' stamp: 'dhn 9/21/2016 14:44:42'!
-bidIncrement
-	"Answer the list for an auction"
-	| col |
-	
-	col _ OrderedCollection new.
-	self bidBump do: [:each | col add: '$', each printStringWithCommas].
-	^ col
-
-	! !
-
 !Contract class methodsFor: 'auction' stamp: 'dhn 9/19/2016 22:09:56'!
 bidSpaces
 	"Answer the positions where competitive bids are required."
@@ -3059,22 +3042,6 @@ assetSold
 		model updateHistory.
 		model enableAll: {'End Turn'}].
 	model updatePlayer! !
-
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 10/28/2016 12:26:42'!
-beginAuction
-	"Show the bid increments and let the bidding begin"
-	
-	self 
-		soldEndButtons;
-		beat: #assetSold;
-		buyerButtons.
-	model 
-		auctionList: model class bidIncrement;
-		assetAuctionItem: 1;
-		changed: #assetAuctionList.
-	heading contents: 'Bid Increment'.
-	begun _ true
-! !
 
 !AuctionAsset methodsFor: 'operation' stamp: 'dhn 9/26/2016 20:07:10'!
 details
