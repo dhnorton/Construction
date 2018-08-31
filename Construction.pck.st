@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3418] on 30 August 2018 at 4:17:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 31 August 2018 at 11:31:40 am'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 173!
+!provides: 'Construction' 1 174!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -3012,7 +3012,7 @@ how
 	Construction start.
 	"! !
 
-!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/28/2018 18:12:13'!
+!AuctionAsset methodsFor: 'operation' stamp: 'dhn 8/31/2018 11:28:03'!
 assetSold
 	"Record the sale; enable End button"
 	| purchase recipient |
@@ -3027,8 +3027,7 @@ assetSold
 			nextPutAll: ' for $';
 			nextPutAll: self currentBid printStringWithCommas; newLine]).
 	self showChant.
-	seller _ model currentPlayer.
-	seller sellAsset: asset listName for: currentBid.
+	model currentPlayer sellAsset: asset listName for: currentBid.
 	currentBidder = model class bankName
 		ifTrue: [recipient _ currentBidder]
 		ifFalse: [
