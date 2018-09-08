@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 31 August 2018 at 11:31:40 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 7 September 2018 at 11:01:05 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 174!
+!provides: 'Construction' 1 175!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -4875,6 +4875,16 @@ setupMarkets
 		add: #'HEAVY HIGHWAY' -> 1;
 		yourself! !
 
+!Contractor methodsFor: 'job-related' stamp: 'dhn 9/7/2018 22:36:59'!
+emphasized: anAmount
+	"Answer a bold-faced string morph for anAmount, colored red if negative"
+	| amt |
+	
+	amt _ '$', anAmount abs printStringWithCommas.
+	^ anAmount < 0
+		ifTrue: [(StringMorph contents: amt font: nil emphasis: 1) color: Color red]
+		ifFalse: [StringMorph contents: amt font: nil emphasis: 1]! !
+
 !Contractor methodsFor: 'job-related' stamp: 'dhn 1/23/2018 16:49:34'!
 jobHistory: roll
 	"Account for job performance"
@@ -4896,7 +4906,7 @@ movingAvg
 			(sub inject: 0 into: [:a :c | a + c]) / self class movingAverageBase]
 		ifFalse: [nil]! !
 
-!Contractor methodsFor: 'job-related' stamp: 'dhn 1/8/2017 12:48:11'!
+!Contractor methodsFor: 'job-related' stamp: 'dhn 9/7/2018 22:46:47'!
 updateIron: anAsset with: aRoll 
 	"Compute the results of a move"
 	| what amt yield total mkt reduced title |
@@ -4922,22 +4932,31 @@ updateIron: anAsset with: aRoll
 					what count: 1 + what count.
 					str _ String new writeStream.
 					spaceEffect
-						ifNotNil: [str nextPutAll: '$' , spaceEffect key asInteger printStringWithCommas , ' Job Expense'.
+						ifNotNil: [
+							str nextPutAll: 'Job Expense'.
 							spaceEffect value
 								ifNotNil: [str nextPutAll: ': (paid to ' , spaceEffect value , ')'].
-							str lf].
+							str 
+								newLine;
+								nextPutAll: (self emphasized: spaceEffect key asInteger) contents;
+								newLine; newLine].
 					contingency
 						ifNotNil: [
 							contingency class ~= Announcement
-								ifTrue: [ str nextPutAll: '$' , contingency result asInteger printStringWithCommas , ' Contingency: ' , contingency description;
-								 lf]].
-					str nextPutAll: '$' , yield asInteger printStringWithCommas , ' Equipment Performance @ ' , aRoll asString.
+								ifTrue: [
+									str 
+										nextPutAll: 'Contingency: ' , contingency description; newLine;
+										nextPutAll: '$' , contingency result asInteger printStringWithCommas;
+										newLine; newLine]].
+					str 
+						nextPutAll: 'Equipment Performance @ ' , aRoll asString.
 					mkt = 2
 						ifTrue: [str nextPutAll: ' (doubled)'].
-					str lf.
-					str nextPutAll: '______________'.
-					str lf.
-					str nextPutAll: '$' , total asInteger printStringWithCommas , ' Net'.
+					str
+						newLine;
+						nextPutAll: '$' , yield asInteger printStringWithCommas; newLine;
+						nextPutAll: '______________'; newLine;
+						nextPutAll: '$' , total asInteger printStringWithCommas , ' Net'.
 					reduced ifTrue: [str nextPutAll: ' reduced by ', contingency factor printString].
 					title _ String streamContents: [:cnts |
 						cnts 
