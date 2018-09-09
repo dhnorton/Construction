@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 9 September 2018 at 3:13:38 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 9 September 2018 at 4:13:07 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 179!
+!provides: 'Construction' 1 180!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -633,10 +633,10 @@ decideCompetitive
 			self updateHistory.
 			self enableAll: {'End Turn'}]! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 12/1/2016 15:45:52'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 9/9/2018 16:11:48'!
 franchiseEffect: anObject
 	"Show the effect of landing on an owned franchise"
-	| fran z invoice amt owner user |
+	| fran z amt owner user |
 	
 	self disableAll: {'Move'}.
 	fran _ self class requiredEquipment at: (self class jobSeason at: currentPlayer position).
@@ -644,14 +644,13 @@ franchiseEffect: anObject
 	z _ amt * anObject.
 	user _ currentPlayer.
 	owner _ (availableOptions at: fran) holder.
+	self triggerEvent: #showJobView: with: 'Franchise Effect'.
 	owner = user
-		ifTrue: [invoice _ (String streamContents: [:str |
+		ifTrue: [(String streamContents: [:str |
 			str
-				nextPutAll: 'First Friendly Bank paid you $';
-				nextPutAll: z printStringWithCommas;
-				nextPutAll: ' because you own ';
-				nextPutAll: (leases at: fran) description]).
-			user triggerEvent: #displayInvoice withArguments: {invoice. 'Franchise Income'}.
+				nextPutAll: 'First Friendly Bank paid you because you own ';
+				nextPutAll: (leases at: fran) description.
+			invoice details: str contents amount: (currentPlayer emphasized: z)]).
 			user earned: z for: fran.
 			user tally: z]
 		ifFalse: [| payee | owner ifNotNil: [
@@ -659,15 +658,13 @@ franchiseEffect: anObject
 					owner earned: z for: fran.
 					owner tally: z.
 					owner appendHistory.
-					invoice _ (String streamContents: [:str |
+					(String streamContents: [:str |
 						str
 							nextPutAll: 'You paid ';
 							nextPutAll: payee;
-							nextPutAll: ' $';
-							nextPutAll: z printStringWithCommas;
 							nextPutAll: ' for your bill from ';
-							nextPutAll: (leases at: fran) description]).
-					user triggerEvent: #displayInvoice withArguments: {invoice. 'Franchise Expense'}.
+							nextPutAll: (leases at: fran) description.
+						invoice details: str contents amount: (currentPlayer emphasized: z)]).
 					user paid: z for: fran.
 					user tally: z negated]].
 	currentPlayer jobDone: true.
@@ -2477,12 +2474,6 @@ numbersArea
 	"Answer the value of numbersArea"
 
 	^ numbersArea! !
-
-!Construction methodsFor: 'windows' stamp: 'dhn 9/8/2018 16:04:42'!
-displayInvoice: details
-	"Display the results of doing the job"
-
-	invoice details: details! !
 
 !Construction methodsFor: 'windows' stamp: 'dhn 4/12/2017 17:50:03'!
 displayInvoice: details title: aTitle
