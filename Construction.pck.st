@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 7 September 2018 at 11:01:05 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 9 September 2018 at 3:13:38 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 175!
+!provides: 'Construction' 1 179!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -8,7 +8,7 @@ SystemOrganization addCategory: #'Construction-Graphics'!
 
 !classDefinition: #Contract category: #'Construction-Model'!
 Game subclass: #Contract
-	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions fates drawnFates paymentList leases statsItem optionsItem optionsReport loanItem loanReport assetAuctionItem auctionList jobAuctionItem windowCount moveButton latestPlayer'
+	instanceVariableNames: 'availableOptions exercisedOptions listOfOptions fates drawnFates paymentList leases statsItem optionsItem optionsReport loanItem loanReport assetAuctionItem auctionList jobAuctionItem windowCount moveButton latestPlayer invoice'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Construction-Model'!
@@ -58,7 +58,7 @@ AuctionJob class
 
 !classDefinition: #JobView category: #'Construction-Graphics'!
 GameView subclass: #JobView
-	instanceVariableNames: 'textPane'
+	instanceVariableNames: 'items index'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Construction-Graphics'!
@@ -1453,6 +1453,18 @@ rollTheDie
 	bone show: bone class faces shuffled event: #jobDone
 ! !
 
+!Contract methodsFor: 'accessing' stamp: 'dhn 9/9/2018 13:45:15'!
+invoice
+	"Answer the value of invoice"
+	
+	^ invoice! !
+
+!Contract methodsFor: 'accessing' stamp: 'dhn 9/9/2018 13:45:37'!
+invoice: anObject
+	"Set the value of invoice"
+	
+	^ invoice _ anObject! !
+
 !Contract methodsFor: 'accessing' stamp: 'dhn 4/15/2012 12:41'!
 listOfOptions: anObject
 	"Set the value of listOfOptions"
@@ -2190,7 +2202,7 @@ includeInNewMorphMenu
 	"Not to be instantiated from the menu"
 	^ false! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 1/1/2018 10:27:10'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 9/8/2018 15:47:09'!
 buildMorphicWindow
 
 	pasteup _ GamePasteUp new
@@ -2208,6 +2220,7 @@ buildMorphicWindow
 	model when: #titleChange send: #titleChange: to: self with: #player.
 	model when: #jobAuctionRequired send: #showJobAuctionAt: to: self with: #pos.
 	model when: #showToken send: #showToken to: self.
+	model when: #showJobView: send: #showJobView: to: self with: #title.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
 ! !
 
@@ -2437,17 +2450,11 @@ startButtonSet
 		addMorph: self makeQuitGameButton.
 ! !
 
-!Construction methodsFor: 'initialization' stamp: 'dhn 4/8/2017 14:08:32'!
+!Construction methodsFor: 'initialization' stamp: 'dhn 9/9/2018 14:07:42'!
 startGame
 	"Change the buttons and start the game"
 	
 	self playButtonSet.
-	model players do: [:ea | 
-		ea 
-			when: #displayInvoice 
-			send: #displayInvoice:title: 
-			to: self 
-			withArguments: #(#invoice #heading)].
 	model playerIndex: 0. "retain players in order of entry"
 	model 
 		testGoal;
@@ -2470,6 +2477,12 @@ numbersArea
 	"Answer the value of numbersArea"
 
 	^ numbersArea! !
+
+!Construction methodsFor: 'windows' stamp: 'dhn 9/8/2018 16:04:42'!
+displayInvoice: details
+	"Display the results of doing the job"
+
+	invoice details: details! !
 
 !Construction methodsFor: 'windows' stamp: 'dhn 4/12/2017 17:50:03'!
 displayInvoice: details title: aTitle
@@ -2522,6 +2535,17 @@ showJobAuctionAt: aPosition
 		buyerButtons;
 		morphExtent: 450@300;
 		openInHand! !
+
+!Construction methodsFor: 'windows' stamp: 'dhn 9/9/2018 13:47:16'!
+showJobView: aTitle
+	"Show window for reporting job results"
+	
+	model invoice: (JobView openOn: model title: aTitle).
+	model invoice
+		openInWorld: pasteup;
+		setWindowColor: model currentPlayer color;
+		morphPosition: self windowPosition;
+		morphExtent: 300 @ 384! !
 
 !Construction methodsFor: 'windows' stamp: 'dhn 3/23/2017 20:56:39'!
 showLoan
@@ -3387,17 +3411,44 @@ openOn: aModel
 	^ win
 ! !
 
-!JobView methodsFor: 'initialization' stamp: 'dhn 9/12/2016 20:52:39'!
+!JobView methodsFor: 'initialization' stamp: 'dhn 9/9/2018 12:09:16'!
 buildMorphicWindow
 	"Lay out the window for job invoice"
+	| top bottom left right text amount |
 	
-	textPane _ (TextModelMorph
-		withModel: (TextModel withText: '')) 	"note the different model specification"
-			askBeforeDiscardingEdits: false;	"discard changes to the text"
-			name: 'job invoice'. 	"give the TextModelMorph a name which will appear in the halos"
+	layoutMorph beColumn.
+	top _ LayoutMorph newRow name: #top.
+	bottom _ (LayoutMorph newRow)
+		layoutSpec: (LayoutSpec 
+			proportionalWidth: 1.0
+			proportionalHeight: 0.15
+			minorDirectionPadding: #center).
+	layoutMorph
+		addMorph: top proportionalHeight: 0.85;
+		addMorph: bottom proportionalHeight: 0.15.
+	
+	left _ LayoutMorph newColumn name: #left.
+	right _ LayoutMorph newColumn name: #right.
+	top
+		addMorph: left proportionalWidth: 0.7;
+		addAdjusterAndMorph: right proportionalWidth: 0.3.
+	
+	1 to: 4 do: [:ea |
+		text _ (TextModelMorph
+			withModel: (TextModel withText: '')) 	"note the different model specification"
+				askBeforeDiscardingEdits: false;
+				name: 'item', ea asString.
+		amount _ LayoutMorph newColumn name: 'amount', ea asString..
+		left addMorph: text proportionalHeight: 0.4.
+		right addMorph: amount.
+		items add: {text. amount}]! !
 
-	self layoutMorph
-		addMorph: textPane layoutSpec: (LayoutSpec useAll)! !
+!JobView methodsFor: 'initialization' stamp: 'dhn 9/8/2018 12:01:53'!
+initialize
+
+	super initialize.
+	items _ OrderedCollection new.
+	index _ 0! !
 
 !JobView methodsFor: 'termination' stamp: 'dhn 9/12/2016 19:37:24'!
 closeBoxHit
@@ -3413,10 +3464,12 @@ endIt
 details
 	"To be compatible - do nothing"! !
 
-!JobView methodsFor: 'accessing' stamp: 'dhn 9/12/2016 20:54:43'!
-details: aString
+!JobView methodsFor: 'accessing' stamp: 'dhn 9/9/2018 13:59:18'!
+details: string1 amount: string2
 
-	textPane model actualContents: aString! !
+	index _ index + 1.
+	(items at: index) first model actualContents: string1.
+	(items at: index) second addMorph: string2! !
 
 !JobView class methodsFor: 'class initialization' stamp: 'dhn 9/12/2016 21:03:49'!
 openOn: aModel title: atitle
@@ -4906,7 +4959,7 @@ movingAvg
 			(sub inject: 0 into: [:a :c | a + c]) / self class movingAverageBase]
 		ifFalse: [nil]! !
 
-!Contractor methodsFor: 'job-related' stamp: 'dhn 9/7/2018 22:46:47'!
+!Contractor methodsFor: 'job-related' stamp: 'dhn 9/9/2018 15:01:02'!
 updateIron: anAsset with: aRoll 
 	"Compute the results of a move"
 	| what amt yield total mkt reduced title |
@@ -4915,8 +4968,16 @@ updateIron: anAsset with: aRoll
 	reduced _ false.
 	self shutDown
 		ifTrue: [GamePopUp inform: 'The IRS has shut you down for the rest of the year.' title: 'Loss of Income']
-		ifFalse: [what _ self assets at: anAsset.
+		ifFalse: [
+			what _ self assets at: anAsset.
 			amt _ what quantity + self demo.
+			title _ String streamContents: [:cnts |
+				cnts 
+					nextPutAll: amt asString;
+					nextPut: $ ;
+					nextPutAll: anAsset.
+				amt > 1 ifTrue: [cnts nextPut: $s]].
+			mgr triggerEvent: #showJobView: with: title.
 			mkt _ self markets
 						at: (self mgr class equipmentMarket at: anAsset).
 			yield _ (what class at: aRoll for: amt)
@@ -4931,40 +4992,36 @@ updateIron: anAsset with: aRoll
 					what quality: aRoll + what quality.
 					what count: 1 + what count.
 					str _ String new writeStream.
+
 					spaceEffect
 						ifNotNil: [
 							str nextPutAll: 'Job Expense'.
 							spaceEffect value
 								ifNotNil: [str nextPutAll: ': (paid to ' , spaceEffect value , ')'].
-							str 
-								newLine;
-								nextPutAll: (self emphasized: spaceEffect key asInteger) contents;
-								newLine; newLine].
+							mgr invoice details: str contents amount: (self emphasized: spaceEffect key asInteger)].
+							
 					contingency
 						ifNotNil: [
 							contingency class ~= Announcement
 								ifTrue: [
 									str 
-										nextPutAll: 'Contingency: ' , contingency description; newLine;
-										nextPutAll: '$' , contingency result asInteger printStringWithCommas;
-										newLine; newLine]].
+										reset;
+										nextPutAll: 'Contingency: ' , contingency description.
+									mgr invoice details: str contents amount: (self emphasized: contingency result asInteger)]].
+
 					str 
+						reset;
 						nextPutAll: 'Equipment Performance @ ' , aRoll asString.
 					mkt = 2
 						ifTrue: [str nextPutAll: ' (doubled)'].
+					mgr invoice details: str contents amount: (self emphasized: yield asInteger).
+						
 					str
-						newLine;
-						nextPutAll: '$' , yield asInteger printStringWithCommas; newLine;
+						reset;
 						nextPutAll: '______________'; newLine;
-						nextPutAll: '$' , total asInteger printStringWithCommas , ' Net'.
+						nextPutAll: ' Net'.
 					reduced ifTrue: [str nextPutAll: ' reduced by ', contingency factor printString].
-					title _ String streamContents: [:cnts |
-						cnts 
-							nextPutAll: amt asString;
-							nextPut: $ ;
-							nextPutAll: anAsset.
-						amt > 1 ifTrue: [cnts nextPut: $s]].
-					self triggerEvent: #displayInvoice withArguments: {str contents. title}]].
+					mgr invoice details: str contents amount: (self emphasized: total asInteger)]].
 	self demo: 0.
 	expenseFactor _ 1.
 	^ total! !
