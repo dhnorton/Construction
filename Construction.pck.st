@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3429] on 9 September 2018 at 4:13:07 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 5 October 2018 at 9:29:10 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 180!
+!provides: 'Construction' 1 181!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -1192,6 +1192,13 @@ endTurn
 						ifTrue: [self wonButtonsState]
 						ifFalse: [self enableAll: {'Move'. 'Stats'}.
 							self disableAll: {'End Turn'}]]]! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 10/5/2018 21:07:07'!
+goalProgress
+	"Answer the percent toward goal of the current player"
+	
+	^ String streamContents: [ :strm | 
+		(self currentPlayer netAssets / self goal * 100) printOn: strm fractionDigits: 1]! !
 
 !Contract methodsFor: 'operating' stamp: 'dhn 9/25/2016 20:53:33'!
 payRent: anAmount for: aSymbol 
@@ -2594,16 +2601,15 @@ windowPosition
 	
 	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 13:00:16'!
+!Construction methodsFor: 'operation' stamp: 'dhn 10/5/2018 21:09:02'!
 displayNumbers
 	"Display cash, debt, and goal progress"
-	| c d net otherLead pluralForm others |
+	| c d  otherLead pluralForm others |
 
 	c _ '$', model currentPlayer cash truncated printStringWithCommas.
 	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
 	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', model goalProgress, '%';
 		color: model currentPlayer color.
 	pluralForm _ model players size = 2
 		ifTrue: ['Player''s']
@@ -2659,20 +2665,19 @@ showToken
 		morphPosition: self morphExtent * (0.006@0.72);
 		openInWorld: pasteup! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 3/18/2017 20:21:07'!
+!Construction methodsFor: 'operation' stamp: 'dhn 10/5/2018 21:09:47'!
 titleChange: aPlayer
 	"Change the title, showing player data in color"
 	"Display cash, debt, and goal progress"
-	| c d net otherLead pluralForm others |
+	| c d otherLead pluralForm others |
 	
 	gameTitle contents: aPlayer identity , '''s turn.'.
 	gameTitle color: aPlayer color.
 	
 	c _ '$', model currentPlayer cash truncated printStringWithCommas.
 	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
-	net _ (model currentPlayer netAssets / model goal * 100 roundDownTo: 0.1) asString.
 	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', net, '%';
+		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', model goalProgress, '%';
 		color: model currentPlayer color.
 	pluralForm _ model players size = 2
 		ifTrue: ['Player''s']
