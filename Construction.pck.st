@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 5 October 2018 at 9:29:10 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 5 October 2018 at 11:15:33 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 181!
+!provides: 'Construction' 1 182!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -633,7 +633,7 @@ decideCompetitive
 			self updateHistory.
 			self enableAll: {'End Turn'}]! !
 
-!Contract methodsFor: 'space-related' stamp: 'dhn 9/9/2018 16:11:48'!
+!Contract methodsFor: 'space-related' stamp: 'dhn 10/5/2018 23:01:23'!
 franchiseEffect: anObject
 	"Show the effect of landing on an owned franchise"
 	| fran z amt owner user |
@@ -664,7 +664,7 @@ franchiseEffect: anObject
 							nextPutAll: payee;
 							nextPutAll: ' for your bill from ';
 							nextPutAll: (leases at: fran) description.
-						invoice details: str contents amount: (currentPlayer emphasized: z)]).
+						invoice details: str contents amount: (currentPlayer emphasized: z negated)]).
 					user paid: z for: fran.
 					user tally: z negated]].
 	currentPlayer jobDone: true.
