@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 5 October 2018 at 11:15:33 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 6 October 2018 at 8:57:53 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 182!
+!provides: 'Construction' 1 183!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -1199,6 +1199,19 @@ goalProgress
 	
 	^ String streamContents: [ :strm | 
 		(self currentPlayer netAssets / self goal * 100) printOn: strm fractionDigits: 1]! !
+
+!Contract methodsFor: 'operating' stamp: 'dhn 10/6/2018 20:33:17'!
+numbersReport
+	"Answer the string for displaying a player's cash, debt, and property value"
+	
+	^ String streamContents: [:string |
+		string
+			nextPutAll: 'Cash: $';
+			nextPutAll: currentPlayer cash truncated printStringWithCommas;
+			nextPutAll: ' Debt: $';
+			nextPutAll: currentPlayer debt negated asInteger printStringWithCommas;
+			nextPutAll: ' Property: $';
+			nextPutAll: currentPlayer propertyValue printStringWithCommas]! !
 
 !Contract methodsFor: 'operating' stamp: 'dhn 9/25/2016 20:53:33'!
 payRent: anAmount for: aSymbol 
@@ -2601,15 +2614,13 @@ windowPosition
 	
 	^ seasonsArea morphPosition + (model windowPosition: 60@-10)! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 10/5/2018 21:09:02'!
+!Construction methodsFor: 'operation' stamp: 'dhn 10/6/2018 20:56:46'!
 displayNumbers
-	"Display cash, debt, and goal progress"
-	| c d  otherLead pluralForm others |
+	"Display financial state of the players"
+	| otherLead pluralForm others |
 
-	c _ '$', model currentPlayer cash truncated printStringWithCommas.
-	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
 	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', model goalProgress, '%';
+		contents: model numbersReport;
 		color: model currentPlayer color.
 	pluralForm _ model players size = 2
 		ifTrue: ['Player''s']
@@ -2665,19 +2676,17 @@ showToken
 		morphPosition: self morphExtent * (0.006@0.72);
 		openInWorld: pasteup! !
 
-!Construction methodsFor: 'operation' stamp: 'dhn 10/5/2018 21:09:47'!
+!Construction methodsFor: 'operation' stamp: 'dhn 10/6/2018 20:57:17'!
 titleChange: aPlayer
 	"Change the title, showing player data in color"
-	"Display cash, debt, and goal progress"
-	| c d otherLead pluralForm others |
+	"Display financial state of the players"
+	| otherLead pluralForm others |
 	
 	gameTitle contents: aPlayer identity , '''s turn.'.
 	gameTitle color: aPlayer color.
 	
-	c _ '$', model currentPlayer cash truncated printStringWithCommas.
-	d _ '$', model currentPlayer debt negated asInteger printStringWithCommas.
 	numbersArea submorphs first 
-		contents: 'Cash: ', c, ' Debt: ', d, ' Goal Progress: ', model goalProgress, '%';
+		contents: model numbersReport;
 		color: model currentPlayer color.
 	pluralForm _ model players size = 2
 		ifTrue: ['Player''s']
@@ -4306,7 +4315,7 @@ initialize
 listName
 	^ 'Current Player'! !
 
-!You methodsFor: 'as yet unclassified' stamp: 'dhn 1/23/2018 15:52:08'!
+!You methodsFor: 'as yet unclassified' stamp: 'dhn 10/6/2018 20:46:01'!
 reportAsAssetFor: aPlayer
 	"Answer the performance report for a player"
 	| exp mkts2 limit |
@@ -4320,10 +4329,7 @@ reportAsAssetFor: aPlayer
 			nextPutAll: ' income'; newLine;
 		 	nextPut: $$;
 			nextPutAll: (exp roundTo: 1) printStringWithCommas;
-			nextPutAll: ' expense'; newLine;
-			nextPut: $$;
-			nextPutAll: owner propertyValue reduce printStringWithCommas;
-			nextPutAll: ' = property value'; newLine.
+			nextPutAll: ' expense'; newLine.
 		owner jobCount ~= 0
 			ifTrue: [ | mavg |
 				(owner jobRoll / owner jobCount) printOn: str fractionDigits: 1.
