@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 6 October 2018 at 8:57:53 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 6 October 2018 at 9:53:49 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 183!
+!provides: 'Construction' 1 184!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -1578,7 +1578,7 @@ loanList
 	^ list
 ! !
 
-!Contract methodsFor: 'loan' stamp: 'dhn 9/15/2016 15:19:50'!
+!Contract methodsFor: 'loan' stamp: 'dhn 10/6/2018 21:45:53'!
 loanReportFor: anInteger
 	"Answer the effect on cash and debt of a payment selected by anInteger"
 	| pmt enab |
@@ -1592,10 +1592,10 @@ loanReportFor: anInteger
 					nextPutAll: 'By making this payment, ', currentPlayer identity, ' would have:';
 					newLine; newLine;
 					nextPut: $$;
-					nextPutAll: (currentPlayer debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
+					nextPutAll: (currentPlayer cash - pmt) asInteger printStringWithCommas , ' in cash and';
 					newLine;
 					nextPut: $$;
-					nextPutAll: (currentPlayer cash - pmt) asInteger printStringWithCommas , ' in cash and';
+					nextPutAll: (currentPlayer debt + pmt) negated asInteger printStringWithCommas, ' in debt and';
 					newLine;
 					nextPutAll: '$' , currentPlayer playerDebtLimit value negated  printStringWithCommas , ' debt limit.'])]
 		ifFalse: [
