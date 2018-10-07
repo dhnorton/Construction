@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 6 October 2018 at 9:53:49 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 7 October 2018 at 4:07:58 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 184!
+!provides: 'Construction' 1 185!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -3356,7 +3356,7 @@ details
 	"Not required for job auctions"
 ! !
 
-!AuctionJob methodsFor: 'operation' stamp: 'dhn 11/13/2016 14:04:57'!
+!AuctionJob methodsFor: 'operation' stamp: 'dhn 10/7/2018 15:48:05'!
 jobSold
 	"SOLD!! the job"
 	
@@ -3364,7 +3364,7 @@ jobSold
 	buyers removeAllMorphs.
 	chant addFirst: (String streamContents: [:str |
 		str
-			nextPutAll: 'SOLD!! to ';
+			nextPutAll: 'SOLD!! Job awarded to ';
 			nextPutAll: currentBidder;
 			nextPutAll: ' for $';
 			nextPutAll: currentBid printStringWithCommas; newLine]).
