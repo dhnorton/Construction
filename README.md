@@ -21,5 +21,6 @@ This program differs from the actual board game as follows:
 - Computer is banker, auctioneer, and auditor
 - Auditing is continuous
 - Rules enforced consistently
+
 Tested in Cuis 5.0  rev 3633 on 2/26/2019
 
