@@ -1,4 +1,4 @@
-# Cuis-Smalltalk-contractor
+# Construction
 Simulation of the Construction board game, a Euro-style game for 2 to 6 players, which is similar to Monopoly. Players operate an earth-moving business with two backhoes, one bulldozer, $100,000 cash, and a $100,000 line of credit. As they move around the board, players try to succeed at jobs which require particular equipment, and be the first to amass $1,500,000 in net assets (default).
 
 Install the package Construction.pck.st, then (cmd-do) the following:
