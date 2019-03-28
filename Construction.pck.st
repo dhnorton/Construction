@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 27 March 2019 at 9:30:45 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 3:54:46 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 186!
+!provides: 'Construction' 1 187!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -5010,13 +5010,13 @@ emphasized: anAmount
 		ifTrue: [(StringMorph contents: amt font: nil emphasis: 1) color: Color red]
 		ifFalse: [StringMorph contents: amt font: nil emphasis: 1]! !
 
-!Contractor methodsFor: 'job-related' stamp: 'dhn 1/23/2018 16:49:34'!
-jobHistory: roll
+!Contractor methodsFor: 'job-related' stamp: 'dhn 3/28/2019 15:53:28'!
+jobHistory: aRoll
 	"Account for job performance"
 	
-	jobRoll _ jobRoll + roll.
+	jobRoll _ jobRoll + aRoll.
 	jobCount _ jobCount + 1.
-	jobMAvg add: roll! !
+	jobMAvg add: aRoll! !
 
 !Contractor methodsFor: 'job-related' stamp: 'dhn 1/23/2018 17:03:22'!
 movingAvg
@@ -5098,13 +5098,13 @@ updateIron: anAsset with: aRoll
 	expenseFactor _ 1.
 	^ total! !
 
-!Contractor methodsFor: 'job-related' stamp: 'dhn 1/23/2018 16:23:01'!
-updateJobRoll: roll
-	"Append roll to jobRoll"
+!Contractor methodsFor: 'job-related' stamp: 'dhn 3/28/2019 15:52:56'!
+updateJobRoll: aRoll
+	"Append aRoll to jobRoll"
 	
 	^ jobRoll notNil 
-		ifTrue: [jobRoll add: roll; yourself]
-		ifFalse: [jobRoll _ OrderedCollection with: roll]! !
+		ifTrue: [jobRoll add: aRoll; yourself]
+		ifFalse: [jobRoll _ OrderedCollection with: aRoll]! !
 
 !Contractor class methodsFor: 'operating' stamp: 'dhn 2/16/2017 19:57:23'!
 moveInterval
