@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 6:00:02 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 7:51:36 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 189!
+!provides: 'Construction' 1 190!
 !requires: 'Game' 1 24 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -2184,7 +2184,7 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)	! !
 
-!ContractToken methodsFor: 'operations' stamp: 'dhn 3/28/2019 17:28:12'!
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/28/2019 18:24:11'!
 leftFrom: from to: to
 	"Animate relocation of self when player must go BACK to 'to' from 'from' "
 	| oldPos newPos index n posns limit i final |
@@ -2213,7 +2213,7 @@ leftFrom: from to: to
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
 				model currentPlayer position: final.
-				model doSpace.
+				model enableAll: {'Do Job'}.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
@@ -2261,7 +2261,7 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!ContractToken methodsFor: 'operations' stamp: 'dhn 3/27/2019 21:14:46'!
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/28/2019 18:25:11'!
 rightFrom: from to: to
 	"Animate relocation of self when player moves ahead to 'to' from 'from' "
 	| oldPos newPos index n posns limit i final |
@@ -2293,8 +2293,7 @@ rightFrom: from to: to
 					position: final;
 					years: 1 + model currentPlayer years;
 					salary.
-				model
-					doSpace.
+				model enableAll: {'Do Job'}.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
