@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3470] on 7 October 2018 at 4:07:58 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 27 March 2019 at 9:30:45 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 185!
+!provides: 'Construction' 1 186!
 !requires: 'Game' 1 0 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -390,6 +390,21 @@ A contingency in Construction Game. Contingencies can be positive or negative fo
 
 !Announcement commentStamp: '<historical>' prior: 0!
 An Announcement is a class which is detected by name, resulting in the early display of its description in the drawContingency method.!
+
+!Construction class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 18:58:07'!
+initializedInstance
+
+	^ self start! !
+
+!Contractor methodsFor: 'accessing' stamp: 'dhn 4/16/2012 13:48'!
+shutDown
+	"Answer the value of shutDown"
+	shutDown ifNil: [shutDown := false].
+	^ shutDown! !
+
+!Contractor methodsFor: 'accessing' stamp: 'dhn 4/16/2012 11:03'!
+shutDown: aBoolean
+	shutDown := aBoolean.! !
 
 !Contract methodsFor: 'auction' stamp: 'dhn 9/15/2016 18:18:14'!
 assetAuctionItem
@@ -2169,6 +2184,39 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)	! !
 
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/27/2019 21:01:07'!
+leftFrom: from to: to
+	"Animate relocation of self when player must go BACK to 'to' from 'from' "
+	| oldPos newPos index n posns limit i final |
+	
+	final _ to.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: from - 6.
+	model positionBoardTo: oldPos.
+	self position: 7.
+	newPos _ index atWrap: final - 7.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n - 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowLeft.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer position: final.
+				model doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
+
 !ContractToken methodsFor: 'operations' stamp: 'dhn 10/1/2016 11:19:54'!
 moved
 	"Perform the results of the move"
@@ -2190,6 +2238,43 @@ moved
 		ifFalse: [
 			mr updateHistory.
 			mr enableAll: {'End Turn'}]! !
+
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/27/2019 21:14:46'!
+rightFrom: from to: to
+	"Animate relocation of self when player moves ahead to 'to' from 'from' "
+	| oldPos newPos index n posns limit i final |
+	
+	final _ to.
+	index _ (Interval from: 1 to: model spaces size by: 1) asArray.
+	oldPos _ index atWrap: from.
+	model positionBoardTo: oldPos.
+	self position: 1.
+	newPos _ final + 1.
+	posns _ OrderedCollection new.
+	n _ oldPos.
+	[(index atWrap: n) ~= newPos] whileTrue: [posns add: (index atWrap: n). n _ n + 1].
+	posns _ posns asArray.
+	model positionBoardTo: posns first.
+	
+	self arrowRight.
+	limit _ posns size.
+	i _ 0.
+	self when: #morphicStep evaluate: [ :unused |
+		i _ i + 1.
+		model positionBoardTo: (posns at: i).
+		i < limit 
+			ifFalse: [
+				self stopStepping.
+				self removeActionsForEvent: #morphicStep.
+				arrow delete.
+				model currentPlayer 
+					position: final;
+					years: 1 + model currentPlayer years;
+					salary.
+				model
+					doSpace.
+				self doubled contents: model currentPlayer doubledString]].
+	self startSteppingStepTime: 500! !
 
 !ContractToken methodsFor: 'operations' stamp: 'dhn 8/14/2017 11:53:01'!
 sickMove
@@ -2855,11 +2940,6 @@ includeInNewMorphMenu
 	"Instantiate from the menu"
 	
 	^ true! !
-
-!Construction class methodsFor: 'instance creation' stamp: 'dhn 1/20/2017 18:58:07'!
-initializedInstance
-
-	^ self start! !
 
 !Construction class methodsFor: 'instance creation' stamp: 'dhn 9/1/2016 21:30:46'!
 labelAreaHeight
@@ -4488,16 +4568,6 @@ priceFactor: aFactor
 	priceFactor := aFactor.
 	^ 0
 ! !
-
-!Contractor methodsFor: 'accessing' stamp: 'dhn 4/16/2012 13:48'!
-shutDown
-	"Answer the value of shutDown"
-	shutDown ifNil: [shutDown := false].
-	^ shutDown! !
-
-!Contractor methodsFor: 'accessing' stamp: 'dhn 4/16/2012 11:03'!
-shutDown: aBoolean
-	shutDown := aBoolean.! !
 
 !Contractor methodsFor: 'accessing' stamp: 'dhn 7/14/2013 10:43'!
 spaceEffect: anObject
