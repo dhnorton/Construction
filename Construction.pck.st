@@ -1,7 +1,7 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 3:54:46 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 6:00:02 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 187!
-!requires: 'Game' 1 0 nil!
+!provides: 'Construction' 1 189!
+!requires: 'Game' 1 24 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
 
@@ -2184,7 +2184,7 @@ makeIdArea
 	^ area	layoutSpec: (LayoutSpec  
 		proportionalWidth: 1.0)	! !
 
-!ContractToken methodsFor: 'operations' stamp: 'dhn 3/27/2019 21:01:07'!
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/28/2019 17:28:12'!
 leftFrom: from to: to
 	"Animate relocation of self when player must go BACK to 'to' from 'from' "
 	| oldPos newPos index n posns limit i final |
@@ -2217,6 +2217,19 @@ leftFrom: from to: to
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
 
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/28/2019 16:40:21'!
+moveFrom: positionA to: positionB
+	"Determine best direction and move"
+	| dir |
+	
+	dir _ Direction
+		shortest: positionA
+		to: positionB
+		in: model spaces size.
+	dir > 0
+		ifTrue: [self rightFrom: positionA to: positionB]
+		ifFalse: [self leftFrom: positionA to: positionB]! !
+
 !ContractToken methodsFor: 'operations' stamp: 'dhn 10/1/2016 11:19:54'!
 moved
 	"Perform the results of the move"
@@ -2238,6 +2251,15 @@ moved
 		ifFalse: [
 			mr updateHistory.
 			mr enableAll: {'End Turn'}]! !
+
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/28/2019 17:27:50'!
+position: aCell
+	"Position the receiver over the board cell numbered by aCell"
+	| horiz |
+	
+	self morphPosition: self posAdjust.
+	horiz _ (model cells at: aCell) morphPosition x.
+	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
 !ContractToken methodsFor: 'operations' stamp: 'dhn 3/27/2019 21:14:46'!
 rightFrom: from to: to
