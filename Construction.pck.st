@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 28 March 2019 at 7:51:36 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3681] on 29 March 2019 at 5:02:46 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 190!
+!provides: 'Construction' 1 191!
 !requires: 'Game' 1 24 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -2261,7 +2261,7 @@ position: aCell
 	horiz _ (model cells at: aCell) morphPosition x.
 	self morphPosition: (self morphPosition translatedBy: (horiz@0))! !
 
-!ContractToken methodsFor: 'operations' stamp: 'dhn 3/28/2019 18:25:11'!
+!ContractToken methodsFor: 'operations' stamp: 'dhn 3/29/2019 13:11:33'!
 rightFrom: from to: to
 	"Animate relocation of self when player moves ahead to 'to' from 'from' "
 	| oldPos newPos index n posns limit i final |
@@ -2289,10 +2289,7 @@ rightFrom: from to: to
 				self stopStepping.
 				self removeActionsForEvent: #morphicStep.
 				arrow delete.
-				model currentPlayer 
-					position: final;
-					years: 1 + model currentPlayer years;
-					salary.
+				model currentPlayer position: final.
 				model enableAll: {'Do Job'}.
 				self doubled contents: model currentPlayer doubledString]].
 	self startSteppingStepTime: 500! !
