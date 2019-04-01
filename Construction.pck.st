@@ -1,6 +1,6 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 1 April 2019 at 11:15:54 am'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3690] on 1 April 2019 at 3:52:50 pm'!
 'Description Please enter a description for this package'!
-!provides: 'Construction' 1 193!
+!provides: 'Construction' 1 194!
 !requires: 'Game' 1 24 nil!
 SystemOrganization addCategory: #'Construction-Model'!
 SystemOrganization addCategory: #'Construction-Graphics'!
@@ -2288,40 +2288,6 @@ buildMorphicWindow
 	model when: #showToken send: #showToken to: self.
 	model when: #showJobView: send: #showJobView: to: self with: #title.
 	model when: #showSeasons: send: #showSeasons: to: self with: #index.
-! !
-
-!Construction methodsFor: 'initialization' stamp: 'dhn 10/27/2016 12:29:45'!
-getPlayers
-	"Get the names of two to six players"
-	| x y cnt clrs |
-
-	model disableAll: {'Players'. 'Tour'}.
-	clrs _ Token colors shuffled.
-	cnt _ 0.
-	x _ FillInTheBlankMorph request: 'First player''s name?' initialAnswer: ''.
-	x 
-		ifEmpty: [
-			model enableAll: {'Players'. 'Tour'}.
-			^ nil]
-		ifNotEmpty: [
-			cnt _ cnt + 1.
-			model setupPlayer: x color: (clrs at: cnt)].
-	
-	[cnt < 6] whileTrue: [
-		y _ FillInTheBlankMorph request: 'Next player''s name?' initialAnswer: ''.
-		y
-			ifEmpty: [
-				cnt > 1 
-					ifTrue: [self startGame]
-					ifFalse: [
-						model players: OrderedCollection new.
-						model enableAll: {'Players'. 'Tour'}].
-				^ nil]
-			ifNotEmpty: [
-				cnt _ cnt + 1.
-				model setupPlayer: y color: (clrs at: cnt)]].
-		
-	self startGame
 ! !
 
 !Construction methodsFor: 'initialization' stamp: 'dhn 10/19/2016 16:06:52'!
